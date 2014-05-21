@@ -1,0 +1,13 @@
+NEWS file for sparseHessianFD package
+
+VERSION 0.1.1 (Nov. 5, 2013)
+
+   o   Removed functions for sampling from, and computing the density of,
+       a multivariate normal distribution.  These functions are now available
+       in the sparseMVN package.
+
+
+VERSION 0.1.0 (Nov. 5, 2012)
+
+   o   Initial upload to CRAN.
+

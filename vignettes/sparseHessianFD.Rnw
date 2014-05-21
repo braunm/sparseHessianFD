@@ -1,0 +1,392 @@
+\documentclass[12pt]{article}
+%\VignetteIndexEntry{Using the sparseHessianFD package}
+\usepackage[onehalfspacing]{setspace}
+\usepackage[sc]{mathpazo}
+\usepackage{amsmath}
+\usepackage{verbatim}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{fancyvrb}
+
+\newcommand{\pkg}[1]{\textbf{#1}}
+  \usepackage{geometry} 
+  \geometry{left=1.2in,right=1.2in,top=1.2in,bottom=1.2in}
+   \usepackage{subfig}
+  \usepackage{rotating}
+  \usepackage{array}
+  \usepackage[page]{appendix}
+  \usepackage{xspace}
+  \usepackage{parskip}
+  
+  \usepackage{natbib} 
+  \DeclareMathOperator\Prob{Prob}
+  \bibpunct[, ]{(}{)}{;}{a}{}{,}
+  \bibliographystyle{plainnat}
+  \onehalfspacing
+\newcommand{\proglang}[1]{\textsf{#1}}
+\newcommand{\func}[1]{\texttt{#1}}
+\newcommand{\funcarg}[1]{\texttt{#1}}
+\newcommand{\class}[1]{\texttt{#1}}
+\newcommand{\method}[1]{\textbf{#1}}
+\newcommand{\file}[1]{\texttt{#1}}
+
+\title{Using the \pkg{sparseHessianFD} package}
+\author{Michael Braun\\
+SMU Cox School of Management\\
+Southern Methodist University\\
+Dallas, TX 75275
+}
+
+\begin{document}
+\maketitle
+
+The \pkg{sparseHessianFD} package is a tool to compute Hessians
+efficiently when the Hessian is sparse (that is, a large proportion of
+the cross-partial derivatives are zero).  The user needs to supply the
+objective function, its gradient, and the sparsity pattern of the
+Hessian.  The non-zero elements of the Hessian are computed through
+finite differencing of the gradients in a way that exploits the
+sparsity pattern.  The Hessian is stored in a compressed format; specifically, an object of class \class{dgCMatrix}, as defined in the
+\pkg{Matrix} package\citep{R_Matrix}.   This allows sparse matrix algorithms to run
+more quickly, with a smaller memory footprint, than their dense-matrix
+counterparts.  For example, the \pkg{trustOptim} package
+\citep{R_trustOptim} includes an
+implementation of a trust region nonlinear optimizer that is designed
+to take advantage of the fact that a Hessian is sparse.  The
+\pkg{sparseMVN} package \citep{R_sparseMVN} samples from, and computes
+the log density of, a multivariate normal distribution with a sparse
+covariance or precision matrix.
+
+For dense Hessians, a standard way of approximating the Hessian involves taking the
+differences between the gradient at point $x\in\mathbb{R}^p$ and the gradient with a
+single element of $x$ perturbed by a small amount $\epsilon$.  If $\nabla f(x)$
+is the gradient of $f(x)$, then the $i^{th}$column of the Hessian is
+equal to $(\nabla(x+\epsilon e_i)-\nabla f(x))/\epsilon$, where
+$e_i$ is a vector of zeros, with a 1 in the $i^{th}$ element. This
+``forward differencing'' method involves computing a gradient $p+1$
+times.  More accurate approximations require even more evaluations of
+the gradient; central differencing requires $2p$ evaluations.  This
+method also requires the storage of $p^2$ elements, even if most of
+the elements of the Hessian are zero.
+
+The \pkg{sparseHessianFD} package uses a graph coloring algorithm to
+partition the $p$ variables into groups (``colors'' in the graph
+theory literature), such that perturbing $x_i$
+will not affect the $j^{th}$ element of the gradient for any $j$ that
+is in the same group as $i$.  This will happen when the cross-partial
+derivative with respect to $x_i$ and $x_j$ is zero, or, equivalently,
+that element $(i,j)$ of the Hessian is zero.  This means that we can
+perturb all of the $x$'s in the same group in a single computation of
+the gradient.  When the number of groups is small, we can estimate the
+Hessian much more quickly.  Note that for a fully dense Hessian, the
+number of groups is equal to $p$, and there is no advantage to using
+this algorithm.  Also, the number of groups depends crucially on
+exactly which elements of the Hessian are non-zero; sparsity does not
+guarantee that this method can be used.  However, for many common
+sparsity patterns, the computational savings is dramatic.
+
+As an example, suppose that we have, in a hierarchical model, $N$
+units, $k$ heterogeneous parameters per unit, and $r$ population-level
+parameters.  Since the cross-partial derivative between an element in
+$\beta_i$ and an element in $\beta_j$ is zero, any element of
+$\beta_i$ and $\beta_j$ can be in the same group, but since the cross
+partials for elements with a single $\beta_i$ are not zero, these
+elements cannot be in the same group.  Furthermore, if we assume that
+any $\beta_i$ could be correlated with the $r$ population-level
+parameters, and that the $r$ population-level parameters may be
+correlated amongst themselves, we can estimate the Hessian (with
+forward differences) with no more than $k+r+1$ gradient evaluations.
+Note that this number \emph{does not grow with N}.  Thus, computing
+the Hessian for a log posterior density of a hierarchical model with, say, 100 heterogeneous units, is no
+more expensive than for a dataset with a million heterogeneous units,
+and the amount of storage required for the sparse Hessian grows only
+linearly in $N$.   
+
+\citet{CurtisPowellReid1974} introduce the idea of reducing
+the number of evaluations to estimate sparse Jacobians, and
+\citet{PowellToint1979} describe how to partition variables into
+appropriate groups, and how to recover Hessian information through
+back-substitution.  \citet{ColemanMore1983} show that the task of
+grouping the variables amounts to a classic graph-coloring
+problem. \citet{GebremedhinManne2005} summarize more recent advances
+in this area. The actual computational ``engine'' for
+\pkg{sparseHessianFD} is ACM TOMS Algorithm 636 \citep{ColemanGarbow1985}.
+The original \proglang{Fortran} code is in the file
+\file{inst/include/misc/FDHS-DSSM.f}.  The file \file{src/FDHS-DSSM.c} is a
+translation of the original\proglang{Fortran} code into \proglang{C}.  The copyright to
+both of these files is retained by the Association of Computational
+Machinery under terms that are included in the LICENSE file in the
+package source code.  My contribution to the package is only the
+interface with \proglang{R}, and not the computational algorithm itself.
+
+
+\section{Using the package}
+
+Using \pkg{sparseHessianFD} involves constructing an
+object of class \class{sparseHessianObj}.  The class \class{sparseHessianObj} contains only one slot:  an
+external pointer to an instance of a \proglang{C++} class that does all of the
+computation. This object stores all of
+the information needs to compute the objective function, gradient and
+Hessian for any argument vector $x$.  The easiest way to compute this
+object is to use the \func{new.sparse.hessian.obj} function.  Its
+signature is:
+
+\begin{Verbatim}
+obj <- new.sparse.hessian.obj(x, fn, gr, hs, fd.method=0,
+                              eps=sqrt(.machine$double.eps), ...)
+\end{Verbatim}
+
+The function \funcarg{fn} returns $f(x)$, the
+value of the objective function to be minimized, 
+\funcarg{gr} that returns the gradient. Both functions can take
+additonal named arguments which are passed through the \funcarg{...}
+argument in \func{get.new.sparse.hessian}.  The argument \funcarg{hs} is a
+list that represents the sparsity pattern of the Hessian.  The
+\funcarg{hs} list contains two integer vectors,\funcarg{iRow} and
+\funcarg{jCol}, that contain the row and column
+indices of the non-zero elements of the lower triangle of the Hessian.
+The length of each of these vectors is equal to the number of
+non-zeros in the lower triangle of the Hessian.  Do \emph{not} include
+any elements from the upper triangle.  Entries must be in order, first
+by column, and then by row within each column.  Indexing starts at
+1. The package includes a convenience function,
+\func{Matrix.to.Coord}, that converts a matrix with the appropriate
+sparsity pattern to a list that can be used as the \funcarg{hs}
+argument. 
+
+\citet{ColemanGarbow1985} provides two approaches for computing a
+sparse Hessian: indirect (\funcarg{fd.method=0}) and direct
+(\funcarg{fd.method=1}).  We refer the reader to that source for an
+explanation of the difference.  In short, the indirect method should
+be somewhat faster that the direct method, with comparable accuracy.
+The argument \funcarg{eps} is the perturbation amount used in the
+finite differencing algorithm.  Again, see \citet{ColemanGarbow1985}
+for more details.
+
+The algorithms in this package work best when the gradient is computed
+directly (i.e., derived analytically or symbolically), or otherwise computed exactly
+(say, by way of algorithmic differentiation).  In general, we never
+recommend finite-differenced gradients.  Finite differencing takes a
+long time to run, and is subject to numerical error, especially near
+the optimum when elements of the gradient are close to zero.  Using
+\pkg{sparseHessianFD} with finite-differenced gradients means that the
+Hessian is ``doubly differenced,'' and the resulting lack of numerical
+precision makes those Hessians nearly worthless.  
+
+Once the \class{sparseHessianObj} object is constructed at an initial
+value of $x$, we can then compute the function, gradient or Hessian for
+any other value of $x$.  The \pkg{sparseHessianFD} includes the
+following methods:
+
+\begin{singlespacing}
+\begin{Verbatim}
+get.fn(x, obj)
+get.gr(x, obj)
+get.hessian(x, obj)
+get.fngr(x, obj)
+\end{Verbatim}
+\end{singlespacing}
+
+These functions return \func{fn(x)}, \func{gr(x)}, the Hessian of
+\func{fn(x)}, and a list with both \func{fn(x)} and \func{gr(x)},
+respectively.  The Hessian is an object of class \class{dgCMatrix}.
+\footnote{Even though the Hessian is symmetric, the
+  \class{dgCMatrix} stores the entire matrix, and not just the lower
+  triangle.  This is because of a current limitation in the
+  \pkg{RcppEigen} package.  As \pkg{RcppEigen} functionality expands,
+  we hope to return Hessians as \class{dsCMatrix} objects.  This would
+  effectively halve the storage requirements for the Hessian.} These functions do not pass additional arguments to the
+original functions, since that information is stored in \funcarg{obj}.
+
+Alternatively, we can access the function, gradient, and Hessian
+functions directly from the object with:
+
+\begin{singlespacing}
+\begin{Verbatim}
+obj$fn(x)
+obj$gr(x)
+obj$hessian(x)
+obj$fngr(x)
+\end{Verbatim}
+\end{singlespacing}
+
+
+\section{Sparsity pattern of the Hessian}
+
+In the following code, we construct a block diagonal matrix, and then
+use the \func{Matrix.to.Coord} function to generate a list of the row
+and column indices of the non-zero elements of the lower triangle.
+ 
+\begin{singlespacing}
+\begin{Verbatim}
+require(Matrix)
+M <- kronecker(Diagonal(4),Matrix(1,2,2))
+print(M)
+8 x 8 sparse Matrix of class "dgTMatrix"
+[1,] 1 1 . . . . . .
+[2,] 1 1 . . . . . .
+[3,] . . 1 1 . . . .
+[4,] . . 1 1 . . . .
+[5,] . . . . 1 1 . .
+[6,] . . . . 1 1 . .
+[7,] . . . . . . 1 1
+[8,] . . . . . . 1 1
+
+H <- Matrix.to.Coord(M)
+print(H)
+$iRow
+ [1] 1 2 2 3 4 4 5 6 6 7 8 8
+
+$jCol
+ [1] 1 1 2 3 3 4 5 5 6 7 7 8
+\end{Verbatim}
+\end{singlespacing}
+
+To check that the indices do, in fact, represent the sparsity pattern of the lower triangular Hessian, you can convert the list back to a pattern \class{Matrix} using the {\tt Coord.to.Matrix} function.
+
+\begin{singlespacing}
+\begin{Verbatim}
+M2 <- Coord.to.Pattern.Matrix(H, 8,8)
+print(M2)
+8 x 8 sparse Matrix of class "ngCMatrix"
+                    
+[1,] | . . . . . . .
+[2,] | | . . . . . .
+[3,] . . | . . . . .
+[4,] . . | | . . . .
+[5,] . . . . | . . .
+[6,] . . . . | | . .
+[7,] . . . . . . | .
+[8,] . . . . . . | |
+\end{Verbatim}
+\end{singlespacing}
+Notice that M2 is only lower-triangular.  Even though M was symmetric,
+H contains only the indices of the non-zero elements in the lower
+triangle. To recover the pattern of the \emph{symmetric} matrix, use
+the \func{Coord.to.Sym.Pattern.Matrix} function.
+
+\begin{singlespacing}
+\begin{Verbatim}
+M3 <- Coord.to.Sym.Pattern.Matrix(H,8)
+print(M3)
+8 x 8 sparse Matrix of class "nsTMatrix"
+                    
+[1,] | | . . . . . .
+[2,] | | . . . . . .
+[3,] . . | | . . . .
+[4,] . . | | . . . .
+[5,] . . . . | | . .
+[6,] . . . . | | . .
+[7,] . . . . . . | |
+[8,] . . . . . . | |
+\end{Verbatim}
+\end{singlespacing}
+
+\section{An example}
+
+As an example,let's compute the Hessian of the log
+posterior density of a hierarchical model.  Suppose we have a dataset of $N$ households, each with $T$ opportunities to purchase a particular product.  Let $y_i$ be the number of times household $i$ purchases the product, out of the $T$ purchase opportunities.  Furthermore, let $p_i$ be the probability of purchase; $p_i$ is the same for all $T$ opportunities, so we can treat $y_i$ as a binomial random variable.  The purchase probability $p_i$ is heterogeneous, and depends on both $k$ continuous covariates $x_i$, and a heterogeneous coefficient vector $\beta_i$, such that
+\begin{align}
+  \label{eq:3}
+  p_i=\frac{\exp(x_i'\beta_i)}{1+\exp(x_i'\beta_i)},~i=1\mathellipsis N
+\end{align}
+The coefficients can be thought of as sensitivities to the covariates, and they are distributed across the population of households following a multivariate normal distribution with mean $\mu$ and covariance $\Sigma$.   We assume that we know $\Sigma$, but we do not know $\mu$.  Instead, we place a multivariate normal prior on $\mu$, with mean $0$ and covariance $\Omega_0$, which is determined in advance.  Thus, each $\beta_i$, and $\mu$ are $k-$dimensional vectors, and the total number of unknown variables in the model is $(N+1)k$. 
+
+The log posterior density, ignoring any normalization constants, is
+\begin{align}
+  \label{eq:1}
+  \log \pi(\beta_{1:N},\mu|Y, X, \Sigma_0,\Omega_0)&=\sum_{i=1}^Np_i^{y_i}(1-p_i)^{T-y_i}
+  -\frac{1}{2}\left(\beta_i-\mu\right)'\Sigma^{-1}\left(\beta_i-\mu\right)
+-\frac{1}{2}\mu'\Omega_0^{-1}\mu
+\end{align}
+
+Since the $\beta_i$ are drawn iid from a multivariate normal, $\displaystyle\frac{\partial^2\log\pi }{\partial\beta_i\beta_j}=0$ for all $i\neq j$.  We also know that all of the $\beta_i$ are correlated with $\mu$.  Therefore, the Hessian will be sparse with a ``block-arrow'' structure.
+For example, if $N=6$ and $k=2$, then $p=14$ and the Hessian will have the pattern as illustrated in Figure \ref{fig:blockArrow}.
+
+
+\begin{figure}[h]
+\begin{singlespacing}
+\begin{BVerbatim}
+ [1,] | | . . . . . . . . . . | | 
+ [2,] | | . . . . . . . . . . | |
+ [3,] . . | | . . . . . . . . | |
+ [4,] . . | | . . . . . . . . | |
+ [5,] . . . . | | . . . . . . | | 
+ [6,] . . . . | | . . . . . . | | 
+ [7,] . . . . . . | | . . . . | | 
+ [8,] . . . . . . | | . . . . | | 
+ [9,] . . . . . . . . | | . . | | 
+[10,] . . . . . . . . | | . . | |
+[11,] . . . . . . . . . . | | | |
+[12,] . . . . . . . . . . | | | |
+[13,] | | | | | | | | | | | | | | 
+[14,] | | | | | | | | | | | | | |
+\end{BVerbatim}
+\end{singlespacing}
+\caption{Sparsity pattern for hierarchical binary choice example.}
+\label{fig:blockArrow} 
+\end{figure}
+
+
+There are 196 elements in this symmetric matrix, but only 169 are
+non-zero, and only 76 values are unique.  Although the reduction in
+RAM from using a sparse matrix structure for the Hessian may be
+modest, consider what would happen if $N=1000$ instead.  In that case,
+there are 2,002 variables in the problem, and more than 4 million
+elements in the Hessian.  However, only 12,004 of those elements are
+non-zero.  If we work with only the lower triangle of the Hessian
+(e.g., through a Cholesky decomposition), we only need to work with
+only 7,003 values.
+
+The file \file{inst/examples/example.R} demonstrates how to estimate
+the Hessian for this model.  The function, gradient, and ``true''
+Hessian are computed using functions in the file
+\file{inst/examples/ex\_funcs.R}).  In \file{example.R}, we first
+simulate some data.  The \func{hess.struct} function returns the list
+than can be used for the \funcarg{hs} argument in the
+\func{get.new.sparse.hessian} function.  
+
+We then create \funcarg{obj} using the defaults for
+\funcarg{fd.method} and \funcarg{eps}.  Finally, we compute the
+function, gradient and Hessian using the two different methods on
+\funcarg{obj}.
+
+The \func{get.hess} function (defined in \file{ex\_funcs.R}) returns
+the exact Hessian, derived analytically.  This Hessian
+is the same as the one that is computed by way of \func{get.hessian}.
+
+
+
+\section{Discussion points}
+
+For some functions, deriving and coding a gradient
+analytically is straightforward (either by hand, or using a symbolic
+computation tool like \pkg{Mathematica}).  For many others, like log
+posterior densities, analytic Hessians can be
+messy to derive and code.  Even then, storing and working with a $p \times p$ matrix
+is expensive when $p$ is large.  The \pkg{sparseHessianFD} package is
+useful when the Hessian is sparse and the sparsity pattern is known
+in advance, even when $p$ is massively large.  The speed at which
+\pkg{sparseHessianFD} computes the Hessian depends on the
+sparsity pattern.  For block diagonal Hessians, as in the example
+above, computation time will grow with the size of each heterogeneous
+parameter, and the number of population-level parameters, but not with
+the number of heterogeneous units.  As $N$ grows, the number of
+non-zero elements in the Hessian grows linearly, and the number of
+gradient differences that need to be computed is constant.
+
+We should note that finite differencing is not the current ``state of
+the art'' for estimating sparse Hessians.  Algorithmic differentiation (AD)
+packages can be faster and more exact (and of course they can compute
+the gradient as well).  A critical requirement of an AD package when we need to differentiate
+scalar-valued functions with large $p$ is that it support
+``reverse-mode'' differentiation.   For C++, \pkg{CppAD} and \pkg{Adol-C} are
+popular choices, and others may be available for Matlab and
+Python. \pkg{AD Model Builder} is a scripting language for AD that can
+be called from \proglang{R} using the \pkg{R2admb} package \citep{R_R2admb}.
+
+\bibliography{sparseHessianFD}
+
+
+\end{document}
