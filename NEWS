@@ -1,5 +1,9 @@
 NEWS file for sparseHessianFD package
 
+VERSION 0.1.2 (Jan. 5, 2015)
+
+   o   Complete refactoring of code to be more "modern," in its use of Rcpp, devtools, Roxygen2 and testthat.
+
 VERSION 0.1.1 (Nov. 5, 2013)
 
    o   Removed functions for sampling from, and computing the density of,
