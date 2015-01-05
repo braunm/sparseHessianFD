@@ -34,11 +34,47 @@ extern "C"
 
 class Rfunc {
 
+
+public:
+  
+  Rfunc(const int, const Rcpp::Function, const Rcpp::Function);
+  
+  ~Rfunc();
+  
+  template <typename Tpars>
+  void get_f(const Eigen::MatrixBase<Tpars>&, const double&);
+  
+  template <typename Tpars, typename Tgrad>
+  void get_df(const Eigen::MatrixBase<Tpars>&, const Eigen::MatrixBase<Tgrad>&);
+  
+  template <typename Tpars, typename Tgrad>
+  void get_fdf(const Eigen::MatrixBase<Tpars>&, const double&, const Eigen::MatrixBase<Tgrad>&);
+  
+  
+  template<typename Tpars, typename Tout>
+  void get_hessian(const Eigen::MatrixBase<Tpars>&, const Eigen::SparseMatrixBase<Tout>&);
+  
+  
+  template<typename TP, typename TX, typename Tout>
+  void get_hessian_CSC(const MatrixBase<TP>&,
+		       const MatrixBase<TX>&,
+		       const MatrixBase<TX>&,
+		       const MatrixBase<Tout>&);
+  
+  
+  template<typename Tin>
+  void hessian_init(const MatrixBase<Tin>&,
+		    const MatrixBase<Tin>&,
+		    int, double);
+  
+  int get_nnz(); 
+  
+  
   int nvars; 
   const Rcpp::Function fn;
   const Rcpp::Function gr;
   
- protected:
+private:
   
   VectorXi iRow; // row indices of nonzero elements
   VectorXi jCol; // col indices of nonzero elements
@@ -51,7 +87,7 @@ class Rfunc {
   MatrixXd pert; // perturbation for finite differencing
   MatrixXd fd; // the finite differences
   int mingrp, maxgrp;
- 
+  
   int dssm_info, fdhs_info;
 
   int fd_method;
@@ -83,39 +119,7 @@ class Rfunc {
   VectorXd valTmp;
   SparseMatrix<double> BkTmp;
 
- public:
-
-  Rfunc(const int, const Rcpp::Function, const Rcpp::Function);
-
-  ~Rfunc();
-
-  template <typename Tpars>
-    void get_f(const Eigen::MatrixBase<Tpars>&, const double&);
-  
-  template <typename Tpars, typename Tgrad>
-    void get_df(const Eigen::MatrixBase<Tpars>&, const Eigen::MatrixBase<Tgrad>&);
-  
-  template <typename Tpars, typename Tgrad>
-    void get_fdf(const Eigen::MatrixBase<Tpars>&, const double&, const Eigen::MatrixBase<Tgrad>&);
-
-
-  template<typename Tpars, typename Tout>
-    void get_hessian(const Eigen::MatrixBase<Tpars>&, const Eigen::SparseMatrixBase<Tout>&);
-
-
-  template<typename TP, typename TX, typename Tout>
-    void get_hessian_CSC(const MatrixBase<TP>&,
-			 const MatrixBase<TX>&,
-			 const MatrixBase<TX>&,
-			 const MatrixBase<Tout>&);
-
  
-  template<typename Tin>
-    void hessian_init(const MatrixBase<Tin>&,
-		      const MatrixBase<Tin>&,
-		      int, double);
-
-  int get_nnz();  
 };
 
 Rfunc::Rfunc(const int nvars_,

@@ -1,8 +1,8 @@
 Package: sparseHessianFD
 Type: Package
 Title: Numerical estimation of sparse Hessians using ACM TOMS Algorithm 636.
-Version: 0.1.1
-Date: 2013-11-05
+Version: 0.1.2
+Date: 2015-01-05
 Author: R interface code by Michael Braun
 	Original Fortran code by Thomas F. Coleman, Burton S. Garbow and
 	Jorge J. More.
@@ -19,7 +19,15 @@ Description:  Computes Hessian of a scalar-valued function, and returns it in sp
 	      Algorithm 636, written by Coleman, Garbow and More (ACM Transactions on Mathematical
 	      Software, 11:4, Dec. 1985).
 License: file LICENSE
-Depends: Rcpp (>= 0.9.6), RcppEigen (>= 0.3.1), Matrix, methods
-Suggests:  plyr
+LazyData:  true
+Depends: Rcpp (>= 0.11.3),
+	 RcppEigen (>= 0.3.2.3),
+	 Matrix (>= 1.1.4),
+	 methods
+Suggests:  plyr, testthat
+RcppModules:  sparseHessianFD
+Roxygen:  list(wrap=TRUE)
 LinkingTo: Rcpp, RcppEigen
+VignetteBuilder:  knitr
+SystemRequirements:  C++11
 
