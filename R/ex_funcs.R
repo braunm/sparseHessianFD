@@ -9,7 +9,7 @@
 
 log.f <- function(pars, Y, X, inv.Omega, inv.Sigma, ...) {
 
-  beta <- matrix(pars[1:(N*k)], k, N, byrow=FALSE)
+  beta <- matrix(pars[1:(N*k)], k, N, byrow=TRUE)
   mu <- pars[(N*k+1):(N*k+k)]
 
   bx <- colSums(X * beta)
@@ -30,7 +30,7 @@ log.f <- function(pars, Y, X, inv.Omega, inv.Sigma, ...) {
 
 dlog.f.db <- function(pars, Y, X, inv.Omega, inv.Sigma) {
 
-  beta <- matrix(pars[1:(N*k)], k, N, byrow=FALSE)
+  beta <- matrix(pars[1:(N*k)], k, N, byrow=TRUE)
   mu <- pars[(N*k+1):length(pars)]
   bx <- colSums(X * beta)
 
@@ -51,7 +51,7 @@ dlog.f.db <- function(pars, Y, X, inv.Omega, inv.Sigma) {
 
 dlog.f.dmu <- function(p, Y, X, inv.Omega, inv.Sigma) {
 
-  beta <- matrix(p[1:(N*k)], k, N, byrow=FALSE)
+  beta <- matrix(p[1:(N*k)], k, N, byrow=TRUE)
   mu <- p[(N*k+1):length(p)]
   Bmu <- apply(beta, 2, "-", mu)
 
@@ -70,7 +70,7 @@ get.grad <- function(p, Y, X, inv.Omega, inv.Sigma, ...) {
 
 d2.db <- function(pars, Y, X, inv.Sigma, ...) {
 
-  beta <- matrix(pars[1:(N*k)], k, N, byrow=FALSE)
+  beta <- matrix(pars[1:(N*k)], k, N, byrow=TRUE)
   mu <- pars[(N*k+1):length(pars)]
   ebx <- exp(colSums(X * beta))
 
@@ -79,12 +79,12 @@ d2.db <- function(pars, Y, X, inv.Sigma, ...) {
   q <- vector("list",length=N)
   for (i in 1:N) {
     q[[i]] <- -T*p[i]*(1-p[i])*tcrossprod(X[,i]) - inv.Sigma
-##    q[[i]] <- -T*p[i]*(1-p[i])*XX.list[[i]] - inv.Sigma
   }
   B <- bdiag(q)
   return(B)
   
 }
+
 
 d2.dmu <- function(inv.Sigma, inv.Omega) {
   return(-N*inv.Sigma-inv.Omega)
@@ -100,23 +100,31 @@ get.hess <- function(p, Y, X, inv.Omega, inv.Sigma, ...) {
   SX <- Matrix(inv.Sigma)
   XO <- Matrix(inv.Omega)
   B1 <- d2.db(p, Y, X, SX, ...)
-  cross <- d2.cross(SX)
+
+  pvec <- NULL
+  for (i in 1:N) {
+      pvec <- c(pvec, seq(i, i+(k-1)*N, length=k))
+  }
+
+  pmat <- as(pvec, "pMatrix")
+  B2 <- Matrix::t(pmat) %*% B1 %*% pmat
+  cross <- d2.cross(SX) %*% pmat
   Bmu <- d2.dmu(SX, XO)
-  res <- rBind(cBind(B1,Matrix::t(cross)),cBind(cross, Bmu))
+  res <- rBind(cBind(B2, Matrix::t(cross)),cBind(cross, Bmu))
 
   return(res)
 }
 
 
 
-get.hess.struct <- function(N, k) {
+## get.hess.struct <- function(N, k) {
 
-  B1 <- kronecker(Diagonal(N),Matrix(TRUE,k,k))
-  B2 <- Matrix(TRUE,k,N*k)
-  B3 <- Matrix(TRUE,k,k)
-  H <- cBind(rBind(B1,B2),rBind(Matrix::t(B2),B3))
-  res <- Matrix.to.Coord(H)
-  return(res)
+##   B1 <- kronecker(Diagonal(N),Matrix(TRUE,k,k))
+##   B2 <- Matrix(TRUE,k,N*k)
+##   B3 <- Matrix(TRUE,k,k)
+##   H <- cBind(rBind(B1,B2),rBind(Matrix::t(B2),B3))
+##   res <- Matrix.to.Coord(H)
+##   return(res)
   
-}
+## }
 

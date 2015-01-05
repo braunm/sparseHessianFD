@@ -7,4 +7,4 @@
 #' @aliases Rcpp_sparseHessianFD-class
 #' @docType class
 #' @export sparseHessianFD
-ads <- setRcppClass("sparseHessianFD", module="sparseHessianFD")
+sparseHessianFD <- setRcppClass("sparseHessianFD", module="sparseHessianFD")
