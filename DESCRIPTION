@@ -25,6 +25,7 @@ Depends: Rcpp (>= 0.11.3),
 	 Matrix (>= 1.1.4),
 	 methods
 Suggests:  plyr, testthat
+RcppModules:  sparseHessianFD
 Roxygen:  list(wrap=TRUE)
 LinkingTo: Rcpp, RcppEigen
 VignetteBuilder:  knitr
