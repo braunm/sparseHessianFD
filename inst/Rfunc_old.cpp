@@ -250,7 +250,7 @@ void Rfunc::hessian_init(const MatrixBase<Tin>& hess_iRow,
     dssm_info = DSSM_wrap(); // convert structure information
     if (dssm_info < 0) {
       TRUST_COUT << "Problem with hessian structure.  Check column " << -dssm_info << "." << endl;
-      throw MyException ("Exception thrown. ", __FILE__, __LINE__);
+      //    throw MyException ("Exception thrown. ", __FILE__, __LINE__);
     }
     if (dssm_info == 0) {
       throw MyException ("DSSM_info = 0 (internal problem).", __FILE__, __LINE__);
