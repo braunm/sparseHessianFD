@@ -58,12 +58,6 @@ public:
   const Rcpp::Function gr;
   
 private:
-
-  void get_hessian_CSC(const NumericVector&,
-		       ivec&,
-		       ivec&,
-		       dvec&);
-
   
   
   ivec iRow; // row indices of nonzero elements
@@ -83,16 +77,6 @@ private:
 
   int DSSM_wrap();  // process Hessian structure
   void FDHS_wrap();
-
-  void sort_CSC_cols(ivec&,
-		     ivec&,
-		     dvec&
-		     );
-  
-
-  void sort_CSC_cols(ivec&,
-		     ivec&
-		     ); // for sorting only the indices
   
   void compute_hessian_fd(const NumericVector&);
 
@@ -154,52 +138,47 @@ Rcpp::S4 Rfunc::get_hessian(const NumericVector& P) {
   if (P.size()!=nvars) throw MyException("Incorrect number of parameters\n",
 					 __FILE__, __LINE__);
 
-
-  ivec irnTmp;
-  irnTmp.resize(nnz);
-  ivec jclTmp;
-  jclTmp.resize(nvars+1);
-  dvec valTmp;
-  valTmp.resize(nnz);
-
  Rcout << "Computing Hessian\n";
   
-   compute_hessian_fd(P);
+ compute_hessian_fd(P);
 
-  /* std::copy(iRow.begin(), iRow.end(), irnTmp.begin()); */
-  /* std::copy(jpntr.begin(), jpntr.end(), jclTmp.begin()); */
-  /* std::copy(fhes.begin(), fhes.end(), valTmp.begin()); */
+ Rcout << "iRow, fhes\n";
+ for (int i=0; i<nnz; i++) {
+   Rcout << iRow[i] << "\t" << fhes[i] << "\n";
+ }
 
+ 
+ std::vector<TT> Trips;
+ Trips.resize(nnz);
+ Eigen::SparseMatrix<double> sp;
+ sp.resize(nvars, nvars);
+ 
+ Rcout << "Copying Hessian\n";
+ 
+ // copy hessian to sparse structure elements
+ int ind, nels;
+ for (int j=0; j<nvars; j++) {
+   ind = jpntr[j]-1;
+   nels = jpntr[j+1] -1 - ind;
+   //  Rcout << "j = " << j << "  ind = " << ind << "  nels = " << nels << "\n";
+   for (int i=0; i<nels; i++) {
+        Rcout <<  "i = " << i << "  iRow = " << iRow[ind+i] << "  jCol = " << jCol[ind+i] << "  fhes = " << fhes[ind+i] << "\n";
+     Trips.push_back(TT(iRow[ind+i]-1, j, fhes[ind+i]));
+   }
+ }
+ sp.setFromTriplets(Trips.begin(), Trips.end());
 
-  
-  // get_hessian_CSC(P, irnTmp, jclTmp, valTmp);
-  
-  std::vector<TT> Trips;
-  Trips.resize(nnz);
-  Eigen::SparseMatrix<double> sp;
-  sp.resize(nvars, nvars);
-
-  Rcout << "COpying Hessian\n";
-  
-  // copy hessian to sparse structure elements
-  int ind, nels;
-  for (int j=0; j<nvars; j++) {
-    ind = jclTmp[j];
-    nels = jclTmp[j+1] - ind;
-    for (int i=0; i<nels; i++) {
-      Trips.push_back(TT(irnTmp[ind+i], j, valTmp[ind+i]));
-    }
-  }
-  sp.setFromTriplets(Trips.begin(), Trips.end());
-  Eigen::SparseMatrix<double> out = sp.selfadjointView<Eigen::Lower>();
-
-  Rcout << "Returning Hessian\n";
-  
-  return(Rcpp::wrap(out));
+ Rcout << sp << "\n";
+ 
+ Eigen::SparseMatrix<double> out = sp.selfadjointView<Eigen::Lower>();
+ 
+ Rcout << "Returning Hessian\n";
+ 
+ return(Rcpp::wrap(out));
 }
 
 /*
-Below this point, functions to compute sparse hessian using FD
+  Below this point, functions to compute sparse hessian using FD
  */
 
 
@@ -253,6 +232,15 @@ void Rfunc::hessian_init(const IntegerVector& hess_iRow,
     for (int i=0; i<nvars; i++) {
       pert(i, ngrp[i]-1) = 1.;  // construct perturbation matrix from DSSM results
     }
+
+    /* int ind, nels; */
+    /* for (int j=0; j<nvars; j++) { */
+    /*   ind = jpntr[j]-1; */
+    /*   nels = jpntr[j+1] -1 - ind; */
+    /*   for (int i=0; i<nels; i++) { */
+    /* 	jCol[ind+i] = j; */
+    /*   } */
+    /* } */
   }
 }
 
@@ -296,90 +284,6 @@ void Rfunc::compute_hessian_fd(const NumericVector& P) {
   FDHS_wrap();  // call FDHS routine
   
 }
-
-
-  void Rfunc::get_hessian_CSC(const NumericVector& P,
-			      ivec& irn,
-			      ivec& jcl,
-			      dvec& vals
-			      )
-{
-
-  
-  compute_hessian_fd(P); // gets CSC format, but unsorted within columns
-
-
-
-  
-  
-  // copy output.  will then be sorted.
-  irn = iRow;
-  vals = fhes;
-  jcl = jpntr;
-  
-  //  sort_CSC_cols(irn, jcl, vals);
-
-  // convert to 0-based indexing
-  for (int i=0; i<irn.size(); i++) {
-    irn[i] = irn[i] - 1;
-  }
-
-  for (int i=0; i<jcl.size(); i++) {
-    jcl[i] = jcl[i] - 1;
-  }
-  
- 
-  
-}
-
-
-void Rfunc::sort_CSC_cols(ivec& irn,
-			  ivec& jcl
-			  )
-{
-
-  int p0, p1, nels;
-
-  for (int col=0; col<nvars; col++){
-    p0 = jcl[col]-1;  // index of first element in column 
-    p1 = jcl[col+1]-1; // index of first element in next column
-    nels = p1 - p0;
-    std::sort(irn.begin()+p0, irn.begin()+p1-1);
-  }
-}
-
-
-void Rfunc::sort_CSC_cols(ivec& irn,
-			  ivec& jcl,
-			  dvec& vals
-			  )
-{
-
-
-
-  Rcout <<"Before sort\n";
-  for (auto i : irn) Rcout << i << "\n";
-  Rcout << "\n";
-  for (auto i : jcl) Rcout << i << "\n";
-  Rcout << "\n";
-  for (auto i : vals) Rcout << i << "\n";
-  Rcout << "\n";
-  
-  int row, p0, p1, nels;
-
-  for (int col=0; col<nvars; col++){
-    p0 = jcl[col] - 1;  // index of first element in column 
-    p1 = jcl[col+1] - 1; // index of first element in next column
-    nels = p1 - p0;
-    for (int z=0; z<nels; z++) {
-      auto M = std::min_element(irn.begin()+p0+z, irn.begin()+p0+nels);
-      row = std::distance(irn.begin()+p0+z, M);
-      std::swap(irn[p0+z], irn[p0+z+row]);
-      std::swap(vals[p0+z], vals[p0+z+row]);
-    }
-  }
-}
-
 
 void Rfunc::FDHS_wrap() {
 

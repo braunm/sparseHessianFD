@@ -18,7 +18,7 @@ library(numDeriv)
 
 set.seed(123)
 
-N <- 5
+N <- 3
 k <- 2
 T <- 20
 
@@ -66,7 +66,7 @@ get.df <- function(v) get.grad(v, Y=Y, X=X, inv.Omega=inv.Omega, inv.Sigma=inv.S
 
 
 obj <- new("sparseHessianFD", nvars, get.f2, get.df2) 
-obj$hessian.init(hess.struct$iRow, hess.struct$jCol, 0, 1e-5)
+obj$hessian.init(hess.struct$iRow, hess.struct$jCol, 1, 1e-5)
 
 ## obj <- new.sparse.hessian.obj(par, log.f, get.grad, hess.struct, 
 ##                               Y=Y, X=X, inv.Omega=inv.Omega, inv.Sigma=inv.Sigma)
