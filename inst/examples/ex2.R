@@ -9,40 +9,40 @@
 
 rm(list=ls())
 gc()
-library(sparseHessianFD)
+
+
 library(mvtnorm)
-library(plyr)
 library(Rcpp)
 library(RcppEigen)
 library(numDeriv)
 
+
+
 set.seed(123)
 
-N <- 3
+N <- 10000
 k <- 2
-T <- 20
+T <- 10
 
 
 ## Simulate data and set priors
 
 x.mean <- rep(0,k)
 x.cov <- diag(k)
-mu <- rnorm(k,0,10)
+mu <- rnorm(k, 0, 1)
 Omega <- diag(k)
 inv.Sigma <- rWishart(1,k+5,diag(k))[,,1]
 inv.Omega <- solve(Omega)
+
 X <- t(rmvnorm(N, mean=x.mean, sigma=x.cov)) ## k x N
 B <- t(rmvnorm(N, mean=mu, sigma=Omega)) ## k x N
 XB <- colSums(X * B)
 log.p <- XB - log1p(exp(XB))
-Y <- laply(log.p, function(q) return(rbinom(1,T,exp(q))))
+Y <- sapply(log.p, function(q) return(rbinom(1,T,exp(q))))
 
 nvars <- as.integer(N*k + k)
 par <- rnorm(nvars) ## random starting values
-
-
-#hess.struct <- get.hess.struct(N, k)  ## for SparseFD method only
-
+print("Creating true hessian")
 true.hess <- get.hess(par, Y, X, inv.Omega, inv.Sigma)
 hess.struct <- Matrix.to.Coord(as(tril(true.hess), "lMatrix"))
 
@@ -58,27 +58,33 @@ make.df <- function(Y, X, inv.Omega, inv.Sigma) {
     }
 }
 
-get.f2 <- make.f(Y, X, inv.Omega, inv.Sigma)
-get.df2 <- make.df(Y, X, inv.Omega, inv.Sigma)
-
-get.f <- function(v) log.f(v, Y=Y, X=X, inv.Omega=inv.Omega, inv.Sigma=inv.Sigma)
-get.df <- function(v) get.grad(v, Y=Y, X=X, inv.Omega=inv.Omega, inv.Sigma=inv.Sigma)
+get.f <- make.f(Y, X, inv.Omega, inv.Sigma)
+get.df <- make.df(Y, X, inv.Omega, inv.Sigma)
 
 
-obj <- new("sparseHessianFD", nvars, get.f2, get.df2) 
-obj$hessian.init(hess.struct$iRow, hess.struct$jCol, 0, 1e-4)
+print("Creating object")
+new.time <- system.time(obj <- new("sparseHessianFD", nvars, get.f, get.df) )
+print(new.time)
+print("Initializing")
+init.time <- system.time(obj$hessian.init(hess.struct$iRow, hess.struct$jCol, 1, 1e-6))
+print(init.time)
 
 ## obj <- new.sparse.hessian.obj(par, log.f, get.grad, hess.struct, 
 ##                               Y=Y, X=X, inv.Omega=inv.Omega, inv.Sigma=inv.Sigma)
 
-fn <- obj$fn(par)
-gr <- obj$gr(par)
-hs <- obj$hessian(par)
-h2 <- drop0(hessian(get.f, par), 1e-8)
-fdf <- obj$fngr(par)
-
-ha <- get.hess(par, Y, X, inv.Omega, inv.Sigma)
-
+cat("Function eval:\n")
+fn.time <- system.time(fn <- obj$fn(par))
+print(fn.time)
+cat("\nGradient eval:\n")
+grad.time <- system.time(gr <- obj$gr(par))
+print(grad.time)
+cat("\nHessian eval:\n")
+hess.time <- system.time(hs <- obj$hessian(par))
+print(hess.time)
+##fdf <- obj$fngr(par)
+##ha <- drop0(get.hess(par, Y, X, inv.Omega, inv.Sigma))
+print("Correct result:?")
+print(all.equal(hs, true.hess))
 
 
 

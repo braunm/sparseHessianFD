@@ -45,7 +45,7 @@ dlog.f.db <- function(pars, Y, X, inv.Omega, inv.Sigma) {
   
   res <- t(dLL.db) + dprior
 
-  return(as.vector(res))
+  return(as.vector(t(res)))
  
 }
 

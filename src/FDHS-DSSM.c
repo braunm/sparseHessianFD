@@ -447,6 +447,12 @@ L140:
 
 } /* dssm_ */
 
+
+
+
+
+
+
 /* Subroutine */ int idog_(int *n, int *nghbrp, int *npntrp, 
 	int *nghbrs, int *npntrs, int *listp, int *maxclq, 
 	int *maxid, int *iwa1, int *iwa2, int *iwa3)

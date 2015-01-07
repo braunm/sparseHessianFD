@@ -59,7 +59,9 @@ dlog.f.dmu <- function(p, Y, X, inv.Omega, inv.Sigma) {
   return(res)
 }
 
-get.grad <- function(p, Y, X, inv.Omega, inv.Sigma, ...) {
+
+
+ get.grad <- function(p, Y, X, inv.Omega, inv.Sigma, ...) {
 
   q1 <- dlog.f.db(p, Y, X, inv.Omega, inv.Sigma)
   q2 <- dlog.f.dmu(p, Y, X, inv.Omega, inv.Sigma)
