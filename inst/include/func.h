@@ -88,10 +88,9 @@ private:
   
   void compute_hessian_fd(const NumericVector&);
 
-  VectorXi hess_iRow;
-  VectorXi hess_jCol;
+  VectorXi hess_iRow, hess_jCol;
+  VectorXd tmp1, tmp2, tmp3;
 
-  NumericVector tmp1, tmp2; 
 };
 
 Rfunc::Rfunc(const int nvars_,
@@ -177,9 +176,7 @@ void Rfunc::hessian_init(const IntegerVector& hess_iRow_,
     ngrp.resize(nvars);
     ipntr.resize(nvars+1);
     jpntr.resize(nvars+1);
-    
-    tmp1 = NumericVector(nvars, 0.0);
-    tmp2 = NumericVector(nvars, 0.0);    
+      
     fd_eps_vec.resize(nvars);
     fd_eps_vec.setConstant(eps);
     
@@ -207,6 +204,11 @@ void Rfunc::hessian_init(const IntegerVector& hess_iRow_,
     for (int i=0; i<nvars; i++) {
       pert(i, ngrp(i)-1) = 1.;  // construct perturbation matrix from DSSM results
     }
+
+
+    tmp1.setZero(nvars);
+    tmp2.setZero(nvars);
+    tmp3.setZero(nvars);
 
     /* int ind, nels; */
     /* for (int j=0; j<nvars; j++) { */
@@ -301,20 +303,12 @@ void Rfunc::compute_hessian_fd(const NumericVector& P) {
   if (fd_method<0) throw MyException("Error:  Hessian is not initialized",
 				     __FILE__, __LINE__);
   
-  VectorXd tmp1(nvars);
   get_df_(vars, tmp1);  // returns current gradient to tmp1
-  fd_eps_vec.setConstant(eps);
+  //  fd_eps_vec.setConstant(eps);
 
 
-  VectorXd tmp2 = vars + fd_eps_vec;
+  tmp2 = vars + fd_eps_vec;
   fd_eps_vec = tmp2 - vars;
-  
-  /* for (int i=0; i<nvars; i++) { */
-  /*   tmp2(i) = P(i) + fd_eps_vec(i); */
-  /*   fd_eps_vec(i) = tmp2(i) - P(i); */
-  /* } */
-
- 
 
   Eigen::PermutationMatrix<Eigen::Dynamic> tmpP(listp - VectorXi::Constant(nvars, 1));
   Eigen::PermutationMatrix<Eigen::Dynamic> tmpPinv = tmpP.inverse();
@@ -330,23 +324,11 @@ void Rfunc::compute_hessian_fd(const NumericVector& P) {
   // It will be worthwhile to create a parallel version of this
 
   for (int j=0; j<maxgrp; j++) {
-    /* for (int i=0; i<nvars; i++) { */
-    /*   tmp2(i) = P(i) + fd_eps_vec[i] * pert(i,j); */
-    /* } */
-    //   tmp2 = P + fd_eps_vec * pert(Rcpp::_, j);
     VectorXd tmp3(nvars);
     tmp2 = vars + eps * pert.col(j);
     get_df_(tmp2, tmp3);
     fd.col(j) = tmp3 - tmp1;
-    
-    /* NumericVector v2 = wrap(tmp2); */
-    /* VectorXd tmp3 = as<VectorXd>(get_df(v2)); */
-    
-    /* fd.col(j) = Rcpp::as<VectorXd>(get_df(wrap(tmp2))); */
-    /* fd.col(j) -= Rcpp::as<VectorXd>(tmp1); */
   }
-
-  //  fd = PPinv * fd; // Permutation
 
   FDHS_wrap();  // call FDHS routine
   
@@ -371,10 +353,10 @@ void Rfunc::compute_hessian_fd(const NumericVector& P) {
   
 
   
-  MatrixXd HH = ((pert * fdtmp.transpose()).array()).matrix();
-  HH = HH;
+  /* MatrixXd HH = ((pert * fdtmp.transpose()).array()).matrix(); */
+  /* HH = HH; */
 
-  Rcout << "HH:\n" << HH << "\n\n";
+  /* Rcout << "HH:\n" << HH << "\n\n"; */
 
 
   
@@ -383,14 +365,12 @@ void Rfunc::compute_hessian_fd(const NumericVector& P) {
 void Rfunc::FDHS_wrap() {
 
   VectorXi iwa(nvars);  
-  int numgrp;
   
-  for (numgrp = 1; numgrp <= maxgrp; numgrp++) {
+  for (int numgrp = 1; numgrp <= maxgrp; numgrp++) {
 
     VectorXd htmp(nvars);
     htmp = fd.col(numgrp-1);
     
-    //   double * fhesd_ptr = &fd(0, numgrp-1);    
     fdhs_(&nvars, iRow.data(), jpntr.data(), jCol.data(), ipntr.data(),
 	  listp.data(), ngrp.data(), &maxgrp, &numgrp, 
 	  fd_eps_vec.data(), htmp.data(), fhes.data(), iwa.data());    
@@ -408,19 +388,25 @@ int Rfunc::DSSM_wrap() {
   VectorXi iwa(liwa);  
   int info = 0;
 
+  Rcout << "Before DSSM (iRow, jCol)\n";
+  for (int i=0; i<nnz; i++) {
+    Rcout << iRow(i) << "\t" << jCol(i) << "\n";
+  }
+
+  
   dssm_(&nvars, &nnz, iRow.data(), jCol.data(), &fd_method,
 	listp.data(), ngrp.data(), &maxgrp, &mingrp,
 	&info, ipntr.data(), jpntr.data(), iwa.data(), &liwa);
 
 
-  /* Rcout << "After DSSM (iRow, jCol)\n"; */
-  /* for (int i=0; i<nnz; i++) { */
-  /*   Rcout << iRow(i) << "\t" << jCol(i) << "\n"; */
-  /* } */
-  /* Rcout << "\n(jpntr, ipntr):\n"; */
-  /* for (int i=0; i<nvars+1; i++) { */
-  /*   Rcout << jpntr(i) << "\t" << ipntr(i) << "\n\n"; */
-  /* } */
+  Rcout << "\nAfter DSSM (iRow, jCol)\n";
+  for (int i=0; i<nnz; i++) {
+    Rcout << iRow(i) << "\t" << jCol(i) << "\n";
+  }
+  Rcout << "\n(jpntr, ipntr):\n";
+  for (int i=0; i<nvars+1; i++) {
+    Rcout << jpntr(i) << "\t" << ipntr(i) << "\n";
+  }
 
   
   return info;
