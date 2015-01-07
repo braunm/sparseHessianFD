@@ -22,6 +22,7 @@ using Eigen::VectorXd;
 using Eigen::MatrixXd;
 using Eigen::MatrixXi;
 using Eigen::VectorXi;
+using Eigen::MatrixBase;
 
 extern "C"  
 {
@@ -38,8 +39,6 @@ extern "C"
 
 class Rfunc {
 
-  typedef std::vector<int> ivec;
-  typedef std::vector<double> dvec;
   typedef Eigen::Triplet<double> TT;
 
 
@@ -62,18 +61,21 @@ public:
   int nvars; 
   const Rcpp::Function fn;
   const Rcpp::Function gr;
+
+  template<typename TP, typename TG>
+    void get_df_(const MatrixBase<TP>&, const MatrixBase<TG>&);
   
 private:
   
   
-  ivec iRow; // row indices of nonzero elements
-  ivec jCol; // col indices of nonzero elements
+  VectorXi iRow; // row indices of nonzero elements
+  VectorXi jCol; // col indices of nonzero elements
   VectorXi listp; // permutation used for DSSM/FDHS
   VectorXi ngrp; // number of groups for DSSM/FDHS
-  ivec ipntr; // for each row, pointer to first element
-  ivec jpntr; // for each col, pointer to first element
-  dvec fhes; // values for nonzero elements
-  dvec fd_eps_vec; // eps used for finite differencing 
+  VectorXi ipntr; // for each row, pointer to first element
+  VectorXi jpntr; // for each col, pointer to first element
+  VectorXd fhes; // values for nonzero elements
+  VectorXd fd_eps_vec; // eps used for finite differencing 
   MatrixXd pert; // perturbation for finite differencing
   MatrixXd fd; // the finite differences
   int mingrp, maxgrp, dssm_info, fd_method;
@@ -120,13 +122,32 @@ NumericVector Rfunc::get_df(const NumericVector& P) {
   
   if (P.size()!=nvars) throw MyException("Incorrect number of parameters\n",
 					 __FILE__, __LINE__);
-   NumericVector grad = gr(P);
+  NumericVector grad = gr(P);
   return(grad);  
 }
 
+template<typename TP, typename TG>
+  void Rfunc::get_df_(const MatrixBase<TP>& P_,
+		     const MatrixBase<TG>& out_) {
+
+  NumericVector P(nvars);
+  std::copy(P_.derived().data(), P_.derived().data() + nvars, P.begin());
+  
+  MatrixBase<TG>& out = const_cast<MatrixBase<TG>&>(out_);
+
+  
+  if (P.size()!=nvars) throw MyException("Incorrect number of parameters\n",
+					 __FILE__, __LINE__);
+  NumericVector grad = gr(P);
+
+  out = as<VectorXd>(grad);
+  
+}
+
+
 Rcpp::List Rfunc::get_fdf(const NumericVector& P)
 {
-
+  
   double f = get_f(P);
   NumericVector df = get_df(P);
   Rcpp::List res = Rcpp::List::create(Rcpp::Named("val") = f,
@@ -160,16 +181,13 @@ void Rfunc::hessian_init(const IntegerVector& hess_iRow_,
     tmp1 = NumericVector(nvars, 0.0);
     tmp2 = NumericVector(nvars, 0.0);    
     fd_eps_vec.resize(nvars);
-    std::fill(fd_eps_vec.begin(), fd_eps_vec.end(), eps);
+    fd_eps_vec.setConstant(eps);
     
     nnz = hess_iRow.size();
-    fhes.resize(nnz);
-    std::fill(fhes.begin(), fhes.end(), 0.0);
+    fhes.setZero(nnz);
 
-    iRow.resize(nnz);
-    std::copy(hess_iRow_.begin(), hess_iRow_.end(), iRow.begin());
-    jCol.resize(nnz);
-    std::copy(hess_jCol_.begin(), hess_jCol_.end(), jCol.begin());
+    iRow = hess_iRow;
+    jCol = hess_jCol;
 
     dssm_info = DSSM_wrap(); // convert structure information
     if (dssm_info < 0) {
@@ -215,9 +233,9 @@ Rcpp::S4 Rfunc::get_hessian(const NumericVector& P) {
   
  compute_hessian_fd(P);
 
- Rcout << "iRow, fhes\n";
+ Rcout << "iRow, jCol, fhes\n";
  for (int i=0; i<nnz; i++) {
-   Rcout << iRow[i] << "\t" << fhes[i] << "\n";
+   Rcout << iRow(i) << "\t" << jCol(i) << "\t" << fhes(i) << "\n";
  }
 
  
@@ -230,15 +248,21 @@ Rcpp::S4 Rfunc::get_hessian(const NumericVector& P) {
  
  // copy hessian to sparse structure elements
  int ind, nels;
- for (int j=0; j<nvars; j++) {
-   ind = jpntr[j]-1;
-   nels = jpntr[j+1] -1 - ind;
-   //  Rcout << "j = " << j << "  ind = " << ind << "  nels = " << nels << "\n";
+ for (int j=0; j<nvars; j++) { 
+   ind = jpntr(j)-1; 
+   nels = jpntr(j+1) -1 - ind;
+   Rcout << "j = " << j << "  ind = " << ind << "  nels = " << nels << "\n";
    for (int i=0; i<nels; i++) {
-     //       Rcout <<  "i = " << i << "  iRow = " << iRow[ind+i] << "  jCol = " << jCol[ind+i] << "  fhes = " << fhes[ind+i] << "\n";
-     Trips.push_back(TT(iRow[ind+i]-1, j, fhes[ind+i]));
-   }
- }
+     Rcout <<  "\ti = " << i << "  iRow = " << iRow(ind+i) << "  jCol = " << jCol(ind+i) << "  fhes = " << fhes(ind+i) << "\n";
+     Trips.push_back(TT(iRow(ind+i)-1, j, fhes(ind+i))); 
+   } 
+ } 
+ 
+
+ /* for (int k=0; k<nnz; k++) { */
+ /*   Trips.push_back(TT(iRow(k)-1, jCol(k)-1, fhes(k))); */
+ /* } */
+ 
  sp.setFromTriplets(Trips.begin(), Trips.end());
 
  Rcout << sp << "\n";
@@ -270,40 +294,27 @@ void Rfunc::compute_hessian_fd(const NumericVector& P) {
     difference is NOT divided by eps
   */
 
+  VectorXd vars = as<VectorXd>(P);
+  
   Rcout << "eps = " << eps << "\n";
   
   if (fd_method<0) throw MyException("Error:  Hessian is not initialized",
 				     __FILE__, __LINE__);
   
-  VectorXd tmp1 = as<VectorXd>(get_df(P));  // returns current gradient to tmp1
-  std::fill(fd_eps_vec.begin(), fd_eps_vec.end(), eps);
+  VectorXd tmp1(nvars);
+  get_df_(vars, tmp1);  // returns current gradient to tmp1
+  fd_eps_vec.setConstant(eps);
+
+
+  VectorXd tmp2 = vars + fd_eps_vec;
+  fd_eps_vec = tmp2 - vars;
   
-  for (int i=0; i<nvars; i++) {
-    tmp2(i) = P(i) + fd_eps_vec[i];
-    fd_eps_vec[i] = tmp2(i) - P(i);
-  }
+  /* for (int i=0; i<nvars; i++) { */
+  /*   tmp2(i) = P(i) + fd_eps_vec(i); */
+  /*   fd_eps_vec(i) = tmp2(i) - P(i); */
+  /* } */
 
-  VectorXd vars = as<VectorXd>(P);
-    
-  // It will be worthwhile to create a parallel version of this
-
-  for (int j=0; j<maxgrp; j++) {
-    /* for (int i=0; i<nvars; i++) { */
-    /*   tmp2(i) = P(i) + fd_eps_vec[i] * pert(i,j); */
-    /* } */
-    //   tmp2 = P + fd_eps_vec * pert(Rcpp::_, j);
-    VectorXd tmp2 = vars + eps*pert.col(j);
-    NumericVector v2 = wrap(tmp2);
-    VectorXd tmp3 = as<VectorXd>(get_df(v2));
-    fd.col(j) = tmp3 - tmp1;
-    /* fd.col(j) = Rcpp::as<VectorXd>(get_df(wrap(tmp2))); */
-    /* fd.col(j) -= Rcpp::as<VectorXd>(tmp1); */
-  }
-
-  Rcout << "listp, ngrp:\n";
-  for (int i=0; i<nvars; i++) {
-    Rcout << listp(i) << "\t" << ngrp(i) << "\n";
-  }
+ 
 
   Eigen::PermutationMatrix<Eigen::Dynamic> tmpP(listp - VectorXi::Constant(nvars, 1));
   Eigen::PermutationMatrix<Eigen::Dynamic> tmpPinv = tmpP.inverse();
@@ -314,38 +325,75 @@ void Rfunc::compute_hessian_fd(const NumericVector& P) {
 
   Rcout << "\npert:\n" << pert << "\n\n";
   
+  
+    
+  // It will be worthwhile to create a parallel version of this
+
+  for (int j=0; j<maxgrp; j++) {
+    /* for (int i=0; i<nvars; i++) { */
+    /*   tmp2(i) = P(i) + fd_eps_vec[i] * pert(i,j); */
+    /* } */
+    //   tmp2 = P + fd_eps_vec * pert(Rcpp::_, j);
+    VectorXd tmp3(nvars);
+    tmp2 = vars + eps * pert.col(j);
+    get_df_(tmp2, tmp3);
+    fd.col(j) = tmp3 - tmp1;
+    
+    /* NumericVector v2 = wrap(tmp2); */
+    /* VectorXd tmp3 = as<VectorXd>(get_df(v2)); */
+    
+    /* fd.col(j) = Rcpp::as<VectorXd>(get_df(wrap(tmp2))); */
+    /* fd.col(j) -= Rcpp::as<VectorXd>(tmp1); */
+  }
+
+  //  fd = PPinv * fd; // Permutation
+
+  FDHS_wrap();  // call FDHS routine
+  
+  
+  Rcout << "listp, ngrp:\n";
+  for (int i=0; i<nvars; i++) {
+    Rcout << listp(i) << "\t" << ngrp(i) << "\n";
+  }
+
+
   MatrixXd fdtmp = (fd.array() / eps).matrix();
   Rcout << "fdtmp:\n" << fdtmp << "\n\n";
 
 
-  MatrixXd pat(nvars, nvars);;
-  pat.setZero();
-  for (int i=0; i<nnz; i++){
-    pat(hess_iRow(i)-1, hess_jCol(i)-1) = 1.;
-  }
+  /* MatrixXd pat(nvars, nvars);; */
+  /* pat.setZero(); */
+  /* for (int i=0; i<nnz; i++){ */
+  /*   pat(hess_iRow(i)-1, hess_jCol(i)-1) = 1.; */
+  /* } */
 
-  Rcout << "Pattern:\n" << pat << "\n\n";
+  /* Rcout << "Pattern:\n" << pat << "\n\n"; */
   
 
   
-  MatrixXd HH = ((pert * fdtmp.transpose()).array() * pat.array()).matrix();
+  MatrixXd HH = ((pert * fdtmp.transpose()).array()).matrix();
+  HH = HH;
 
   Rcout << "HH:\n" << HH << "\n\n";
 
-  FDHS_wrap();  // call FDHS routine
+
   
 }
 
 void Rfunc::FDHS_wrap() {
 
-  std::vector<int> iwa(nvars);  
+  VectorXi iwa(nvars);  
   int numgrp;
   
   for (numgrp = 1; numgrp <= maxgrp; numgrp++) {
-    double * fhesd_ptr = &fd(0, numgrp-1);    
-    fdhs_(&nvars, &iRow[0], &jpntr[0], &jCol[0], &ipntr[0],
-	  &listp(0), &ngrp[0], &maxgrp, &numgrp, 
-	  &fd_eps_vec[0], fhesd_ptr, &fhes[0], &iwa[0]);    
+
+    VectorXd htmp(nvars);
+    htmp = fd.col(numgrp-1);
+    
+    //   double * fhesd_ptr = &fd(0, numgrp-1);    
+    fdhs_(&nvars, iRow.data(), jpntr.data(), jCol.data(), ipntr.data(),
+	  listp.data(), ngrp.data(), &maxgrp, &numgrp, 
+	  fd_eps_vec.data(), htmp.data(), fhes.data(), iwa.data());    
   }
   
   return;
@@ -357,12 +405,23 @@ int Rfunc::DSSM_wrap() {
   // converts structure information into format needed for FDHS
 
   int liwa = 6 * nvars;   
-  std::vector<int> iwa(liwa);  
+  VectorXi iwa(liwa);  
   int info = 0;
 
-  dssm_(&nvars, &nnz, &iRow[0], &jCol[0], &fd_method,
-	&listp(0), &ngrp[0], &maxgrp, &mingrp,
-	&info, &ipntr[0], &jpntr[0], &iwa[0], &liwa);
+  dssm_(&nvars, &nnz, iRow.data(), jCol.data(), &fd_method,
+	listp.data(), ngrp.data(), &maxgrp, &mingrp,
+	&info, ipntr.data(), jpntr.data(), iwa.data(), &liwa);
+
+
+  /* Rcout << "After DSSM (iRow, jCol)\n"; */
+  /* for (int i=0; i<nnz; i++) { */
+  /*   Rcout << iRow(i) << "\t" << jCol(i) << "\n"; */
+  /* } */
+  /* Rcout << "\n(jpntr, ipntr):\n"; */
+  /* for (int i=0; i<nvars+1; i++) { */
+  /*   Rcout << jpntr(i) << "\t" << ipntr(i) << "\n\n"; */
+  /* } */
+
   
   return info;
 }
