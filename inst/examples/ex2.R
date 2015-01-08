@@ -20,10 +20,10 @@ library(numDeriv)
 
 set.seed(123)
 
-N <- 10000
+N <- 4
 k <- 2
 T <- 10
-
+order.row <- TRUE
 
 ## Simulate data and set priors
 
@@ -43,23 +43,23 @@ Y <- sapply(log.p, function(q) return(rbinom(1,T,exp(q))))
 nvars <- as.integer(N*k + k)
 par <- rnorm(nvars) ## random starting values
 print("Creating true hessian")
-true.hess <- get.hess(par, Y, X, inv.Omega, inv.Sigma)
+true.hess <- drop0(get.hess(par, Y, X, inv.Omega, inv.Sigma, order.row=order.row))
 hess.struct <- Matrix.to.Coord(as(tril(true.hess), "lMatrix"))
 
-make.f <- function(Y, X, inv.Omega, inv.Sigma) {
+make.f <- function(Y, X, inv.Omega, inv.Sigma, order.row=FALSE) {
     function(pars) {
-        log.f(pars, Y=Y, X=X, inv.Omega=inv.Omega, inv.Sigma=inv.Sigma)
+        log.f(pars, Y=Y, X=X, inv.Omega=inv.Omega, inv.Sigma=inv.Sigma, order.row=order.row)
     }
 }
 
-make.df <- function(Y, X, inv.Omega, inv.Sigma) {
+make.df <- function(Y, X, inv.Omega, inv.Sigma, order.row=FALSE) {
     function(pars) {
-        get.grad(pars, Y=Y, X=X, inv.Omega=inv.Omega, inv.Sigma=inv.Sigma)
+        get.grad(pars, Y=Y, X=X, inv.Omega=inv.Omega, inv.Sigma=inv.Sigma, order.row=order.row)
     }
 }
 
-get.f <- make.f(Y, X, inv.Omega, inv.Sigma)
-get.df <- make.df(Y, X, inv.Omega, inv.Sigma)
+get.f <- make.f(Y, X, inv.Omega, inv.Sigma, order.row)
+get.df <- make.df(Y, X, inv.Omega, inv.Sigma, order.row)
 
 
 print("Creating object")
@@ -83,8 +83,14 @@ hess.time <- system.time(hs <- obj$hessian(par))
 print(hess.time)
 ##fdf <- obj$fngr(par)
 ##ha <- drop0(get.hess(par, Y, X, inv.Omega, inv.Sigma))
+h2 <- drop0(hessian(get.f, par), 1e-8)
 print("Correct result:?")
+
+num.grad <- grad(get.f, par)
+print(all.equal(gr, num.grad))
 print(all.equal(hs, true.hess))
+print(all.equal(hs, h2))
+
 
 
 

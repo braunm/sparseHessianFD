@@ -7,9 +7,9 @@
 ## example.R
 
 
-log.f <- function(pars, Y, X, inv.Omega, inv.Sigma, ...) {
+log.f <- function(pars, Y, X, inv.Omega, inv.Sigma, ..., order.row=FALSE) {
 
-  beta <- matrix(pars[1:(N*k)], k, N, byrow=TRUE)
+  beta <- matrix(pars[1:(N*k)], k, N, byrow=order.row)
   mu <- pars[(N*k+1):(N*k+k)]
 
   bx <- colSums(X * beta)
@@ -28,9 +28,47 @@ log.f <- function(pars, Y, X, inv.Omega, inv.Sigma, ...) {
   
 }
 
-dlog.f.db <- function(pars, Y, X, inv.Omega, inv.Sigma) {
 
-  beta <- matrix(pars[1:(N*k)], k, N, byrow=TRUE)
+get.grad <- function(p, ..., order.row=FALSE) {
+
+  q1 <- dlog.f.db(p, ..., order.row=order.row)
+  q2 <- dlog.f.dmu(p, ..., order.row=order.row)
+  res <- c(q1, q2)
+  return(res)
+}
+
+
+get.hess <- function(p, Y, X, inv.Omega, inv.Sigma, ...., order.row=FALSE) {
+  SX <- Matrix(inv.Sigma)
+  XO <- Matrix(inv.Omega)
+  B1 <- d2.db(p, Y, X, SX, order.row)
+
+  if(order.row) {
+      pvec <- NULL
+      for (i in 1:N) {
+          pvec <- c(pvec, seq(i, i+(k-1)*N, length=k))
+      }
+      
+      pmat <- as(pvec, "pMatrix")
+      B2 <- Matrix::t(pmat) %*% B1 %*% pmat
+      cross <- d2.cross(SX) %*% pmat      
+  } else {
+      B2 <- B1
+      cross <- d2.cross(SX)
+  }
+  
+
+  Bmu <- d2.dmu(SX, XO)
+  res <- rBind(cBind(B2, Matrix::t(cross)),cBind(cross, Bmu))
+
+  return(res)
+}
+
+
+
+dlog.f.db <- function(pars, Y, X, inv.Omega, inv.Sigma, order.row) {
+
+  beta <- matrix(pars[1:(N*k)], k, N, byrow=order.row)
   mu <- pars[(N*k+1):length(pars)]
   bx <- colSums(X * beta)
 
@@ -44,14 +82,15 @@ dlog.f.db <- function(pars, Y, X, inv.Omega, inv.Sigma) {
   dprior <- -inv.Sigma %*% Bmu
   
   res <- t(dLL.db) + dprior
+  if (order.row) res <- t(res)
 
-  return(as.vector(t(res)))
+  return(as.vector(res))
  
 }
 
-dlog.f.dmu <- function(p, Y, X, inv.Omega, inv.Sigma) {
+dlog.f.dmu <- function(p, Y, X, inv.Omega, inv.Sigma, order.row) {
 
-  beta <- matrix(p[1:(N*k)], k, N, byrow=TRUE)
+  beta <- matrix(p[1:(N*k)], k, N, byrow=order.row)
   mu <- p[(N*k+1):length(p)]
   Bmu <- apply(beta, 2, "-", mu)
 
@@ -59,18 +98,11 @@ dlog.f.dmu <- function(p, Y, X, inv.Omega, inv.Sigma) {
   return(res)
 }
 
-get.grad <- function(p, Y, X, inv.Omega, inv.Sigma, ...) {
-
-  q1 <- dlog.f.db(p, Y, X, inv.Omega, inv.Sigma)
-  q2 <- dlog.f.dmu(p, Y, X, inv.Omega, inv.Sigma)
-  res <- c(q1, q2)
-  return(res)
-}
 
 
-d2.db <- function(pars, Y, X, inv.Sigma, ...) {
+d2.db <- function(pars, Y, X, inv.Sigma, order.row) {
 
-  beta <- matrix(pars[1:(N*k)], k, N, byrow=TRUE)
+  beta <- matrix(pars[1:(N*k)], k, N, byrow=order.row)
   mu <- pars[(N*k+1):length(pars)]
   ebx <- exp(colSums(X * beta))
 
@@ -96,35 +128,5 @@ d2.cross <- function(inv.Sigma) {
 }
 
 
-get.hess <- function(p, Y, X, inv.Omega, inv.Sigma, ...) {
-  SX <- Matrix(inv.Sigma)
-  XO <- Matrix(inv.Omega)
-  B1 <- d2.db(p, Y, X, SX, ...)
 
-  pvec <- NULL
-  for (i in 1:N) {
-      pvec <- c(pvec, seq(i, i+(k-1)*N, length=k))
-  }
-
-  pmat <- as(pvec, "pMatrix")
-  B2 <- Matrix::t(pmat) %*% B1 %*% pmat
-  cross <- d2.cross(SX) %*% pmat
-  Bmu <- d2.dmu(SX, XO)
-  res <- rBind(cBind(B2, Matrix::t(cross)),cBind(cross, Bmu))
-
-  return(res)
-}
-
-
-
-## get.hess.struct <- function(N, k) {
-
-##   B1 <- kronecker(Diagonal(N),Matrix(TRUE,k,k))
-##   B2 <- Matrix(TRUE,k,N*k)
-##   B3 <- Matrix(TRUE,k,k)
-##   H <- cBind(rBind(B1,B2),rBind(Matrix::t(B2),B3))
-##   res <- Matrix.to.Coord(H)
-##   return(res)
-  
-## }
 
