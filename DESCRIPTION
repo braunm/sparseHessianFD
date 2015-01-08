@@ -4,30 +4,33 @@ Title: Numerical estimation of sparse Hessians using ACM TOMS Algorithm 636.
 Version: 0.1.2
 Date: 2015-01-05
 Author: R interface code by Michael Braun
-	Original Fortran code by Thomas F. Coleman, Burton S. Garbow and
-	Jorge J. More.
+    Original Fortran code by Thomas F. Coleman, Burton S. Garbow and
+    Jorge J. More.
 Maintainer: Michael Braun <braunm@smu.edu>
 URL: mbraun.cox.smu.edu
-Description:  Computes Hessian of a scalar-valued function, and returns it in sparse Matrix format.
-	      The user must supply the objective function, the 
-	      gradient, and the row and column indices of the non-zero elements of the lower
-	      triangle of the Hessian (i.e., the sparsity structure must be known in advance).
-	      The algorithm exploits this sparsity, so Hessians can be computed quickly even
-	      when the number of arguments to the objective functions is large. This package is
-	      intended to be useful for numeric optimization (e.g., with the trustOptim package) 
-	      or in simulation (e.g., the sparseMVN package). The underlying algorithm is ACM TOMS
-	      Algorithm 636, written by Coleman, Garbow and More (ACM Transactions on Mathematical
-	      Software, 11:4, Dec. 1985).
+Description: Computes Hessian of a scalar-valued function, and returns it in
+    sparse Matrix format. The user must supply the objective function, the
+    gradient, and the row and column indices of the non-zero elements of the
+    lower triangle of the Hessian (i.e., the sparsity structure must be known
+    in advance). The algorithm exploits this sparsity, so Hessians can be
+    computed quickly even when the number of arguments to the objective
+    functions is large. This package is intended to be useful for numeric
+    optimization (e.g., with the trustOptim package) or in simulation (e.g.,
+    the sparseMVN package). The underlying algorithm is ACM TOMS Algorithm 636,
+    written by Coleman, Garbow and More (ACM Transactions on Mathematical
+    Software, 11:4, Dec. 1985).
 License: file LICENSE
-LazyData:  true
-Depends: Rcpp (>= 0.11.3),
-	 RcppEigen (>= 0.3.2.3),
-	 Matrix (>= 1.1.4),
-	 methods
-Suggests:  plyr, testthat
-RcppModules:  sparseHessianFD
-Roxygen:  list(wrap=TRUE)
+LazyData: true
+Depends:
+    Rcpp (>= 0.11.3),
+    RcppEigen (>= 0.3.2.3),
+    Matrix (>= 1.1.4),
+    methods
+Suggests:
+    plyr,
+    testthat
+RcppModules: sparseHessianFD
+Roxygen: list(wrap=TRUE)
 LinkingTo: Rcpp, RcppEigen
-VignetteBuilder:  knitr
-SystemRequirements:  C++11
-
+VignetteBuilder: knitr
+SystemRequirements: C++11

@@ -4,6 +4,23 @@
 
 
 
+#' @name Matrix.to.Coord
+#' @title Row and column indices of non-zero elements of a sparse symmetric matrix
+#' @param M A symmwetric Matrix
+#' @description Takes an object of class Matrix and returns the row and column indices of the non-zero elements in the lower triangle
+#' @return A list with two named elements.
+#' \item{iRow} Integer vector containing row indices of non-zero elements in the lower triangle of M
+#' \item{jCol} Integer vector containing column indices of non-zero elements in the lower triangle of M
+#' @export
+Matrix.to.Coord <- function(M) {
+  res <- vector("list",length=2)
+  names(res) <- c("iRow","jCol")
+  M <- tril(as(M,"TsparseMatrix"))
+  res$iRow <- as.integer(M@i + 1) ## return to 1-based indexingk
+  res$jCol <- as.integer(M@j + 1)
+  return(res)
+}
+
 Sym.CSC.to.Matrix <- function(H,nvars) {
 
 ## H is a list of data stored in compressed sparse column (CSC) format
@@ -15,16 +32,7 @@ Sym.CSC.to.Matrix <- function(H,nvars) {
 }
 
 
-Matrix.to.Coord <- function(M) {
 
-  res <- vector("list",length=2)
-  names(res) <- c("iRow","jCol")
-  M <- tril(as(M,"TsparseMatrix"))
-  res$iRow <- as.integer(M@i)+1 ## return to 1-based indexingk
-  res$jCol <- as.integer(M@j)+1
-  return(res)
-
-}
 
 Coord.to.Pattern.Matrix <- function(H,nrows, ncols=nrows) {
 

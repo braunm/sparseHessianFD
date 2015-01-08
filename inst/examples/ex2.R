@@ -43,34 +43,32 @@ Y <- sapply(log.p, function(q) return(rbinom(1,T,exp(q))))
 nvars <- as.integer(N*k + k)
 par <- rnorm(nvars) ## random starting values
 print("Creating true hessian")
-true.hess <- drop0(get.hess(par, Y, X, inv.Omega, inv.Sigma, order.row=order.row))
+true.hess <- drop0(binary.hess(par, Y, X, T, inv.Omega, inv.Sigma, order.row=order.row))
 hess.struct <- Matrix.to.Coord(as(tril(true.hess), "lMatrix"))
 
-make.f <- function(Y, X, inv.Omega, inv.Sigma, order.row=FALSE) {
+make.f <- function(Y, X, T, inv.Omega, inv.Sigma, order.row=FALSE) {
     function(pars) {
-        log.f(pars, Y=Y, X=X, inv.Omega=inv.Omega, inv.Sigma=inv.Sigma, order.row=order.row)
+        binary.f(pars, Y=Y, X=X, T=T, inv.Omega=inv.Omega, inv.Sigma=inv.Sigma, order.row=order.row)
     }
 }
 
-make.df <- function(Y, X, inv.Omega, inv.Sigma, order.row=FALSE) {
+make.df <- function(Y, X, T, inv.Omega, inv.Sigma, order.row=FALSE) {
     function(pars) {
-        get.grad(pars, Y=Y, X=X, inv.Omega=inv.Omega, inv.Sigma=inv.Sigma, order.row=order.row)
+        binary.grad(pars, Y=Y, X=X, T=T, inv.Omega=inv.Omega, inv.Sigma=inv.Sigma, order.row=order.row)
     }
 }
 
-get.f <- make.f(Y, X, inv.Omega, inv.Sigma, order.row)
-get.df <- make.df(Y, X, inv.Omega, inv.Sigma, order.row)
+get.f <- make.f(Y, X, T, inv.Omega, inv.Sigma, order.row)
+get.df <- make.df(Y, X, T, inv.Omega, inv.Sigma, order.row)
 
 
 print("Creating object")
 new.time <- system.time(obj <- new("sparseHessianFD", nvars, get.f, get.df) )
 print(new.time)
 print("Initializing")
-init.time <- system.time(obj$hessian.init(hess.struct$iRow, hess.struct$jCol, 1, 1e-6))
+init.time <- system.time(obj$hessian.init(hess.struct$iRow, hess.struct$jCol, 1, 1e-8))
 print(init.time)
 
-## obj <- new.sparse.hessian.obj(par, log.f, get.grad, hess.struct, 
-##                               Y=Y, X=X, inv.Omega=inv.Omega, inv.Sigma=inv.Sigma)
 
 cat("Function eval:\n")
 fn.time <- system.time(fn <- obj$fn(par))
@@ -81,8 +79,6 @@ print(grad.time)
 cat("\nHessian eval:\n")
 hess.time <- system.time(hs <- obj$hessian(par))
 print(hess.time)
-##fdf <- obj$fngr(par)
-##ha <- drop0(get.hess(par, Y, X, inv.Omega, inv.Sigma))
 h2 <- drop0(hessian(get.f, par), 1e-8)
 print("Correct result:?")
 

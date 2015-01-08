@@ -7,16 +7,14 @@ if (!require(devtools)) {
 
 set.seed(123)
 
-N <- 100
-k <- 3
+N <- 30
+k <- 2
 T <- 20
 
 x.mean <- rep(0,k)
 x.cov <- diag(k)
 mu <- rnorm(k, 0, 1)
 Omega <- diag(k)
-##inv.Sigma <- rWishart(1,k+5,diag(k))[,,1]
-##inv.Omega <- solve(Omega)
 
 X <- t(rmvnorm(N, mean=x.mean, sigma=x.cov)) ## k x N
 B <- t(rmvnorm(N, mean=mu, sigma=Omega)) ## k x N
@@ -26,6 +24,6 @@ Y <- sapply(log.p, function(q) return(rbinom(1,T,exp(q))))
 
 binary <- list(Y=Y, X=X, T=T)
 
-devtools::use_data(binary)
+devtools::use_data(binary, overwrite=TRUE)
  
 
