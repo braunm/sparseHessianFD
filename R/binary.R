@@ -1,7 +1,6 @@
-## ex_funcs.R -- this file is part of sparseHessianFD, a contributed package
-## for the R statistical programming platform.
-##
-## Copyright (C) 2013 Michael Braun
+## binary.R -- Part of the sparseHessianFD package 
+## Copyright (C) 2013-2015 Michael Braun
+## See LICENSE file for details.
 
 ## Functions to compute objective function, gradient, and Hessian for
 ## binary choice example, and some unit tests.
@@ -11,37 +10,48 @@
 #' @title Binary choice example
 #' @description Functions for binary choice example in the vignette.
 #' @param P Numeric vector of length (N+1)*k.  First N*k elements are heterogeneous coefficients. The remaining k elements are population parameters.
-#' @param Y,X Data matrices
-#' @param inv.Omega,inv.Sigma Prior parameters
+#' @param data List of data matrices Y and X, and choice count integer T
+#' @param priors List of named matrices inv.Omega and inv.Sigma
+#' @param order.row Determines order of heterogeneous coefficients in
+#' parameter vector. Affects sparsity pattern of Hessian. See vignette. 
 #' @return Log posterior density, gradient and Hessian.
 #' @details Hessian is sparse, and returned as a dgcMatrix object
 #' @rdname binary
-binary.f <- function(P, Y, X, T, inv.Omega, inv.Sigma, order.row=FALSE) {
+#' @export
 
-    N <- length(Y)
-    k <- NROW(X)
+binary.f <- function(P, data, priors, order.row=FALSE) {
+
+    N <- length(data$Y)
+    k <- NROW(data$X)
     beta <- matrix(P[1:(N*k)], k, N, byrow=order.row)
     mu <- P[(N*k+1):(N*k+k)]
     
-    bx <- colSums(X * beta)
+    bx <- colSums(data$X * beta)
     
     log.p <- bx - log1p(exp(bx))
     log.p1 <- -log1p(exp(bx))
     
-    data.LL <- sum(Y*log.p + (T-Y)*log.p1)
+    data.LL <- sum(data$Y*log.p + (data$T-data$Y)*log.p1)
     
     Bmu <- apply(beta, 2, "-", mu)
     
-    prior <- -0.5 * sum(diag(tcrossprod(Bmu) %*% inv.Sigma))
-    hyp <- -0.5 * t(mu) %*% inv.Omega %*% mu
+    prior <- -0.5 * sum(diag(tcrossprod(Bmu) %*% priors$inv.Sigma))
+    hyp <- -0.5 * t(mu) %*% priors$inv.Omega %*% mu
     res <- data.LL + prior + hyp
     return(as.numeric(res))
     
 }
 
 #' @rdname binary
-binary.grad <- function(P, Y, X, T, inv.Omega, inv.Sigma, order.row=FALSE) {
+#' @export
+binary.grad <- function(P, data, priors, order.row=FALSE) {
 
+    Y <- data$Y
+    X <- data$X
+    T <- data$T
+    inv.Sigma <- priors$inv.Sigma
+    inv.Omega <- priors$inv.Omega
+    
   q1 <- .dlog.f.db(P, Y, X, T, inv.Omega, inv.Sigma, order.row=order.row)
   q2 <- .dlog.f.dmu(P, Y, X, T, inv.Omega, inv.Sigma, order.row=order.row)
   res <- c(q1, q2)
@@ -49,11 +59,17 @@ binary.grad <- function(P, Y, X, T, inv.Omega, inv.Sigma, order.row=FALSE) {
 }
 
 #' @rdname binary
-binary.hess <- function(P, Y, X, T, inv.Omega, inv.Sigma,  order.row=FALSE) {
+#' @export
+binary.hess <- function(P, data, priors, order.row=FALSE) {
+
+    Y <- data$Y
+    X <- data$X
+    T <- data$T
+    inv.Sigma <- priors$inv.Sigma
+    inv.Omega <- priors$inv.Omega
     N <- length(Y)
     k <- NROW(X)
-    
-    
+        
     SX <- Matrix(inv.Sigma)
     XO <- Matrix(inv.Omega)
     B1 <- .d2.db(P, Y, X, T, SX, order.row)

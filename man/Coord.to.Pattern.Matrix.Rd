@@ -3,27 +3,32 @@
 \alias{Coord.to.Pattern.Matrix}
 \title{Pattern matrix from row and column indices.}
 \usage{
-Coord.to.Pattern.Matrix(H, nrows, ncols = nrows)
+Coord.to.Pattern.Matrix(rows, cols, dims, compressed = TRUE,
+  symmetric = FALSE)
 }
 \arguments{
-  \item{H}{a list containing matrix structure data.  See
-  details.}
+  \item{rows,cols}{row and column indices of non-zero
+  elements}
 
-  \item{nrows}{the number of rows in the matrix.}
+  \item{dims}{2-element vector for number of rows and
+  columns in matrix}
 
-  \item{ncols}{the number of columns in the matrix.}
+  \item{compressed}{If TRUE, returns a matrix is compressed
+  column (default=TRUE)}
+
+  \item{symmetric}{If TRUE, matrix will be symmetric, and
+  only the lower triangular elements need to be provided
+  (default=FALSE)}
 }
 \value{
-An object of Matrix class.
+A sparse pattern matrix
 }
 \description{
 Converts row and column indices to a pattern Matrix object
 of Matrix class
 }
 \details{
-H is a list with two vectors. \describe{ \item{iRow}{Row
-indices for each of the non-zero elements in the matrix.}
-\item{jCol}{Column indices for each of the non-zero
-elements in the matrix.}}
+This function is useful to prototype a sparsity pattern. No
+assumptions are made about symmetry.
 }
 

@@ -16,7 +16,6 @@ vignette: >
 ---
 
 
-
 The **sparseHessianFD** package provides an interface to ACM TOMS Algorithm
 636 for estimating a Hessian that is sparse, in that a large proportion of
 the cross-partial derivatives are zero.  The user provides the following:
@@ -61,6 +60,8 @@ $$
 $$
 
 ```{r, echo=FALSE}
+require(Matrix)
+require(sparseHessianFD)
 N <- 6
 k <- 2
 nv1 <- (N+1)*k
@@ -133,7 +134,7 @@ with the "off-diagonal" case.
 ## Using the package
 
 The functions for computing the objective function, gradient and
-Hessian for this example are in the R/ex\_funcs.R file.  The package
+Hessian for this example are in the R/binary.R file.  The package
 also includes a sample dataset with simulated data from the binary choice example.
 
 To start, we load the data, set some dimension parameters, set prior
@@ -143,15 +144,14 @@ vector of variables at which to evaluate the function.
 ```{r}
 set.seed(123)
 data(binary)
-Y <- binary$Y
-X <- binary$X
-T <- binary$T
-N <- length(Y)
-k <- NROW(X)
+str(binary)
+N <- length(binary$Y)
+k <- NROW(binary$X)
 nvars <- as.integer(N*k + k)
 P <- rnorm(nvars) ## random starting values
-inv.Sigma <- rWishart(1,k+5,diag(k))[,,1]
-inv.Omega <- diag(k)
+priors <- list(inv.Sigma = rWishart(1,k+5,diag(k))[,,1],
+               inv.Omega = diag(k))
+
 ```
 
 ```r
@@ -165,7 +165,8 @@ is influenced by $k= `r k`$ covariates.
 The objective function for the binary choice example is `binary.f` and the gradient function is
 `binary.grad`.  The first argument to both is the variable vector, and
 the argument lists must be the same for both.  For this example, we
-need to provide the data ($X$ and $Y$) and the prior parameters
+need to provide the data list ($X$, $Y$ and $T$) and the prior
+parameter list
 ($\Sigma^{-1}$ and $\Omega^{-1}$). The functions also have an
 `order.row` argument to change the ordering of the variables (and
 thus, the sparsity pattern). If `order.row=TRUE`, then the Hessian
@@ -177,9 +178,9 @@ function that returns the Hessian as a sparse `dgCMatrix` object (see
 the Matrix package).
 
 ```{r, tidy=TRUE}
-true.f <- binary.f(P, Y=Y, X=X, T=T, inv.Sigma=inv.Sigma, inv.Omega=inv.Omega, order.row=FALSE)
-true.grad <- binary.grad(P, Y=Y, X=X, T=T, inv.Sigma=inv.Sigma, inv.Omega=inv.Omega, order.row=FALSE)
-true.hess <- binary.hess(P, Y=Y, X=X, T=T, inv.Sigma=inv.Sigma, inv.Omega=inv.Omega, order.row=FALSE)
+true.f <- binary.f(P, binary, priors, order.row=FALSE)
+true.grad <- binary.grad(P, binary, priors, order.row=FALSE)
+true.hess <- binary.hess(P, binary, priors, order.row=FALSE)
 ```
 	     
 The sparsity pattern of the Hessian is specified by two **integer**
@@ -201,8 +202,8 @@ other arguments for `binary.f` and `binary.grad`.  We accept the default
 values for other arguments to `sparseHessianFD.new`.
 ```{r}
 obj <- sparseHessianFD.new(P, binary.f, binary.grad,
-       rows=pattern$iRow, cols=pattern$jCol,
-       X=X, Y=Y, T=T, inv.Sigma=inv.Sigma, inv.Omega=inv.Omega,
+       rows=pattern$rows, cols=pattern$cols,
+       data=binary, priors=priors,
        order.row=FALSE)
 ```
 
@@ -252,3 +253,20 @@ The sparseHessianFD package can be substantially faster than estimating a dense
 Hessian by brute force finite differencing.  The cost of this speed up
 is that the user does need to provide the gradient and the sparsity
 structure.  As with everything in life, there are trade-offs.
+
+## Quick summary
+In short, to use the package, follow the following steps:
+
+1.  Write R functions to return the value and gradient of the
+objective function.
+2.  Determine the row and column indices of the non-zero elements of
+the lower triangle of the Hessian.
+3.  Pick a variable vector (i.e., a starting value) at which you can
+    initialize the sparseHessian object.  It doesn't really matter
+    what this vector is, as long as the function value and gradient
+    elements are all finite.
+3.  Create a new sparseHessianFD object using the sparseHessianFD.new
+function.  For this example, call that object F.
+4.  Compute Hessian at x by calling F$hessian(x).
+5.  ???
+6.  Profit.

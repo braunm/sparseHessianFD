@@ -1,17 +1,36 @@
 NEWS file for sparseHessianFD package
 
-VERSION 0.1.2 (Jan. 5, 2015)
+VERSION 0.2.0 (Jan. 9, 2015)
 
-   o   Complete refactoring of code to be more "modern," in its use of Rcpp, devtools, Roxygen2 and testthat.
+   o  Essentially a complete re-write of the package.
+   o  New vignette, using a binary choice model as an example.
+   Functions for this model are in binary.R.  Access sample simluated
+   data with data(binary).
+   o  Documentation written using roxygen2
+   o  Added unit tests
+   o  Core class has been renamed sparseHessianFD. Construction and
+   initialization are now two seaprate steps.
+   o  New function sparseHessianFD.new is a wrapper around the
+   construction and initialization steps.
+
+   Deprecated functions in Version 0.2.0
+
+   o  new.sparse.hessian.object.  Use sparseHessianFD.new instead.
+   o  Coord.to.Sym.Pattern.Matrix. Use Coord.to.Pattern.Matrix
+   instead, with option symmetric=TRUE.
+   o  Sym.CSC.to.Matrix.  Use the spMatrix function in the Matrix
+   package instead.
+   
+
 
 VERSION 0.1.1 (Nov. 5, 2013)
 
-   o   Removed functions for sampling from, and computing the density of,
-       a multivariate normal distribution.  These functions are now available
-       in the sparseMVN package.
+   o  Removed functions for sampling from, and computing the density of,
+      a multivariate normal distribution.  These functions are now available
+      in the sparseMVN package.
 
 
 VERSION 0.1.0 (Nov. 5, 2012)
 
-   o   Initial upload to CRAN.
+   o  Initial upload to CRAN.
 

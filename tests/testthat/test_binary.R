@@ -1,44 +1,41 @@
+## test_binary.R -- Part of the sparseHessianFD package 
+## Copyright (C) 2013-2015 Michael Braun
+## See LICENSE file for details.
+
 context("binary example")
 
 test_that("binary_example", {
     require(numDeriv)
 
     set.seed(123)
-
-
     data(binary)
-    Y <- binary$Y
-    X <- binary$X
-    T <- binary$T
-    N <- length(Y)
-    k <- NROW(X)
+ 
+    N <- length(binary$Y)
+    k <- NROW(binary$X)
     nvars <- as.integer(N*k + k)
     P <- rnorm(nvars) ## random starting values
 
     Omega <- diag(k)
-    inv.Omega <- solve(Omega)
-    inv.Sigma <- rWishart(1,k+5,diag(k))[,,1]
+    priors <- list(inv.Omega = solve(Omega),
+                   inv.Sigma = rWishart(1,k+5,diag(k))[,,1])
 
-    make.funcs <- function(Y, X, T, inv.Omega, inv.Sigma, order.row) {
+    make.funcs <- function(D, priors, order.row) {
         res <- vector("list", length=3)
         names(res) <- c("fn", "gr", "hessian")
         res$fn <-  function(pars) {
-            binary.f(pars, Y=Y, X=X, T=T, inv.Omega=inv.Omega,
-                     inv.Sigma=inv.Sigma, order.row=order.row)
+            binary.f(pars, data=D, priors=priors, order.row=order.row)
         }
         res$gr <-  function(pars) {
-            binary.grad(pars, Y=Y, X=X, T=T, inv.Omega=inv.Omega,
-                        inv.Sigma=inv.Sigma, order.row=order.row)
+            binary.grad(pars, data=D, priors=priors, order.row=order.row)
         }
         res$hessian <-  function(pars) {
-            binary.hess(pars, Y=Y, X=X, T=T, inv.Omega=inv.Omega,
-                        inv.Sigma=inv.Sigma, order.row=order.row)
+            binary.hess(pars, data=D, priors=priors, order.row=order.row)
         }
         return(res)
     }
         
-    f1 <- make.funcs(Y, X, T, inv.Omega, inv.Sigma, order.row=FALSE) ## block-arrow
-    f2 <- make.funcs(Y, X, T, inv.Omega, inv.Sigma, order.row=TRUE) ## off-diagonals
+    f1 <- make.funcs(D=binary, priors=priors, order.row=FALSE) ## block-arrow
+    f2 <- make.funcs(D=binary, priors=priors, order.row=TRUE) ## off-diagonals
     
     ## True values for test
     
@@ -51,20 +48,20 @@ test_that("binary_example", {
     true.hess2 <- f2$hessian(P)    
 
     ## Get hessian structure
-    hess.struct1 <- Matrix.to.Coord(tril(true.hess1))
-    hess.struct2 <- Matrix.to.Coord(tril(true.hess2))
+    pattern1 <- Matrix.to.Coord(tril(true.hess1))
+    pattern2 <- Matrix.to.Coord(tril(true.hess2))
     
     obj10 <- new("sparseHessianFD", nvars, f1$fn, f1$gr)
-    obj10$hessian.init(hess.struct1$iRow, hess.struct1$jCol, 0, 1e-7)
+    obj10$hessian.init(pattern1$rows, pattern1$cols, 0, 1e-7)
 
     obj11 <- new("sparseHessianFD", nvars, f1$fn, f1$gr)
-    obj11$hessian.init(hess.struct1$iRow, hess.struct1$jCol, 1, 1e-7)
+    obj11$hessian.init(pattern1$rows, pattern1$cols, 1, 1e-7)
 
     obj20 <- new("sparseHessianFD", nvars, f2$fn, f2$gr)
-    obj20$hessian.init(hess.struct2$iRow, hess.struct2$jCol, 0, 1e-7)
+    obj20$hessian.init(pattern2$rows, pattern2$cols, 0, 1e-7)
 
     obj21 <- new("sparseHessianFD", nvars, f2$fn, f2$gr)
-    obj21$hessian.init(hess.struct2$iRow, hess.struct2$jCol, 1, 1e-7)
+    obj21$hessian.init(pattern2$rows, pattern2$cols, 1, 1e-7)
 
 
     test.val10 <- obj10$fn(P)

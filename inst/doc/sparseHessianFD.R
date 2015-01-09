@@ -1,4 +1,6 @@
 ## ----, echo=FALSE--------------------------------------------------------
+require(Matrix)
+require(sparseHessianFD)
 N <- 6
 k <- 2
 nv1 <- (N+1)*k
@@ -27,20 +29,19 @@ print(M)
 ## ------------------------------------------------------------------------
 set.seed(123)
 data(binary)
-Y <- binary$Y
-X <- binary$X
-T <- binary$T
-N <- length(Y)
-k <- NROW(X)
+str(binary)
+N <- length(binary$Y)
+k <- NROW(binary$X)
 nvars <- as.integer(N*k + k)
 P <- rnorm(nvars) ## random starting values
-inv.Sigma <- rWishart(1,k+5,diag(k))[,,1]
-inv.Omega <- diag(k)
+priors <- list(inv.Sigma = rWishart(1,k+5,diag(k))[,,1],
+               inv.Omega = diag(k))
+
 
 ## ----, tidy=TRUE---------------------------------------------------------
-true.f <- binary.f(P, Y=Y, X=X, T=T, inv.Sigma=inv.Sigma, inv.Omega=inv.Omega, order.row=FALSE)
-true.grad <- binary.grad(P, Y=Y, X=X, T=T, inv.Sigma=inv.Sigma, inv.Omega=inv.Omega, order.row=FALSE)
-true.hess <- binary.hess(P, Y=Y, X=X, T=T, inv.Sigma=inv.Sigma, inv.Omega=inv.Omega, order.row=FALSE)
+true.f <- binary.f(P, binary, priors, order.row=FALSE)
+true.grad <- binary.grad(P, binary, priors, order.row=FALSE)
+true.hess <- binary.hess(P, binary, priors, order.row=FALSE)
 
 ## ------------------------------------------------------------------------
 pattern <- Matrix.to.Coord(tril(true.hess))
@@ -48,8 +49,8 @@ str(pattern)
 
 ## ------------------------------------------------------------------------
 obj <- sparseHessianFD.new(P, binary.f, binary.grad,
-       rows=pattern$iRow, cols=pattern$jCol,
-       X=X, Y=Y, T=T, inv.Sigma=inv.Sigma, inv.Omega=inv.Omega,
+       rows=pattern$rows, cols=pattern$cols,
+       data=binary, priors=priors,
        order.row=FALSE)
 
 ## ------------------------------------------------------------------------

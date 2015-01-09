@@ -1,6 +1,6 @@
-## wrappers.R --   Part of the sparsehessianFD package for the R programming language.
-##
-## Copyright (C) 2015 Michael Braun
+## matrices.R -- Part of the sparseHessianFD package 
+## Copyright (C) 2013-2015 Michael Braun
+## See LICENSE file for details.
 
 
 #' @name sparseHessianFD.new
@@ -18,10 +18,9 @@
 #' @param eps The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).
 #' @param ... Other parameters to be passed to fn and gr.
 #' @return An object of class sparseHessianFD
-#' @details  Indexing starts at 1, and should include the diagonal
-#' elements, even though it is obvious that the diagonal elements are
-#' non-zero.  Entries must be ordered by column, and by row within
-#' columns.  Do not include any entries for the upper triangle.
+#' @details  Indexing starts at 1, and must include the diagonal
+#' elements.  Any upper triangle coordinates will be removed, and
+#' replaced with their lower triangle counterparts. 
 #' The algorithms used for estimating sparse Hessians using finite
 #' differencing are described in the reference below.
 #'
@@ -31,9 +30,28 @@
 #' the partition and permutation:  direct and indirect.  The direct
 #' method tends to require more computation, but may be more
 #' accurate.  We recommend the indirect method to start, so the
-#' default value is 0.
+#' default value is FALSE.
 #'
-#' The function new.sparse.hessian.obj has been deprecated.  Use sparseHessianFD.new instead.
+#' Here is the description of the two methods, as included in the
+#' original ACM TOMS Fortran code:
+#'
+#'   The direct method (method = 1) first determines a partition of
+#'   the columns of symmetric matrix A such that two columns in a
+#'   group have a non-zero element in row K only if column K is in an
+#'   earlier group. Using this partition, the subroutine then computes
+#'   a symmetric permutation of A consistent with the determination of
+#'   A by a lower triangular substitution method. 
+#' 
+#'   The indirect method first computes a symmetric permutation of A
+#'   which minimizes the maximum number of non-zero elements in any 
+#'   row of L, where L is the lower triangular part of the permuted
+#'   matrix. The subroutine then partitions the columns of L into
+#'   groups such that columns of L in a group do not have a non-zero
+#'   in the same row position.
+#'
+#'
+#' The function new.sparse.hessian.obj has been deprecated.  Use
+#' sparseHessianFD.new instead. 
 #' @seealso sparseHessianFD-class
 #' @references Coleman, Thomas F, Burton S Garbow, and Jorge J More
 #' 1985. Software for Estimating Sparse Hessian Matrices. ACM
@@ -71,16 +89,3 @@ sparseHessianFD.new <- function(x, fn, gr, rows, cols, direct=FALSE,
     
 }
 
-
-#' @rdname sparseHessianFD.new
-new.sparse.hessian.obj <- function(x, fn, gr, hs, fd.method=0L, eps=sqrt(.Machine$double.eps),...) {
-    .Deprecated("sparseHessianFD.new")
-    if (is.null(hs))
-        stop("sparseHessianFD: you must supply structure of the Hessian.")
-    if (!is.list(hs))
-        stop ("sparseHessianFD:  hs must be a list")
-    if (!all.equal(names(hs),c("iRow","jCol")))
-        stop ("sparseHessianFD:  Names of hs must be iRow and jCol")
-    direct <- as.logical(fd.method)        
-    return(sparseHessianFD.new(x, fn, gr, hs$iRows, hs$jCols, direct, eps, ...))
-}

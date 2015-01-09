@@ -208,7 +208,6 @@ void Rfunc::hessian_init(const IntegerVector& hess_iRow_,
       pert(i, ngrp(i)-1) = 1.;  // construct perturbation matrix from DSSM results
     }
 
-
     tmp1.setZero(nvars);
     tmp2.setZero(nvars);
     tmp3.setZero(nvars);

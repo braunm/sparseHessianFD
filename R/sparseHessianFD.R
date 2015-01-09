@@ -1,7 +1,5 @@
-#' @encoding{utf-8}
 #' @name sparseHessianFD-package
-#' @alias sparseHessianFD-package
-#' @alias sparseHessianFD
+#' @aliases sparseHessianFD-package
 #' @docType package
 #' @title Estimate sparse Hessians using finite differences of
 #' gradients.
@@ -15,7 +13,8 @@
 #' assumptions. This package is intended to be useful when optimizing
 #' objective functions with this structure, using optimizers than can
 #' exploit this sparsity, such as the trustOptim package.
-#' @license License details are available in the LICENSE file in the source code.
+#'
+#' License details are available in the LICENSE file in the source code.
 #' @references
 #' Coleman, Thomas F, Burton S Garbow, and Jorge J More. 1985. Software
 #' for Estimating Sparse Hessian Matrices. ACM Transaction on
@@ -24,16 +23,12 @@
 #' Coleman, Thomas F, Burton S Garbow, and Jorge J More. 1985. Algorithm
 #' 636:  FORTRAN Subroutines for Estimating Sparse Hessian Matrices. ACM
 #' Transactions on Mathematical Software 11 (4): 378.
-#' @keyword package
+#' @keywords package
 #'
-
-## \details{
-## \tabular{ll}{
-## Package: \tab sparseHessianFD\cr
-## Type: \tab Package\cr
-## Version: \tab 0.1-0\cr
-## Date: \tab 2012-11-07\cr
-## License: \tab See the LICENSE file included in the source code.\cr
-## LazyLoad: \tab yes\cr
-## }
-
+#' @useDynLib sparseHessianFD
+#' @encoding UTF-8
+#' @import Rcpp
+#' @import RcppEigen
+#' @import methods
+#' @import Matrix
+NULL

@@ -6,20 +6,26 @@
 \alias{binary.hess}
 \title{Binary choice example}
 \usage{
-binary.f(P, Y, X, T, inv.Omega, inv.Sigma, order.row = FALSE)
+binary.f(P, data, priors, order.row = FALSE)
 
-binary.grad(P, Y, X, T, inv.Omega, inv.Sigma, order.row = FALSE)
+binary.grad(P, data, priors, order.row = FALSE)
 
-binary.hess(P, Y, X, T, inv.Omega, inv.Sigma, order.row = FALSE)
+binary.hess(P, data, priors, order.row = FALSE)
 }
 \arguments{
   \item{P}{Numeric vector of length (N+1)*k.  First N*k
   elements are heterogeneous coefficients. The remaining k
   elements are population parameters.}
 
-  \item{Y,X}{Data matrices}
+  \item{data}{List of data matrices Y and X, and choice
+  count integer T}
 
-  \item{inv.Omega,inv.Sigma}{Prior parameters}
+  \item{priors}{List of named matrices inv.Omega and
+  inv.Sigma}
+
+  \item{order.row}{Determines order of heterogeneous
+  coefficients in parameter vector. Affects sparsity
+  pattern of Hessian. See vignette.}
 }
 \value{
 Log posterior density, gradient and Hessian.
