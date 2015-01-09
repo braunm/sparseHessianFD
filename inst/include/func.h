@@ -58,7 +58,8 @@ public:
 		    int, double);
   
   int get_nnz(); 
-  int nvars; 
+  int nvars;
+  int get_nvars();
   const Rcpp::Function fn;
   const Rcpp::Function gr;
 
@@ -106,6 +107,10 @@ Rfunc::~Rfunc() {
 
 int Rfunc::get_nnz() {
   return(nnz);
+}
+
+int Rfunc::get_nvars() {
+  return(nvars);
 }
 
 

@@ -13,7 +13,7 @@ binary.grad(P, Y, X, T, inv.Omega, inv.Sigma, order.row = FALSE)
 binary.hess(P, Y, X, T, inv.Omega, inv.Sigma, order.row = FALSE)
 }
 \arguments{
-  \item{P}{Numeric vector of length (N+1)*k.  First N*K
+  \item{P}{Numeric vector of length (N+1)*k.  First N*k
   elements are heterogeneous coefficients. The remaining k
   elements are population parameters.}
 

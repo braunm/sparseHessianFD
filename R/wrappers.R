@@ -5,17 +5,39 @@
 
 #' @name sparseHessianFD.new
 #' @title Create and initialize a new sparseHessianFD object
-#' @param x vector of variables at which to evaluate value, gradient and Hessian during initialization.
+#' @param x A intital vector of variables at which to evaluate value, gradient
+#' and Hessian during initialization.
 #' @param fn R function that returns function value
 #' @param gr R function that returns the gradient of the function
-#' @param rows Integer vector of row indices of non-zero elements of the lower triangle of the Hessian
-#' @param cols Integer vector of column indices of non-zero elements of the lower triangle of the Hessian
-#' @param direct If TRUE, use direct method.  Otherwise, use indirect/substitution method.
-#' @param eps Difference parameter for finite differencing
+#' @param rows Integer vector of row indices of non-zero elements of
+#' the lower triangle of the Hessian
+#' @param cols Integer vector of column indices of non-zero elements
+#' of the lower triangle of the Hessian 
+#' @param direct If TRUE, use direct method for computatation.  Otherwise, use
+#' indirect/substitution method.  See references.
+#' @param eps The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).
 #' @param ... Other parameters to be passed to fn and gr.
 #' @return An object of class sparseHessianFD
-#' @details The function new.sparse.hessian.obj has been deprecated.  Use sparseHessianFD.new instead.
+#' @details  Indexing starts at 1, and should include the diagonal
+#' elements, even though it is obvious that the diagonal elements are
+#' non-zero.  Entries must be ordered by column, and by row within
+#' columns.  Do not include any entries for the upper triangle.
+#' The algorithms used for estimating sparse Hessians using finite
+#' differencing are described in the reference below.
+#'
+#' This method involves a partitioning and permutation of the Hessian
+#' matrix to reduce the number of distinct finite differencing
+#' operations of the gradient.  There are two methods for computing
+#' the partition and permutation:  direct and indirect.  The direct
+#' method tends to require more computation, but may be more
+#' accurate.  We recommend the indirect method to start, so the
+#' default value is 0.
+#'
+#' The function new.sparse.hessian.obj has been deprecated.  Use sparseHessianFD.new instead.
 #' @seealso sparseHessianFD-class
+#' @references Coleman, Thomas F, Burton S Garbow, and Jorge J More
+#' 1985. Software for Estimating Sparse Hessian Matrices. ACM
+#' Transaction on Mathematical Software 11 (4) (December): 363-377.
 #' @export
 sparseHessianFD.new <- function(x, fn, gr, rows, cols, direct=FALSE,
                             eps=sqrt(.Machine$double.eps), ...) {
