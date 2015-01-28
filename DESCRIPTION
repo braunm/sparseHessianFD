@@ -2,7 +2,7 @@ Package: sparseHessianFD
 Type: Package
 Title: Numerical Estimation of Sparse Hessians
 Version: 0.2.0
-Date: 2015-01-09
+Date: 2015-01-29
 Author: R interface code by Michael Braun
     Original Fortran code by Thomas F. Coleman, Burton S. Garbow and
     Jorge J. More.

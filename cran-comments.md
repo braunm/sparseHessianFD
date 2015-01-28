@@ -17,5 +17,3 @@ of other R packages.
 The LICENSE file has not changed from previous versions.  ACM holds the
 copyright on the original Fortran code, and allows redistribution
 under their standard license.
-
-
