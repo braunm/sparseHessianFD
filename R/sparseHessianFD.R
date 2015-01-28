@@ -18,7 +18,7 @@
 #' @references
 #' Coleman, Thomas F, Burton S Garbow, and Jorge J More. 1985. Software
 #' for Estimating Sparse Hessian Matrices. ACM Transaction on
-#' Mathematical Software 11 (4) (December): 363–377. 
+#' Mathematical Software 11 (4) (December): 363-377. 
 #'
 #' Coleman, Thomas F, Burton S Garbow, and Jorge J More. 1985. Algorithm
 #' 636:  FORTRAN Subroutines for Estimating Sparse Hessian Matrices. ACM
