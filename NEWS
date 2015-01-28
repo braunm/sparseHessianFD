@@ -1,4 +1,7 @@
-NEWS file for sparseHessianFD package
+
+
+NEWS FILE FOR SPARSEHESSIANFD PACKAGE
+
 
 VERSION 0.2.0 (Jan. 28, 2015)
 
@@ -19,18 +22,19 @@ VERSION 0.2.0 (Jan. 28, 2015)
     construction and initialization steps.
 
 -   Deprecated functions in Version 0.2.0
+    -   new.sparse.hessian.object. Use sparseHessianFD.new instead.
+    -   Coord.to.Sym.Pattern.Matrix. Use Coord.to.Pattern.Matrix
+        instead, with option symmetric=TRUE.
+    -   Sym.CSC.to.Matrix. Use the spMatrix function in the _Matrix_
+        package instead.
 
--   new.sparse.hessian.object. Use sparseHessianFD.new instead.
--   Coord.to.Sym.Pattern.Matrix. Use Coord.to.Pattern.Matrix instead,
-    with option symmetric=TRUE.
--   Sym.CSC.to.Matrix. Use the spMatrix function in the _Matrix_ package
-    instead.
 
 VERSION 0.1.1 (Nov. 5, 2013)
 
 -   Removed functions for sampling from, and computing the density of, a
     multivariate normal distribution. These functions are now available
     in the _sparseMVN_ package.
+
 
 VERSION 0.1.0 (Nov. 5, 2012)
 

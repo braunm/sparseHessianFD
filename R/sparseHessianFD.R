@@ -28,7 +28,6 @@
 #' @useDynLib sparseHessianFD
 #' @encoding UTF-8
 #' @import Rcpp
-#' @import RcppEigen
 #' @import methods
 #' @import Matrix
 NULL

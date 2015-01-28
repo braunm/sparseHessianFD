@@ -9,9 +9,7 @@
 ### R CMD check results
 There were no ERRORs or WARNINGs
 
-NOTE is probably related to changing from the Author/Maintainer fields
-to the Authors@R field in the DESCRIPTION file.  There is no change to
-the maintainer.
+The only NOTE is related to the LICENSE file.  See below.
 
 ### LICENSE
 LICENSE file has not changed from previous versions.

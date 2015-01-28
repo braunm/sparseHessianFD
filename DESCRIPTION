@@ -24,7 +24,6 @@ LazyData: true
 Depends:
     R (>= 3.1.2),
     Rcpp (>= 0.11.3),
-    RcppEigen (>= 0.3.2.3),
     Matrix (>= 1.1.4),
     methods
 Suggests:
@@ -33,6 +32,6 @@ Suggests:
     knitr
 RcppModules: sparseHessianFD
 Roxygen: list(wrap=TRUE)
-LinkingTo: Rcpp, RcppEigen
+LinkingTo: Rcpp, RcppEigen (>= 0.3.2.3)
 VignetteBuilder: knitr
 SystemRequirements: C++11
