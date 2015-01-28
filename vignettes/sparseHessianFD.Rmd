@@ -272,5 +272,3 @@ the lower triangle of the Hessian.
 3.  Create a new sparseHessianFD object using the sparseHessianFD.new
 function.  For this example, call that object F.
 4.  Compute Hessian at x by calling F$hessian(x).
-5.  ???
-6.  Profit.
