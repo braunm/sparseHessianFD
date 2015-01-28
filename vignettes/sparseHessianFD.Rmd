@@ -240,6 +240,10 @@ and use the hessian function numDeriv package. The advantage of the
 numDeriv package is that it does not require the gradient.  However,
 you can see that it takes some time to run.
 
+```{r, echo=FALSE}
+options(scipen=0)
+```
+
 ```{r, tidy=TRUE}
 library(numDeriv)
 hess.time <- system.time(H1 <- obj$hessian(P))	  

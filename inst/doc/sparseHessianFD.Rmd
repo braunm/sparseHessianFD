@@ -141,7 +141,7 @@ To start, we load the data, set some dimension parameters, set prior
 values for $\Sigma^{-1}$ and $\Omega^{-1}$, and simulate a
 vector of variables at which to evaluate the function.
 
-```{r}
+```{r, collapse=TRUE}
 set.seed(123)
 data(binary)
 str(binary)
@@ -154,7 +154,7 @@ priors <- list(inv.Sigma = rWishart(1,k+5,diag(k))[,,1],
 
 ```
 
-```r
+```{r, echo=FALSE}
 options(scipen=-999)
 ```
 	
@@ -190,7 +190,7 @@ happen have have an example of a matrix with the same sparsity pattern
 of the Hessian you are trying to compute, you can use the following
 convenience function to extract the appropriate index vectors.
 
-```{r}
+```{r, collapse=TRUE}
 pattern <- Matrix.to.Coord(tril(true.hess))
 str(pattern)	    	    
 ```
@@ -221,7 +221,7 @@ stored in `obj`.
 
 Do we get the same results that we would get after calling `binary.f`,
 `binary.grad` and `binary.hess` directly?  Let's see.
-```{r}
+```{r, collapse=TRUE}
 
 
 all.equal(f, true.f)
@@ -239,6 +239,10 @@ Instead of using this package, we could treat the Hessian as dense,
 and use the hessian function numDeriv package. The advantage of the
 numDeriv package is that it does not require the gradient.  However,
 you can see that it takes some time to run.
+
+```{r, echo=FALSE}
+options(scipen=0)
+```
 
 ```{r, tidy=TRUE}
 library(numDeriv)

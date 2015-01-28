@@ -14,11 +14,11 @@ VERSION 0.2.0 (Jan. 28, 2015)
 
 -  New function sparseHessianFD.new is a wrapper around the construction and initialization steps.
 
-Deprecated functions in Version 0.2.0
+-  Deprecated functions in Version 0.2.0
 
--  `new.sparse.hessian.object`.  Use `sparseHessianFD.new` instead.
--  `Coord.to.Sym.Pattern.Matrix`. Use `Coord.to.Pattern.Matrix` instead, with option `symmetric=TRUE`.
--  `Sym.CSC.to.Matrix`.  Use the `spMatrix` function in the *Matrix* package instead.
+  -  `new.sparse.hessian.object`.  Use `sparseHessianFD.new` instead.
+  -  `Coord.to.Sym.Pattern.Matrix`. Use `Coord.to.Pattern.Matrix` instead, with option `symmetric=TRUE`.
+  -  `Sym.CSC.to.Matrix`.  Use the `spMatrix` function in the *Matrix* package instead.
    
 
 

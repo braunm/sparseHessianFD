@@ -1,6 +1,6 @@
 Package: sparseHessianFD
 Type: Package
-Title: Numerical estimation of sparse Hessians using ACM TOMS Algorithm 636.
+Title: Numerical Estimation of Sparse Hessians
 Version: 0.2.0
 Date: 2015-01-09
 Author: R interface code by Michael Braun
@@ -9,7 +9,7 @@ Author: R interface code by Michael Braun
 Maintainer: Michael Braun <braunm@smu.edu>
 URL: coxprofs.cox.smu.edu/braunm
 Description: Computes Hessian of a scalar-valued function, and returns it in
-    sparse Matrix format. The user must supply the objective function, the
+    sparse Matrix format, using ACM TOMS Algorithm 636. The user must supply the objective function, the
     gradient, and the row and column indices of the non-zero elements of the
     lower triangle of the Hessian (i.e., the sparsity structure must be known
     in advance). The algorithm exploits this sparsity, so Hessians can be

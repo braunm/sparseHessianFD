@@ -8,4 +8,4 @@
 vignettes/*_cache
 inst/doc/*
 README.R
-
+README.html

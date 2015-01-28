@@ -26,7 +26,7 @@ M <- rBind(M, Matrix(TRUE,k,N*k))
 M <- cBind(M, Matrix(TRUE, k*(N+1), k))
 print(M)
 
-## ------------------------------------------------------------------------
+## ----, collapse=TRUE-----------------------------------------------------
 set.seed(123)
 data(binary)
 str(binary)
@@ -38,12 +38,15 @@ priors <- list(inv.Sigma = rWishart(1,k+5,diag(k))[,,1],
                inv.Omega = diag(k))
 
 
+## ----, echo=FALSE--------------------------------------------------------
+options(scipen=-999)
+
 ## ----, tidy=TRUE---------------------------------------------------------
 true.f <- binary.f(P, binary, priors, order.row=FALSE)
 true.grad <- binary.grad(P, binary, priors, order.row=FALSE)
 true.hess <- binary.hess(P, binary, priors, order.row=FALSE)
 
-## ------------------------------------------------------------------------
+## ----, collapse=TRUE-----------------------------------------------------
 pattern <- Matrix.to.Coord(tril(true.hess))
 str(pattern)	    	    
 
@@ -58,12 +61,15 @@ f <- obj$fn(P)
 gr <- obj$gr(P)
 hs <- obj$hessian(P)
 
-## ------------------------------------------------------------------------
+## ----, collapse=TRUE-----------------------------------------------------
 
 
 all.equal(f, true.f)
 all.equal(gr, true.grad)
 all.equal(hs, true.hess)	      	     	     
+
+## ----, echo=FALSE--------------------------------------------------------
+options(scipen=0)
 
 ## ----, tidy=TRUE---------------------------------------------------------
 library(numDeriv)
