@@ -8,3 +8,5 @@
 README\.md
 inst/old
 data-raw
+^README\.Rmd$
+^README-.*\.png$
