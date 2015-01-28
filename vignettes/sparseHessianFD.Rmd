@@ -154,7 +154,7 @@ priors <- list(inv.Sigma = rWishart(1,k+5,diag(k))[,,1],
 
 ```
 
-```r
+```{r, echo=FALSE}
 options(scipen=-999)
 ```
 	
