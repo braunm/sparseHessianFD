@@ -76,6 +76,7 @@ Coord.to.Sym.Pattern.Matrix <- function(H, nvars) {
 #' lower triangle of Hessian.}
 #' }
 #' @rdname sparseHessianFD-deprecated
+#' @export
 new.sparse.hessian.obj <- function(x, fn, gr, hs, fd.method=0L, eps=sqrt(.Machine$double.eps),...) {
     .Deprecated("sparseHessianFD.new")
     if (is.null(hs))
