@@ -76,14 +76,21 @@ Coord.to.Sym.Pattern.Matrix <- function(H, nvars) {
 #' lower triangle of Hessian.}
 #' }
 #' @rdname sparseHessianFD-deprecated
-new.sparse.hessian.obj <- function(x, fn, gr, hs, fd.method=0L, eps=sqrt(.Machine$double.eps),...) {
+#' @export
+new.sparse.hessian.obj <- function(x, fn, gr, hs, fd.method=0L, eps=sqrt(.Machine$double.eps), ...) {
     .Deprecated("sparseHessianFD.new")
     if (is.null(hs))
         stop("sparseHessianFD: you must supply structure of the Hessian.")
     if (!is.list(hs))
         stop ("sparseHessianFD:  hs must be a list")
-    if (!all.equal(names(hs),c("iRow","jCol")))
-        stop ("sparseHessianFD:  Names of hs must be iRow and jCol")
+    if (!all.equal(names(hs), c("rows","cols"))) {
+        if (all.equal(names(hs), c("iRow","jCol"))) {
+            names(hs) <- c("rows","cols")
+        }
+    }
+    if (!all.equal(names(hs),c("rows","cols"))) {
+        stop ("sparseHessianFD:  Names of hs must be either (\"iRow, jCol\") or (\"rows, cols\")")
+    }
     direct <- as.logical(fd.method)        
-    return(sparseHessianFD.new(x, fn, gr, hs$iRows, hs$jCols, direct, eps, ...))
+    return(sparseHessianFD.new(x, fn, gr, hs$rows, hs$cols, direct, eps, ...))
 }

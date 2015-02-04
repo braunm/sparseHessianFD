@@ -81,8 +81,13 @@ sparseHessianFD.new <- function(x, fn, gr, rows, cols, direct=FALSE,
     cols <- as.integer(cols)
     stopifnot(length(rows)==length(cols))
     stopifnot(all(is.finite(rows)) & all(is.finite(cols)))
-    if (any(cols > rows)) stop("sparseHessianFD: Some elements in upper triangle.  Provide lower triangle only.")
-
+    if (any(cols > rows)) {
+        warning("sparseHessianFD:  Some elements are in upper triangle and will be deleted.")
+        cat("Provide lower triangle only.\n")
+        ww <- which(cols > rows)
+        rows <- rows[-ww]
+        cols <- cols[-ww]
+    }
     obj$hessian.init(rows, cols, as.integer(direct), eps)
     
     return(obj)
