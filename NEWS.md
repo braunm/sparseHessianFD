@@ -1,4 +1,4 @@
-# NEWS file for sparseHessianFD package
+# NEWS file for sparseHessianFD package 
 
 ## VERSION 0.2.0.9990 (development)
 
