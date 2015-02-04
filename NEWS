@@ -3,6 +3,9 @@
 NEWS FILE FOR SPARSEHESSIANFD PACKAGE
 
 
+VERSION 0.2.0.9990 (development)
+
+
 VERSION 0.2.0 (Jan. 28, 2015)
 
 -   Essentially a complete re-write of the package.
