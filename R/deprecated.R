@@ -77,7 +77,8 @@ Coord.to.Sym.Pattern.Matrix <- function(H, nvars) {
 #' }
 #' @rdname sparseHessianFD-deprecated
 #' @export
-new.sparse.hessian.obj <- function(x, fn, gr, hs, fd.method=0L, eps=sqrt(.Machine$double.eps), ...) {
+new.sparse.hessian.obj <- function(x, fn, gr, hs, fd.method=0L, eps=sqrt(.Machine$double.eps),...) {
+
     .Deprecated("sparseHessianFD.new")
     if (is.null(hs))
         stop("sparseHessianFD: you must supply structure of the Hessian.")
