@@ -13,7 +13,7 @@
 
 #' Compute finite difference
 get.grad.delta <- function(d, x, df, gr, ...) {
-    df1(x + d, ...) - gr
+    df(x + d, ...) - gr
 }
 
 
@@ -32,5 +32,5 @@ get.diffs <- function(x, df, rows, cols, W, delta, ...) {
     gr <- df(x, ...) ## gradient at x
 
     ## return gr(x+d) - gr(x) for each column of D
-    apply(D, 2, get.grad.delta, x=x, df1=df1, gr=gr)
+    apply(D, 2, get.grad.delta, x=x, df=df, gr=gr)
 }

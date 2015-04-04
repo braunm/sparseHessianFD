@@ -1,4 +1,4 @@
-## test_binary.R -- Part of the sparseHessianFD package 
+## test_binary.R -- Part of the sparseHessianFD package
 ## Copyright (C) 2013-2015 Michael Braun
 ## See LICENSE file for details.
 
@@ -9,7 +9,7 @@ test_that("binary_example", {
 
     set.seed(123)
     data(binary)
- 
+
     N <- length(binary$Y)
     k <- NROW(binary$X)
     nvars <- as.integer(N*k + k)
@@ -33,24 +33,24 @@ test_that("binary_example", {
         }
         return(res)
     }
-        
+
     f1 <- make.funcs(D=binary, priors=priors, order.row=FALSE) ## block-arrow
     f2 <- make.funcs(D=binary, priors=priors, order.row=TRUE) ## off-diagonals
-    
+
     ## True values for test
-    
+
     true.val1 <- f1$fn(P)
     true.grad1 <- f1$gr(P)
-    true.hess1 <- f1$hessian(P)    
+    true.hess1 <- f1$hessian(P)
 
     true.val2 <- f2$fn(P)
     true.grad2 <- f2$gr(P)
-    true.hess2 <- f2$hessian(P)    
+    true.hess2 <- f2$hessian(P)
 
     ## Get hessian structure
     pattern1 <- Matrix.to.Coord(tril(true.hess1))
     pattern2 <- Matrix.to.Coord(tril(true.hess2))
-    
+
     obj10 <- new("sparseHessianFD", nvars, f1$fn, f1$gr)
     obj10$hessian.init(pattern1$rows, pattern1$cols, 0, 1e-7)
 
@@ -67,15 +67,15 @@ test_that("binary_example", {
     test.val10 <- obj10$fn(P)
     test.grad10 <- obj10$gr(P)
     test.hess10 <- obj10$hessian(P)
-    
+
     test.val11 <- obj11$fn(P)
     test.grad11 <- obj11$gr(P)
     test.hess11 <- obj11$hessian(P)
-    
+
     test.val20 <- obj20$fn(P)
     test.grad20 <- obj20$gr(P)
     test.hess20 <- obj20$hessian(P)
-    
+
     test.val21 <- obj21$fn(P)
     test.grad21 <- obj21$gr(P)
     test.hess21 <- obj21$hessian(P)
@@ -93,8 +93,8 @@ test_that("binary_example", {
     expect_equal(test.grad21, true.grad2)
     expect_equal(test.hess21, true.hess2)
 })
-    
 
 
- 
+
+
 

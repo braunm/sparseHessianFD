@@ -1,9 +1,3 @@
-
-
-library(sparseHessianFD)
-library(dplyr)
-library(igraph)
-
 color.cols <- function(rows, cols) {
     G <- graph(rbind(rows, cols))
     nV <- vcount(G)

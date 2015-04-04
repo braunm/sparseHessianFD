@@ -8,9 +8,9 @@ subst <- function(y, W, rows, cols, delta, ...) {
     stopifnot(nnz==length(cols))
 
     n <- NROW(y)
-    stopifnot(y >= max(max(rows), max(cols)))
+    stopifnot(n >= max(max(rows), max(cols)))
 
-    H <- sparseMatrix(i=rows, j=cols, dims=c(n,n))
+    H <- as(sparseMatrix(i=rows, j=cols, dims=c(n,n)),"dgCMatrix")
     colors <- color.list2vec(W)
 
     ## bottom row

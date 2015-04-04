@@ -1,37 +1,67 @@
 
 
-testthat("newmethod", {
+context("newmethod")
+test_that("newmethod", {
 
+    set.seed(123)
+    data(binary)
 
+    N <- length(binary$Y)
+    k <- NROW(binary$X)
+    nvars <- as.integer(N*k + k)
+    P <- rnorm(nvars) ## random starting values
 
-## Test matrices H and L
-b <- 3
-n <- 5
-p <- 2
+    Omega <- diag(k)
+    priors <- list(inv.Omega = solve(Omega),
+                   inv.Sigma = rWishart(1,k+5,diag(k))[,,1])
 
-H <- Matrix(FALSE, nrow=n*b+p, ncol=n*b+p)
-for (j in 1:b) {
-    for (i in 1:n) {
-        H[seq(i,n*b,by=n),(j-1)*n+i] <- TRUE
-        H[(n*b+1):(n*b+p), (j-1)*n+i] <- TRUE
+    make.funcs <- function(D, priors, order.row) {
+        res <- vector("list", length=3)
+        names(res) <- c("fn", "gr", "hessian")
+        res$fn <-  function(pars) {
+            binary.f(pars, data=D, priors=priors, order.row=order.row)
+        }
+        res$gr <-  function(pars) {
+            binary.grad(pars, data=D, priors=priors, order.row=order.row)
+        }
+        res$hessian <-  function(pars) {
+            binary.hess(pars, data=D, priors=priors, order.row=order.row)
+        }
+        return(res)
     }
-}
-H[,(n*b+1):(n*b+p)] <- T
+
+    f1 <- make.funcs(D=binary, priors=priors, order.row=FALSE) ## block-arrow
+    f2 <- make.funcs(D=binary, priors=priors, order.row=TRUE) ## off-diagonals
+
+    ## True values for test
+
+    true.val1 <- f1$fn(P)
+    true.grad1 <- f1$gr(P)
+    true.hess1 <- f1$hessian(P)
+
+    true.val2 <- f2$fn(P)
+    true.grad2 <- f2$gr(P)
+    true.hess2 <- f2$hessian(P)
+
+    ## Get hessian structure
+    pattern1 <- Matrix.to.Coord(tril(true.hess1))
+    pattern2 <- Matrix.to.Coord(tril(true.hess2))
+
+    W1 <- color.cols(pattern1$rows, pattern1$cols)
+    W2 <- color.cols(pattern2$rows, pattern2$cols)
+
+    delta <- 1e-5
+
+    Y1 <- get.diffs(P, df=f1$gr, pattern1$rows, pattern1$cols, W1, delta)
+    Y2 <- get.diffs(P, df=f2$gr, pattern2$rows, pattern2$cols, W2, delta)
 
 
-L <- bdiag(replicate(n, matrix(T,b,b), simplify=FALSE)) %>%
-  rBind(matrix(TRUE, p,n*b)) %>%
-  cBind(matrix(TRUE, b*n+p,p))
+    H1 <- subst(Y1, W1, pattern1$rows, pattern1$cols, delta)
+    H2 <- subst(Y2, W2, pattern2$rows, pattern2$cols, delta)
 
+    browser()
 
-testmat <- L
-hs <- Matrix.to.Coord(tril(testmat))
-
-W <- color.cols(hs$rows, hs$cols)
-
-
-
-
+print("done")
 
 
 })
