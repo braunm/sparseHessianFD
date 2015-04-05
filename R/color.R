@@ -35,7 +35,7 @@ color.list2vec <- function(W, n) {
     k <- length(W)
     res <- rep(0,n)
     for (i in 1:k) {
-        res[as.integer(W[[k]])] <- k
+        res[as.integer(W[[i]])] <- i
     }
     return(res)
 }

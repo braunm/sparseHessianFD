@@ -4,24 +4,37 @@
 #' @param finite differencing factor
 #' @return Sparse Hessian in dgCMatrix format
 subst <- function(y, W, rows, cols, delta, ...) {
+    print("Starting subst")
     nnz <- length(rows)
     stopifnot(nnz==length(cols))
 
-    n <- NROW(y)
-    stopifnot(n >= max(max(rows), max(cols)))
+    nvars <- NROW(y)
+    stopifnot(nvars >= max(max(rows), max(cols)))
 
-    H <- as(sparseMatrix(i=rows, j=cols, dims=c(n,n)),"dgCMatrix")
-    colors <- color.list2vec(W)
-
+    H <- as(sparseMatrix(i=rows, j=cols, dims=c(nvars, nvars)),
+            "dgCMatrix")
+    colors <- color.list2vec(W, nvars)
     ## bottom row
-    nzcols <- cols[rows==n]
-    H[n, nzcols] <- y[n, colors[nzcols]] / delta
+    nzcols <- cols[rows==nvars]
+    yi <- y[, colors[nvars]]
+
+    H[nvars, nzcols] <- yi
+    H[1:(nvars-1),nvars] <- H[nvars,1:(nvars-1)]
 
     ## working backwards from bottom
-    for (i in seq(n-1, 1)) {
+    for (i in seq(nvars-1, 1)) {
+
         nzcols <- cols[rows==i & cols<=i]
-        H[i, nzcols] <- y[i, colors[nzcols]]/delta - sum(H[(i+1):n, i])
+        grp <- colors[i]
+        yi <- y[nzcols, grp]
+        ##     cat("i = ",i,"\n")
+        ##     cat("\tnzcols = ",nzcols,"\n")
+        ##     cat("\tgroups = ", grp, "\n")
+        ##     cat("\tyi = ", yi, "\n")
+        ind <- (seq(1,nvars) > i) & (colors==grp)
+        H[i, nzcols] <- yi - sum(H[ind, i])
         H[1:(i-1), i] <- H[i, 1:(i-1)] ## symmetric
+
     }
-    return(as(H, "dgCMatrix"))
+    return(H)
 }

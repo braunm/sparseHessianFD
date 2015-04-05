@@ -4,7 +4,8 @@ context("newmethod")
 test_that("newmethod", {
 
     set.seed(123)
-    data(binary)
+    data(binary_small)
+    binary <- binary_small
 
     N <- length(binary$Y)
     k <- NROW(binary$X)
@@ -37,11 +38,11 @@ test_that("newmethod", {
 
     true.val1 <- f1$fn(P)
     true.grad1 <- f1$gr(P)
-    true.hess1 <- f1$hessian(P)
+    true.hess1 <- drop0(f1$hessian(P))
 
     true.val2 <- f2$fn(P)
     true.grad2 <- f2$gr(P)
-    true.hess2 <- f2$hessian(P)
+    true.hess2 <- drop0(f2$hessian(P))
 
     ## Get hessian structure
     pattern1 <- Matrix.to.Coord(tril(true.hess1))
@@ -50,7 +51,8 @@ test_that("newmethod", {
     W1 <- color.cols(pattern1$rows, pattern1$cols)
     W2 <- color.cols(pattern2$rows, pattern2$cols)
 
-    delta <- 1e-5
+
+    delta <- 1e-8
 
     Y1 <- get.diffs(P, df=f1$gr, pattern1$rows, pattern1$cols, W1, delta)
     Y2 <- get.diffs(P, df=f2$gr, pattern2$rows, pattern2$cols, W2, delta)
@@ -59,7 +61,9 @@ test_that("newmethod", {
     H1 <- subst(Y1, W1, pattern1$rows, pattern1$cols, delta)
     H2 <- subst(Y2, W2, pattern2$rows, pattern2$cols, delta)
 
-    browser()
+    expect_equal(true.hess1, H1, tolerance=1e-6)
+    expect_equal(true.hess2, H2, tolerance=1e-6)
+
 
 print("done")
 
