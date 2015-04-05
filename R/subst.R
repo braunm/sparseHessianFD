@@ -3,7 +3,7 @@
 #' @param W color list
 #' @param finite differencing factor
 #' @return Sparse Hessian in dgCMatrix format
-subst <- function(y, W, rows, cols, delta, ...) {
+subst_ <- function(y, W, rows, cols, delta) {
 
     nnz <- length(rows)
     stopifnot(nnz==length(cols))
@@ -23,18 +23,15 @@ subst <- function(y, W, rows, cols, delta, ...) {
 
     ## working backwards from bottom
     for (i in seq(nvars-1, 1)) {
-
-        nzcols <- cols[rows==i & cols<=i]
         grp <- colors[i]
+        nzcols <- cols[rows==i & cols<=i]
         yi <- y[nzcols, grp]
-        ##     cat("i = ",i,"\n")
-        ##     cat("\tnzcols = ",nzcols,"\n")
-        ##     cat("\tgroups = ", grp, "\n")
-        ##     cat("\tyi = ", yi, "\n")
         ind <- (seq(1,nvars) > i) & (colors==grp)
         H[i, nzcols] <- yi/delta - sum(H[ind, i])
         H[1:(i-1), i] <- H[i, 1:(i-1)] ## symmetric
-
     }
     return(H)
 }
+
+subst <- subst_
+##subst <- compiler::cmpfun(subst_)

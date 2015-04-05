@@ -30,7 +30,8 @@ Depends:
 Suggests:
     testthat,
     numDeriv,
-    knitr
+    knitr,
+    compiler
 RcppModules: sparseHessianFD
 Roxygen: list(wrap=TRUE)
 LinkingTo: Rcpp, RcppEigen (>= 0.3.2.3)
