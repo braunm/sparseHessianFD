@@ -52,7 +52,7 @@ test_that("newmethod", {
     W2 <- color.cols(pattern2$rows, pattern2$cols)
 
 
-    delta <- 1e-8
+    delta <- 1e-7
 
     Y1 <- get.diffs(P, df=f1$gr, pattern1$rows, pattern1$cols, W1, delta)
     Y2 <- get.diffs(P, df=f2$gr, pattern2$rows, pattern2$cols, W2, delta)
@@ -61,11 +61,9 @@ test_that("newmethod", {
     H1 <- subst(Y1, W1, pattern1$rows, pattern1$cols, delta)
     H2 <- subst(Y2, W2, pattern2$rows, pattern2$cols, delta)
 
-    expect_equal(true.hess1, H1, tolerance=1e-6)
-    expect_equal(true.hess2, H2, tolerance=1e-6)
 
 
-print("done")
-
+    expect_equal(true.hess1, H1, tolerance=1e-7)
+    expect_equal(true.hess2, H2, tolerance=1e-7)
 
 })

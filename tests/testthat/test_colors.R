@@ -2,6 +2,7 @@
 
 context("colors")
 test_that("colors", {
+    library(dplyr)
 
     ## Test matrices H and L
     b <- 3

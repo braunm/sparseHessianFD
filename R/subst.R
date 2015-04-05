@@ -4,7 +4,7 @@
 #' @param finite differencing factor
 #' @return Sparse Hessian in dgCMatrix format
 subst <- function(y, W, rows, cols, delta, ...) {
-    print("Starting subst")
+
     nnz <- length(rows)
     stopifnot(nnz==length(cols))
 
@@ -18,7 +18,7 @@ subst <- function(y, W, rows, cols, delta, ...) {
     nzcols <- cols[rows==nvars]
     yi <- y[, colors[nvars]]
 
-    H[nvars, nzcols] <- yi
+    H[nvars, nzcols] <- yi/delta
     H[1:(nvars-1),nvars] <- H[nvars,1:(nvars-1)]
 
     ## working backwards from bottom
@@ -32,7 +32,7 @@ subst <- function(y, W, rows, cols, delta, ...) {
         ##     cat("\tgroups = ", grp, "\n")
         ##     cat("\tyi = ", yi, "\n")
         ind <- (seq(1,nvars) > i) & (colors==grp)
-        H[i, nzcols] <- yi - sum(H[ind, i])
+        H[i, nzcols] <- yi/delta - sum(H[ind, i])
         H[1:(i-1), i] <- H[i, 1:(i-1)] ## symmetric
 
     }

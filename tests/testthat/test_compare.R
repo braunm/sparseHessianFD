@@ -3,6 +3,7 @@
 context("compare")
 test_that("compare", {
 
+    library(dplyr)
     set.seed(123)
     data(binary_small)
     binary <- binary_small
@@ -97,9 +98,7 @@ test_that("compare", {
     expect_equal(H2, test.hess20)
     expect_equal(H2, test.hess21)
 
-    browser()
 
-print("done")
 
 
 })

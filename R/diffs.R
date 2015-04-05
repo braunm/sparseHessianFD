@@ -7,7 +7,7 @@
 .coord2vec <- function(j, n, delta=1) {
     ind <- as.integer(j)
     z <- rep(0,n)
-    z[ind] <- 1
+    z[ind] <- delta
     return(z)
 }
 
@@ -27,9 +27,10 @@ get.grad.delta <- function(d, x, df, gr, ...) {
 get.diffs <- function(x, df, rows, cols, W, delta, ...) {
     k <- length(W) ## number of colors
     n <- length(x) ## number of variables
-    D <- sapply(W, .coord2vec, n, delta)
 
     gr <- df(x, ...) ## gradient at x
+
+    D <- sapply(W, .coord2vec, n, delta)
 
     ## return gr(x+d) - gr(x) for each column of D
     apply(D, 2, get.grad.delta, x=x, df=df, gr=gr)
