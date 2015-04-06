@@ -27,6 +27,9 @@ color.cols <- function(rows, cols) {
         G <- G - W[[k]]
   ##      cat("\tW[[",k,"]] = ", W[[k]], "\n")
     }
+    for (i in 1:length(W)) {
+        W[[i]] <- as.integer(W[[i]])
+    }
     return(W)
 }
 
@@ -35,7 +38,7 @@ color.list2vec <- function(W, n) {
     k <- length(W)
     res <- rep(0,n)
     for (i in 1:k) {
-        res[as.integer(W[[i]])] <- i
+        res[as.integer(W[[i]])] <- as.integer(i)
     }
     return(res)
 }

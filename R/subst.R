@@ -3,7 +3,7 @@
 #' @param W color list
 #' @param finite differencing factor
 #' @return Sparse Hessian in dgCMatrix format
-subst_ <- function(y, W, rows, cols, delta) {
+subst <- function(y, W, rows, cols, delta) {
 
     nnz <- length(rows)
     stopifnot(nnz==length(cols))
@@ -33,5 +33,28 @@ subst_ <- function(y, W, rows, cols, delta) {
     return(H)
 }
 
-subst <- subst_
-##subst <- compiler::cmpfun(subst_)
+#' @param y Matrix of finite differences, with each group in a column
+#' @param rows,cols row and column indices of non-zero elements
+#' @param W color list
+#' @param finite differencing factor
+#' @return Sparse Hessian in dgCMatrix format
+subst.C <- function(Y, W, rows, cols, delta) {
+
+    nnz <- length(rows)
+    stopifnot(nnz==length(cols))
+
+    nvars <- NROW(Y)
+    stopifnot(nvars >= max(max(rows), max(cols)))
+
+    colors <- as.integer(color.list2vec(W, nvars))
+    Sp <- vector("list", length=nvars)
+
+    for (i in 1:nvars) {
+        q <- which(rows==i)
+        Sp[[i]] <- as.integer(sort(cols[q]))
+    }
+
+    H <- subst2(Y, colors, W, Sp, delta)
+    return(H)
+
+}

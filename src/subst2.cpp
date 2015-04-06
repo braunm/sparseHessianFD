@@ -27,7 +27,7 @@ NumericMatrix subst2(NumericMatrix Y, IntegerVector colors,
 	double acc = 0;
 	for (int k : W[grp]) {	
 	  if (k > i) {
-	    acc += H(k, i);
+	    acc += H(k-1, i);
 	  }
 	}
 	H(i,j) = yi/delta - acc;
