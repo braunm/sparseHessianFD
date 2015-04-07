@@ -19,7 +19,8 @@ color.cols <- function(rows, cols) {
             r <- nm[which.max(deg)]
             ##       cat("\tmax.degree.vertex = ",r,"\n")
             W[[k]] <- c(W[[k]], r)
-            nei <- nm[neighborhood(S, 2, r)[[1]]]
+            nm.idx <- neighborhood(S, 2, r)
+            nei <- nm[nm.idx[[1]]]
             ##       cat("\tneighborhood = ",nei,"\n")
             S <- delete.vertices(S, nei)
             nm <- get.vertex.attribute(S, "name")
@@ -32,6 +33,7 @@ color.cols <- function(rows, cols) {
     }
     return(W)
 }
+
 
 color.list2vec <- function(W, n) {
 

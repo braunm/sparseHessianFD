@@ -6,9 +6,9 @@
 
 using namespace Rcpp;
 
-// subst2
-NumericMatrix subst2(NumericMatrix Y, IntegerVector colors, ListOf<IntegerVector> W, ListOf<IntegerVector> Sp, double delta);
-RcppExport SEXP sparseHessianFD_subst2(SEXP YSEXP, SEXP colorsSEXP, SEXP WSEXP, SEXP SpSEXP, SEXP deltaSEXP) {
+// subst_C
+S4 subst_C(NumericMatrix Y, IntegerVector colors, ListOf<IntegerVector> W, ListOf<IntegerVector> Sp, double delta);
+RcppExport SEXP sparseHessianFD_subst_C(SEXP YSEXP, SEXP colorsSEXP, SEXP WSEXP, SEXP SpSEXP, SEXP deltaSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
@@ -18,7 +18,7 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< ListOf<IntegerVector> >::type W(WSEXP );
         Rcpp::traits::input_parameter< ListOf<IntegerVector> >::type Sp(SpSEXP );
         Rcpp::traits::input_parameter< double >::type delta(deltaSEXP );
-        NumericMatrix __result = subst2(Y, colors, W, Sp, delta);
+        S4 __result = subst_C(Y, colors, W, Sp, delta);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

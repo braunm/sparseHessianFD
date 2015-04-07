@@ -3,16 +3,16 @@
 \name{subst}
 \alias{subst}
 \usage{
-subst(y, W, rows, cols, delta)
+subst(Y, W, rows, cols, delta)
 }
 \arguments{
-  \item{y}{Matrix of finite differences, with each group in
-  a column}
-
   \item{W}{color list}
 
   \item{rows,cols}{row and column indices of non-zero
   elements}
+
+  \item{y}{Matrix of finite differences, with each group in
+  a column}
 
   \item{finite}{differencing factor}
 }

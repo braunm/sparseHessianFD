@@ -58,12 +58,12 @@ test_that("newmethod", {
     Y2 <- get.diffs(P, df=f2$gr, pattern2$rows, pattern2$cols, W2, delta)
 
 
-    H1 <- subst(Y1, W1, pattern1$rows, pattern1$cols, delta)
-    H2 <- subst(Y2, W2, pattern2$rows, pattern2$cols, delta)
+    H1 <- drop0(subst(Y1, W1, pattern1$rows, pattern1$cols, delta))
+    H2 <- drop0(subst(Y2, W2, pattern2$rows, pattern2$cols, delta))
 
 
 
-    expect_equal(true.hess1, H1, tolerance=1e-7)
-    expect_equal(true.hess2, H2, tolerance=1e-7)
+    expect_equivalent(true.hess1, H1)
+    expect_equivalent(true.hess2, H2)
 
 })

@@ -62,8 +62,8 @@ test_that("compare", {
     H1 <- subst(Y1, W1, pattern1$rows, pattern1$cols, delta)
     H2 <- subst(Y2, W2, pattern2$rows, pattern2$cols, delta)
 
-    expect_equal(true.hess1, H1, tolerance=1e-6)
-    expect_equal(true.hess2, H2, tolerance=1e-6)
+    expect_equivalent(true.hess1, drop0(H1))
+    expect_equivalent(true.hess2, drop0(H2))
 
     obj10 <- new("sparseHessianFD", nvars, f1$fn, f1$gr)
     obj10$hessian.init(pattern1$rows, pattern1$cols, 0, delta)
@@ -93,10 +93,10 @@ test_that("compare", {
     test.grad21 <- obj21$gr(P)
     test.hess21 <- obj21$hessian(P)
 
-    expect_equal(H1, test.hess10)
-    expect_equal(H1, test.hess11)
-    expect_equal(H2, test.hess20)
-    expect_equal(H2, test.hess21)
+    expect_equivalent(drop0(H1), test.hess10)
+    expect_equivalent(drop0(H1), test.hess11)
+    expect_equivalent(drop0(H2), test.hess20)
+    expect_equivalent(drop0(H2), test.hess21)
 
 
 

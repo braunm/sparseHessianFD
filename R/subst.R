@@ -3,7 +3,7 @@
 #' @param W color list
 #' @param finite differencing factor
 #' @return Sparse Hessian in dgCMatrix format
-subst <- function(y, W, rows, cols, delta) {
+subst_R <- function(y, W, rows, cols, delta) {
 
     nnz <- length(rows)
     stopifnot(nnz==length(cols))
@@ -38,7 +38,7 @@ subst <- function(y, W, rows, cols, delta) {
 #' @param W color list
 #' @param finite differencing factor
 #' @return Sparse Hessian in dgCMatrix format
-subst.C <- function(Y, W, rows, cols, delta) {
+subst <- function(Y, W, rows, cols, delta) {
 
     nnz <- length(rows)
     stopifnot(nnz==length(cols))
@@ -47,14 +47,12 @@ subst.C <- function(Y, W, rows, cols, delta) {
     stopifnot(nvars >= max(max(rows), max(cols)))
 
     colors <- as.integer(color.list2vec(W, nvars))
-    Sp <- vector("list", length=nvars)
 
-    for (i in 1:nvars) {
-        q <- which(rows==i)
-        Sp[[i]] <- as.integer(sort(cols[q]))
-    }
+    ## Cols do not need to be sorted
+    Sp <- lapply(1:nvars, function(i) as.integer(cols[rows==i]))
+  ##  Sp <- lapply(1:nvars, function(i) sort(as.integer(cols[rows==i])))
 
-    H <- subst2(Y, colors, W, Sp, delta)
+    H <- subst_C(Y, colors, W, Sp, delta)
     return(H)
 
 }

@@ -2,8 +2,8 @@ library(Matrix)
 library(testthat)
 
 set.seed(123)
-data(binary)
-binary <- binary
+data(binary_large)
+binary <- binary_large
 
 N <- length(binary$Y)
 k <- NROW(binary$X)
@@ -46,6 +46,10 @@ dimnames(time) <- list(order=c("block","band"),
                        method=c("direct","indirect"),
                        stat=c("init","diff", "subst","fd","setup"),
                        version=c("old","new"))
+
+nnz1 <- nnzero(tril(true.hess1))
+nnz2 <- nnzero(tril(true.hess2))
+rs <- sample.int(nnz2)
 
 time["block","indirect","init","new"] <- system.time(
     W1 <- color.cols(pattern1$rows, pattern1$cols))[["elapsed"]]
@@ -91,11 +95,11 @@ time["band","indirect","fd","old"] <- system.time(test.hess20 <- obj20$hessian(P
 time["band","direct","fd","old"] <- system.time(test.hess21 <- obj21$hessian(P))[["elapsed"]]
 
 
-expect_equal(true.hess1, H1, tolerance=1e-6)
-expect_equal(true.hess2, H2, tolerance=1e-6)
-expect_equal(H1, test.hess10)
-expect_equal(H1, test.hess11)
-expect_equal(H2, test.hess20)
-expect_equal(H2, test.hess21)
+expect_equivalent(true.hess1, drop0(H1))
+expect_equivalent(true.hess2, drop0(H2))
+expect_equivalent(drop0(H1), test.hess10)
+expect_equivalent(drop0(H1), test.hess11)
+expect_equivalent(drop0(H2), test.hess20)
+expect_equivalent(drop0(H2), test.hess21)
 
 

@@ -44,13 +44,17 @@ test_that("subst_C", {
     true.grad2 <- f2$gr(P)
     true.hess2 <- drop0(f2$hessian(P))
 
+    nnz1 <- nnzero(tril(true.hess1))
+    nnz2 <- nnzero(tril(true.hess2))
+
     ## Get hessian structure
     pattern1 <- Matrix.to.Coord(tril(true.hess1))
     pattern2 <- Matrix.to.Coord(tril(true.hess2))
 
-    W1 <- color.cols(pattern1$rows, pattern1$cols)
-    W2 <- color.cols(pattern2$rows, pattern2$cols)
+    rs <- sample.int(nnz1)
 
+    W1 <- color.cols(pattern1$rows[rs], pattern1$cols[rs])
+    W2 <- color.cols(pattern2$rows, pattern2$cols)
 
     delta <- 1e-7
 
@@ -58,12 +62,10 @@ test_that("subst_C", {
     Y2 <- get.diffs(P, df=f2$gr, pattern2$rows, pattern2$cols, W2, delta)
 
 
-    H1 <- subst.C(Y1, W1, pattern1$rows, pattern1$cols, delta)
-    H2 <- subst.C(Y2, W2, pattern2$rows, pattern2$cols, delta)
-
+    H1 <- drop0(subst(Y1, W1, pattern1$rows, pattern1$cols, delta))
+    H2 <- drop0(subst(Y2, W2, pattern2$rows, pattern2$cols, delta))
 browser()
-
-    expect_equal(true.hess1, H1, tolerance=1e-7)
-    expect_equal(true.hess2, H2, tolerance=1e-7)
+    expect_equal(true.hess1, H1)
+    expect_equal(true.hess2, H2)
 
 })

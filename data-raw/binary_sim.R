@@ -29,7 +29,7 @@ binary_sim <- function(N, k, T) {
     return(binary)
 }
 
-binary <- binary_sim(30, 2, 20)
+binary <- binary_sim(100, 2, 20)
 devtools::use_data(binary, overwrite=TRUE)
 
 binary_small <- binary_sim(4, 2, 200)
