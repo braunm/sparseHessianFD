@@ -22,11 +22,12 @@ test_that("colors", {
       rBind(matrix(TRUE, p,n*b)) %>%
       cBind(matrix(TRUE, b*n+p,p))
 
-    testmat <- L
+    testmat <- H
     hs <- Matrix.to.Coord(tril(testmat))
 
     W <- color.cols(hs$rows, hs$cols)
-
-    expect_equal(b, 3)
+    print("test_colors")
+    print(tril(testmat))
+    print(W)
 
 })

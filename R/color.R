@@ -1,4 +1,4 @@
-color.cols <- function(rows, cols) {
+color.cols2 <- function(rows, cols) {
     G <- graph(rbind(rows, cols))
     nV <- vcount(G)
     ## Since igraph renumbers vertices after some are removed,
@@ -45,6 +45,43 @@ color.list2vec <- function(W, n) {
     return(res)
 }
 
+
+color.cols <- function(rows, cols) {
+    G <- sparseMatrix(i=rows, j=cols)
+    nV <- NROW(G)
+    dimnames(G) <- list(1:nV, 1:nV)
+
+    k <- 0
+    W <- NULL
+    while (NROW(G) > 0) {
+        k <- k + 1
+        S <- G
+        nm <- rownames(S)
+        W <- c(W, list(NULL))
+        while (NROW(S) > 0) {
+            if (NROW(S) != 1) {
+                deg <- Matrix::rowSums(S)-1
+                r <- nm[which.max(deg)]
+                W[[k]] <- c(W[[k]], r)
+                S2 <- S %*% S
+                nei <- nm[S2[r,]]
+                d <- which(nm %in% nei)
+                S <- S[-d, -d, drop=FALSE]
+                nm <- rownames(S)
+            } else {
+                W[[k]] <- c(W[[k]], nm[1])
+                S <- NULL
+                nm <- NULL
+            }
+        }
+        d <- which(rownames(G) %in% W[[k]])
+        G <- G[-d, -d, drop=FALSE]
+    }
+    for (i in 1:length(W)) {
+        W[[i]] <- as.integer(W[[i]])
+    }
+    return(W)
+}
 
 
 

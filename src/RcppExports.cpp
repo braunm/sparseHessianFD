@@ -10,18 +10,14 @@ using namespace Rcpp;
 S4 subst_C(NumericMatrix Y, IntegerVector colors, ListOf<IntegerVector> W, ListOf<IntegerVector> Sp, double delta);
 RcppExport SEXP sparseHessianFD_subst_C(SEXP YSEXP, SEXP colorsSEXP, SEXP WSEXP, SEXP SpSEXP, SEXP deltaSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< NumericMatrix >::type Y(YSEXP );
-        Rcpp::traits::input_parameter< IntegerVector >::type colors(colorsSEXP );
-        Rcpp::traits::input_parameter< ListOf<IntegerVector> >::type W(WSEXP );
-        Rcpp::traits::input_parameter< ListOf<IntegerVector> >::type Sp(SpSEXP );
-        Rcpp::traits::input_parameter< double >::type delta(deltaSEXP );
-        S4 __result = subst_C(Y, colors, W, Sp, delta);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericMatrix >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type colors(colorsSEXP);
+    Rcpp::traits::input_parameter< ListOf<IntegerVector> >::type W(WSEXP);
+    Rcpp::traits::input_parameter< ListOf<IntegerVector> >::type Sp(SpSEXP);
+    Rcpp::traits::input_parameter< double >::type delta(deltaSEXP);
+    __result = Rcpp::wrap(subst_C(Y, colors, W, Sp, delta));
+    return __result;
 END_RCPP
 }

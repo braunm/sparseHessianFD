@@ -1,9 +1,9 @@
-library(Matrix)
+rm(list=ls())
 library(testthat)
 
 set.seed(123)
-data(binary_large)
-binary <- binary_large
+data(binary)
+binary <- binary
 
 N <- length(binary$Y)
 k <- NROW(binary$X)
@@ -54,7 +54,7 @@ rs <- sample.int(nnz2)
 time["block","indirect","init","new"] <- system.time(
     W1 <- color.cols(pattern1$rows, pattern1$cols))[["elapsed"]]
 time["band","indirect","init","new"] <- system.time(
-    W2 <- color.cols(pattern2$rows, pattern2$cols))[["elapsed"]]
+    W2 <- color.cols(pattern2$rows[rs], pattern2$cols[rs]))[["elapsed"]]
 
 delta <- 1e-7
 

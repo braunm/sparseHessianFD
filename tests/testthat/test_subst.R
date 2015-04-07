@@ -64,7 +64,7 @@ test_that("subst_C", {
 
     H1 <- drop0(subst(Y1, W1, pattern1$rows, pattern1$cols, delta))
     H2 <- drop0(subst(Y2, W2, pattern2$rows, pattern2$cols, delta))
-browser()
+
     expect_equal(true.hess1, H1)
     expect_equal(true.hess2, H2)
 

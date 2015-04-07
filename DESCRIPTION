@@ -23,15 +23,13 @@ License: file LICENSE
 LazyData: true
 Depends:
     R (>= 3.1.2),
-    Rcpp (>= 0.11.3),
-    Matrix (>= 1.1.4),
-    methods,
-    igraph
+    Rcpp (>= 0.11.5),
+    Matrix (>= 1.2.0),
+    methods
 Suggests:
     testthat,
     numDeriv,
-    knitr,
-    compiler
+    knitr
 RcppModules: sparseHessianFD
 Roxygen: list(wrap=TRUE)
 LinkingTo: Rcpp, RcppEigen (>= 0.3.2.3)
