@@ -2,8 +2,8 @@ rm(list=ls())
 library(testthat)
 
 set.seed(123)
-data(binary)
-binary <- binary
+data(binary_large)
+binary <- binary_large
 
 N <- length(binary$Y)
 k <- NROW(binary$X)
@@ -41,52 +41,52 @@ pattern1 <- Matrix.to.Coord(tril(true.hess1))
 pattern2 <- Matrix.to.Coord(tril(true.hess2))
 
 
-time <- array(NA, dim=c(2,2,5,2))
+time <- array(NA, dim=c(2,2,3,2))
 dimnames(time) <- list(order=c("block","band"),
                        method=c("direct","indirect"),
-                       stat=c("init","diff", "subst","fd","setup"),
+                       stat=c("init","fd","setup"),
                        version=c("old","new"))
 
 nnz1 <- nnzero(tril(true.hess1))
 nnz2 <- nnzero(tril(true.hess2))
 rs <- sample.int(nnz2)
 
+rows1 <- pattern1$rows[rs]
+rows2 <- pattern2$rows[rs]
+cols1 <- pattern1$cols[rs]
+cols2 <- pattern2$cols[rs]
+
 time["block","indirect","init","new"] <- system.time(
-    W1 <- color.cols(pattern1$rows, pattern1$cols))[["elapsed"]]
+    W1 <- color.cols(rows1, cols1))[["elapsed"]]
 time["band","indirect","init","new"] <- system.time(
-    W2 <- color.cols(pattern2$rows[rs], pattern2$cols[rs]))[["elapsed"]]
+    W2 <- color.cols(rows2, cols2))[["elapsed"]]
 
 delta <- 1e-7
 
-time["block","indirect","diff","new"] <- system.time(
-    Y1 <- get.diffs(P, df=f1$gr, pattern1$rows, pattern1$cols, W1, delta))[["elapsed"]]
-time["band","indirect","diff","new"] <- system.time(
-    Y2 <- get.diffs(P, df=f2$gr, pattern2$rows, pattern2$cols, W2, delta))[["elapsed"]]
-
-time["block","indirect","subst","new"] <- system.time(
-    H1 <- subst(Y1, W1, pattern1$rows, pattern1$cols, delta))[["elapsed"]]
-time["band","indirect","subst","new"] <- system.time(
-    H2 <- subst(Y2, W2, pattern2$rows, pattern2$cols, delta))[["elapsed"]]
+time["block","indirect","fd","new"] <- system.time(
+    H1 <- get.fd(P, df=f1$gr, rows1, cols1, W1, delta))[["elapsed"]]
+time["band","indirect","fd","new"] <- system.time(
+    H2 <- get.fd(P, df=f2$gr, rows2, cols2, W2, delta))[["elapsed"]]
 
 time["block","indirect","setup","old"] <- system.time(
     obj10 <- new("sparseHessianFD", nvars, f1$fn, f1$gr))[["elapsed"]]
 time["block","indirect","init","old"] <- system.time(
-    obj10$hessian.init(pattern1$rows, pattern1$cols, 0, delta))[["elapsed"]]
+    obj10$hessian.init(rows1, cols1, 0, delta))[["elapsed"]]
 
 time["block","direct","setup","old"] <- system.time(
     obj11 <- new("sparseHessianFD", nvars, f1$fn, f1$gr))[["elapsed"]]
 time["block","direct","init","old"] <- system.time(
-    obj11$hessian.init(pattern1$rows, pattern1$cols, 1, delta))[["elapsed"]]
+    obj11$hessian.init(rows1, cols1, 1, delta))[["elapsed"]]
 
 time["band","indirect","setup","old"] <- system.time(
     obj20 <- new("sparseHessianFD", nvars, f2$fn, f2$gr))[["elapsed"]]
 time["band","indirect","init","old"] <- system.time(
-    obj20$hessian.init(pattern2$rows, pattern2$cols, 0, delta))[["elapsed"]]
+    obj20$hessian.init(rows2, cols2, 0, delta))[["elapsed"]]
 
 time["band","direct","setup","old"] <- system.time(
     obj21 <- new("sparseHessianFD", nvars, f2$fn, f2$gr))[["elapsed"]]
 time["band","direct","init","old"] <- system.time(
-    obj21$hessian.init(pattern2$rows, pattern2$cols, 1, delta))[["elapsed"]]
+    obj21$hessian.init(rows2, cols2, 1, delta))[["elapsed"]]
 
 
 time["block","indirect","fd","old"] <- system.time(test.hess10 <- obj10$hessian(P))[["elapsed"]]

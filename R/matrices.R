@@ -1,4 +1,4 @@
-## matrices.R -- Part of the sparseHessianFD package 
+## matrices.R -- Part of the sparseHessianFD package
 ## Copyright (C) 2013-2015 Michael Braun
 ## See LICENSE file for details.
 
@@ -39,12 +39,41 @@ Matrix.to.Coord <- function(M) {
 #' @export
 Coord.to.Pattern.Matrix <- function(rows, cols, dims, compressed=TRUE,
                                     symmetric=FALSE) {
-  
+
     res <- sparseMatrix(i=as.integer(rows),
                         j=as.integer(cols),
                         dims=dims,
                         giveCsparse=compressed,
                         symmetric=symmetric)
     return(res)
-    
+
+}
+
+
+#' @name Matrix.to.Pointers
+#' @title Column (row) indices and row (column) pointers from sparse matrix.
+#' @description Returns list of column (row) indices row (column) pointers
+#' of the non-zero elements of a sparse matrix stored in row (column)-oriented
+#' compressed format.
+#' @param M A sparse Matrix, as defined in the Matrix package.
+#' @return A list with two named elements.
+#' \describe{
+#' \item{rows}{ Integer vector containing row indices of non-zero elements}
+#' \item{cols}{ Integer vector containing column indices of non-zero elements}
+#' }
+#' @export
+Matrix.to.Pointers <- function(M, order=c("column", "row")) {
+    res <- vector("list",length=2)
+    if (order == "row") {
+        M <- as(M,"RsparseMatrix")
+        names(res) <- c("jCol","ipntr")
+        res$jCol <- as.integer(M@j + 1)
+        res$ipntr <- as.integer(M@p + 1)
+    } else {
+        M <- as(M,"CsparseMatrix")
+        names(res) <- c("iRow","jpntr")
+        res$iRow <- as.integer(M@i + 1)
+        res$jpntr <- as.integer(M@p + 1)
+    }
+    return(res)
 }

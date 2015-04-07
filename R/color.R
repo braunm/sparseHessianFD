@@ -78,7 +78,7 @@ color.cols <- function(rows, cols) {
         G <- G[-d, -d, drop=FALSE]
     }
     for (i in 1:length(W)) {
-        W[[i]] <- as.integer(W[[i]])
+        W[[i]] <- sort(as.integer(W[[i]]), decreasing=FALSE)
     }
     return(W)
 }

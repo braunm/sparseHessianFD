@@ -55,12 +55,8 @@ test_that("compare", {
 
     delta <- 1e-7
 
-    Y1 <- get.diffs(P, df=f1$gr, pattern1$rows, pattern1$cols, W1, delta)
-    Y2 <- get.diffs(P, df=f2$gr, pattern2$rows, pattern2$cols, W2, delta)
-
-
-    H1 <- subst(Y1, W1, pattern1$rows, pattern1$cols, delta)
-    H2 <- subst(Y2, W2, pattern2$rows, pattern2$cols, delta)
+    H1 <- get.fd(P, df=f1$gr, pattern1$rows, pattern1$cols, W1, delta)
+    H2 <- get.fd(P, df=f2$gr, pattern2$rows, pattern2$cols, W2, delta)
 
     expect_equivalent(true.hess1, drop0(H1))
     expect_equivalent(true.hess2, drop0(H2))

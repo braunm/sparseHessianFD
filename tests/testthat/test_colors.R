@@ -26,8 +26,8 @@ test_that("colors", {
     hs <- Matrix.to.Coord(tril(testmat))
 
     W <- color.cols(hs$rows, hs$cols)
-    print("test_colors")
-    print(tril(testmat))
-    print(W)
+ ##   print("test_colors")
+ ##   print(tril(testmat))
+ ##   print(W)
 
 })

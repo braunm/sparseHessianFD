@@ -3,6 +3,7 @@
 export(Coord.to.Pattern.Matrix)
 export(Coord.to.Sym.Pattern.Matrix)
 export(Matrix.to.Coord)
+export(Matrix.to.Pointers)
 export(Sym.CSC.to.Matrix)
 export(binary.f)
 export(binary.grad)
