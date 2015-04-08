@@ -29,17 +29,14 @@ color.cols <- function(rows, cols) {
         trackS <- trackG
         while (any(trackS)) {
             r <- which.max(deg)
-            Sr <- S[r,,drop=FALSE] %*% S
-            nei <- trackS & as.vector(Sr)
+            Sr <- as.vector(S[r,,drop=FALSE] %*% S)
+            nei <- trackS & Sr
             deg[nei] <- 0
             trackS[nei] <- FALSE
             W[[k]] <- c(W[[k]], r)
         }
         G[,W[[k]]] <- FALSE
         trackG[W[[k]]] <- FALSE
-    }
-    for (i in 1:length(W)) {
-        W[[i]] <- as.integer(W[[i]])
     }
     return(W)
 }
