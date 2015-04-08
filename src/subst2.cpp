@@ -66,13 +66,15 @@ S4 subst_C(const NumericMatrix& Y,
 S4 subst2(const NumericMatrix& Y,
 	  const IntegerVector& colors,
 	  const ListOf<IntegerVector>& W,
-	  const ListOf<IntegerVector>& Sp,
+	  const IntegerVector& jCol_,
+	  const IntegerVector& ipntr_,
 	  const double& delta,
+	  const int& nvars,
 	  const int& nnz) {
 
   //  auto subst_start = std::chrono::steady_clock::now();
   
-  const int nvars = Sp.size();
+
   const int ngrp = W.size();
 
   typedef Eigen::Triplet<double> T;
@@ -80,48 +82,26 @@ S4 subst2(const NumericMatrix& Y,
   Trips.reserve(nnz*2);
   VectorXd B(nvars);
   B.setZero();
-  
-  //  auto reserve_trips = std::chrono::steady_clock::now();
+
+  const Map<const VectorXi> jCol = VectorXi::Map(jCol_.begin(), nvars+1);
+  const Map<const VectorXi> ipntr = VectorXi::Map(ipntr_.begin(), nnz);
   
   for (int g=0; g<ngrp; g++) {
     B.setZero();
-    // for (int i : W[g]) { // make this reverse order?
-    //   for (int i=W[g].rbegin(); i != W[g].rend(); ++i) { // must be sorted
     for (int k = W[g].size()-1; k >= 0; --k){
       int i = W[g](k)-1;
-      for (int j : Sp[i]) {
-	double z = Y(j-1, colors(i)-1)/delta - B(j-1);
-	B(j-1) += z;
-	Trips.push_back(T(i, j-1, z));
-	if (i != j-1) Trips.push_back(T(j-1, i, z));
+      for (int m = ipntr(i); m<ipntr(i+1); m++) {
+	int j = jCol(m-1)-1;
+	double z = Y(j, colors(i)-1)/delta - B(j);
+	B(j) += z;
+	Trips.push_back(T(i, j, z));
+	if (i != j) Trips.push_back(T(j, i, z));
       }
     } // move up a row
   } // next group and reset accumulator
-
-  //  auto make_sparse = std::chrono::steady_clock::now();
   
   SparseMatrix<double> M(nvars, nvars);
   M.setFromTriplets(Trips.begin(), Trips.end());
-
-  // auto wrapping = std::chrono::steady_clock::now();
-  
-  S4 res = Rcpp::wrap(M);
-  
-  // auto subst_end = std::chrono::steady_clock::now();
-
-  // std::chrono::duration<double> diff1 = reserve_trips - subst_start;
-  // std::chrono::duration<double> diff2 = make_sparse - reserve_trips;
-  // std::chrono::duration<double> diff3 = wrapping - make_sparse;
-  // std::chrono::duration<double> diff4 = subst_end - wrapping;
-  // std::chrono::duration<double> diff5 = subst_end - subst_start;
-
-  // Rcout << "setup = " << diff1.count() << " s\n";
-  // Rcout << "subst = " << diff2.count() << " s\n";
-  // Rcout << "make_sparse = " << diff3.count() << " s\n";
-  // Rcout << "wrapping = " << diff4.count() << " s\n";
-  // Rcout << "total = " << diff5.count() << " s\n";
-
-  
-  return(res); 
+  return(Rcpp::wrap(M)); 
 }
 

@@ -5,7 +5,7 @@ subst_C <- function(Y, colors, W, Sp, colsize_, delta) {
     .Call('sparseHessianFD_subst_C', PACKAGE = 'sparseHessianFD', Y, colors, W, Sp, colsize_, delta)
 }
 
-subst2 <- function(Y, colors, W, Sp, delta, nnz) {
-    .Call('sparseHessianFD_subst2', PACKAGE = 'sparseHessianFD', Y, colors, W, Sp, delta, nnz)
+subst2 <- function(Y, colors, W, jCol_, ipntr_, delta, nvars, nnz) {
+    .Call('sparseHessianFD_subst2', PACKAGE = 'sparseHessianFD', Y, colors, W, jCol_, ipntr_, delta, nvars, nnz)
 }
 

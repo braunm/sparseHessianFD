@@ -23,18 +23,20 @@ BEGIN_RCPP
 END_RCPP
 }
 // subst2
-S4 subst2(const NumericMatrix& Y, const IntegerVector& colors, const ListOf<IntegerVector>& W, const ListOf<IntegerVector>& Sp, const double& delta, const int& nnz);
-RcppExport SEXP sparseHessianFD_subst2(SEXP YSEXP, SEXP colorsSEXP, SEXP WSEXP, SEXP SpSEXP, SEXP deltaSEXP, SEXP nnzSEXP) {
+S4 subst2(const NumericMatrix& Y, const IntegerVector& colors, const ListOf<IntegerVector>& W, const IntegerVector& jCol_, const IntegerVector& ipntr_, const double& delta, const int& nvars, const int& nnz);
+RcppExport SEXP sparseHessianFD_subst2(SEXP YSEXP, SEXP colorsSEXP, SEXP WSEXP, SEXP jCol_SEXP, SEXP ipntr_SEXP, SEXP deltaSEXP, SEXP nvarsSEXP, SEXP nnzSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< const NumericMatrix& >::type Y(YSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colors(colorsSEXP);
     Rcpp::traits::input_parameter< const ListOf<IntegerVector>& >::type W(WSEXP);
-    Rcpp::traits::input_parameter< const ListOf<IntegerVector>& >::type Sp(SpSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type jCol_(jCol_SEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type ipntr_(ipntr_SEXP);
     Rcpp::traits::input_parameter< const double& >::type delta(deltaSEXP);
+    Rcpp::traits::input_parameter< const int& >::type nvars(nvarsSEXP);
     Rcpp::traits::input_parameter< const int& >::type nnz(nnzSEXP);
-    __result = Rcpp::wrap(subst2(Y, colors, W, Sp, delta, nnz));
+    __result = Rcpp::wrap(subst2(Y, colors, W, jCol_, ipntr_, delta, nvars, nnz));
     return __result;
 END_RCPP
 }

@@ -35,21 +35,6 @@ get.grad.delta <- function(d, x, df, gr, ...) {
 ## }
 
 
-#' @description Returns row (column) indices for non-zero elements in
-#' column (row) k.
-#' @param k row or column for which you want the column or row indices of the
-#' non-zero elements
-#' @param a list representing the sparsity structure in column (row)-compressed
-#' format. The first element contains the row (column) indices, and the second
-#' contains the column (row) pointers.
-#' @return An integer vector of row (column) indices.
-#' @details All indices are 1-based (as in R).  The Matrix.to.Pointers function
-#' will return a list suitable for use in this function.
-get.indices <- function(k, Q) {
-    Q[[1]][(Q[[2]][k]):(Q[[2]][k+1]-1)]
-}
-
-
 #' @param x Value at which to evaluate Hessian
 #' @param df function that returns gradient at x
 #' @param rows,cols row and column indices of non-zero elements in the lower
@@ -67,7 +52,6 @@ get.fd <- function(x, df, rows, cols, W, delta, ...) {
     ## things that can happen at initialization
     M <- sparseMatrix(i=rows, j=cols)
     ptr <- Matrix.to.Pointers(M, order="row")
-    Sp <- lapply(1:nvars, get.indices, Q=ptr)
     colors <- as.integer(color.list2vec(W, nvars))
 
 
@@ -76,7 +60,7 @@ get.fd <- function(x, df, rows, cols, W, delta, ...) {
 
     ## return gr(x+d) - gr(x) for each column of D
     Y <- apply(D, 2, get.grad.delta, x=x, df=df, gr=gr, ...)
-    H <- subst2(Y, colors, W, Sp, delta, nnz)
+    H <- subst2(Y, colors, W, ptr$jCol, ptr$ipntr, delta, nvars, nnz)
 
 
     return(H)
