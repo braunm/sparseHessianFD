@@ -46,12 +46,13 @@ color.list2vec <- function(W, n) {
 }
 
 
-color.cols <- function(rows, cols) {
+color.cols1 <- function(rows, cols) {
 
     A <- sparseMatrix(i=rows, j=cols) ## lower triangle
     stopifnot(Matrix::isTriangular(A, upper=FALSE))
     G <- as(tril(A) + Matrix::t(tril(A, k=-1)), "nMatrix") ## symmetric
     stopifnot(Matrix::isSymmetric(G))
+
     nV <- NROW(G)
     dimnames(G) <- list(1:nV, 1:nV)
 
@@ -62,21 +63,20 @@ color.cols <- function(rows, cols) {
         S <- G
         nm <- rownames(S)
         W <- c(W, list(NULL))
-        while (NROW(S) > 0) {
-            if (NROW(S) != 1) {
-                deg <- Matrix::rowSums(S)-1
-                r <- nm[which.max(deg)]
-                W[[k]] <- c(W[[k]], r)
-                S2 <- as.logical(S[r,,drop=FALSE] %*% S)
-                nei <- nm[S2]
-                d <- which(nm %in% nei)
-                S <- S[-d, -d, drop=FALSE]
-                nm <- rownames(S)
-            } else {
-                W[[k]] <- c(W[[k]], nm[1])
-                S <- NULL
-                nm <- NULL
-            }
+        while (NROW(S) > 1) {
+            deg <- Matrix::rowSums(S)-1
+            r <- nm[which.max(deg)]
+            W[[k]] <- c(W[[k]], r)
+            S2 <- as.logical(S[r,,drop=FALSE] %*% S)
+            nei <- nm[S2]
+            d <- which(nm %in% nei)
+            S <- S[-d, -d, drop=FALSE]
+            nm <- nm[-d]
+        }
+        if (NROW(S) <= 1) {
+            W[[k]] <- c(W[[k]], nm[1])
+            S <- NULL
+            nm <- NULL
         }
         d <- which(rownames(G) %in% W[[k]])
         G <- G[-d, -d, drop=FALSE]
@@ -87,5 +87,41 @@ color.cols <- function(rows, cols) {
     return(W)
 }
 
+color.cols2 <- function(rows, cols) {
 
+    A <- sparseMatrix(i=rows, j=cols) ## lower triangle
+    stopifnot(Matrix::isTriangular(A, upper=FALSE))
+    G <- as(tril(A) + Matrix::t(tril(A, k=-1)), "nMatrix") ## symmetric
+    stopifnot(Matrix::isSymmetric(G))
+
+    nV <- NROW(G)
+    k <- 0
+    W <- NULL
+    trackG <- rep(TRUE, nV)
+    while (any(trackG)) {
+        k <- k + 1
+        deg <- Matrix::rowSums(G) * trackG
+        W <- c(W, list(NULL))
+        S <- G
+        trackS <- trackG
+        while (any(trackS)) {
+            r <- which.max(deg)
+            W[[k]] <- c(W[[k]], r)
+            Sr <- S[r,,drop=FALSE] %*% S
+            nei <- trackS & as.logical(Sr)
+            deg[nei] <- 0
+            trackS[nei] <- FALSE
+        }
+        G[W[[k]],] <- FALSE
+        G[,W[[k]]] <- FALSE
+        trackG[W[[k]]] <- FALSE
+    }
+    for (i in 1:length(W)) {
+        W[[i]] <- sort(as.integer(W[[i]]), decreasing=FALSE)
+    }
+    return(W)
+}
+
+
+color.cols <- color.cols2
 

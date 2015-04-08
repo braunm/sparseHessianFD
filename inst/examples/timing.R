@@ -3,8 +3,8 @@ gc()
 library(testthat)
 
 set.seed(123)
-data(binary_super)
-binary <- binary_super
+data(binary)
+binary <- binary
 
 N <- length(binary$Y)
 k <- NROW(binary$X)
