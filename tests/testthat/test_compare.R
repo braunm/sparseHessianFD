@@ -46,32 +46,35 @@ test_that("compare", {
     true.hess2 <- drop0(f2$hessian(P))
 
     ## Get hessian structure
-    pattern1 <- Matrix.to.Coord(tril(true.hess1))
-    pattern2 <- Matrix.to.Coord(tril(true.hess2))
+    pattern1LT <- Matrix.to.Coord(tril(true.hess1))
+    pattern2LT <- Matrix.to.Coord(tril(true.hess2))
 
-    W1 <- color.cols(pattern1$rows, pattern1$cols)
-    W2 <- color.cols(pattern2$rows, pattern2$cols)
+    pattern1 <- Matrix.to.Coord(true.hess1)
+    pattern2 <- Matrix.to.Coord(true.hess2)
+
+    W1 <- color.cols(pattern1LT$rows, pattern1LT$cols)
+    W2 <- color.cols(pattern2LT$rows, pattern2LT$cols)
 
 
     delta <- 1e-7
 
-    H1 <- get.fd(P, df=f1$gr, pattern1$rows, pattern1$cols, W1, delta)
-    H2 <- get.fd(P, df=f2$gr, pattern2$rows, pattern2$cols, W2, delta)
+    H1 <- get.fd(P, df=f1$gr, pattern1LT$rows, pattern1LT$cols, W1, delta)
+    H2 <- get.fd(P, df=f2$gr, pattern2LT$rows, pattern2LT$cols, W2, delta)
 
     expect_equivalent(true.hess1, drop0(H1))
     expect_equivalent(true.hess2, drop0(H2))
 
     obj10 <- new("sparseHessianFD", nvars, f1$fn, f1$gr)
-    obj10$hessian.init(pattern1$rows, pattern1$cols, 0, delta)
+    obj10$hessian.init(pattern1LT$rows, pattern1LT$cols, 0, delta)
 
     obj11 <- new("sparseHessianFD", nvars, f1$fn, f1$gr)
-    obj11$hessian.init(pattern1$rows, pattern1$cols, 1, delta)
+    obj11$hessian.init(pattern1LT$rows, pattern1LT$cols, 1, delta)
 
     obj20 <- new("sparseHessianFD", nvars, f2$fn, f2$gr)
-    obj20$hessian.init(pattern2$rows, pattern2$cols, 0, delta)
+    obj20$hessian.init(pattern2LT$rows, pattern2LT$cols, 0, delta)
 
     obj21 <- new("sparseHessianFD", nvars, f2$fn, f2$gr)
-    obj21$hessian.init(pattern2$rows, pattern2$cols, 1, delta)
+    obj21$hessian.init(pattern2LT$rows, pattern2LT$cols, 1, delta)
 
     test.val10 <- obj10$fn(P)
     test.grad10 <- obj10$gr(P)

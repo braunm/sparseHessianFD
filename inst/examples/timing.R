@@ -3,8 +3,8 @@ gc()
 library(testthat)
 
 set.seed(123)
-data(binary_small)
-binary <- binary_small
+data(binary_super)
+binary <- binary_super
 
 N <- length(binary$Y)
 k <- NROW(binary$X)
@@ -37,10 +37,11 @@ f2 <- make.funcs(D=binary, priors=priors, order.row=TRUE) ## off-diagonals
 true.hess1 <- drop0(f1$hessian(P))
 true.hess2 <- drop0(f2$hessian(P))
 
-## Get hessian structure
-pattern1 <- Matrix.to.Coord(tril(true.hess1))
-pattern2 <- Matrix.to.Coord(tril(true.hess2))
-
+## Get hessian structure2
+pattern1LT <- Matrix.to.Coord(tril(true.hess1))
+pattern2LT <- Matrix.to.Coord(tril(true.hess2))
+pattern1 <- Matrix.to.Coord(true.hess1)
+pattern2 <- Matrix.to.Coord(true.hess2)
 
 time <- array(NA, dim=c(2,2,3,2))
 dimnames(time) <- list(order=c("block","band"),
@@ -48,46 +49,48 @@ dimnames(time) <- list(order=c("block","band"),
                        stat=c("init","fd","setup"),
                        version=c("old","new"))
 
-nnz1 <- nnzero(tril(true.hess1))
-nnz2 <- nnzero(tril(true.hess2))
-rs <- sample.int(nnz2)
 
-rows1 <- pattern1$rows[rs]
-rows2 <- pattern2$rows[rs]
-cols1 <- pattern1$cols[rs]
-cols2 <- pattern2$cols[rs]
+rows1 <- pattern1$rows
+rows2 <- pattern2$rows
+cols1 <- pattern1$cols
+cols2 <- pattern2$cols
+
+rows1LT <- pattern1LT$rows
+rows2LT <- pattern2LT$rows
+cols1LT <- pattern1LT$cols
+cols2LT <- pattern2LT$cols
 
 time["block","indirect","init","new"] <- system.time(
-    W1 <- color.cols(rows1, cols1))[["elapsed"]]
+    W1 <- color.cols(rows1LT, cols1LT))[["elapsed"]]
 time["band","indirect","init","new"] <- system.time(
-    W2 <- color.cols(rows2, cols2))[["elapsed"]]
+    W2 <- color.cols(rows2LT, cols2LT))[["elapsed"]]
 
 delta <- 1e-7
 
 time["block","indirect","fd","new"] <- system.time(
-    H1 <- get.fd(P, df=f1$gr, rows1, cols1, W1, delta))[["elapsed"]]
+    H1 <- get.fd(P, df=f1$gr, rows1LT, cols1LT, W1, delta))[["elapsed"]]
 time["band","indirect","fd","new"] <- system.time(
-    H2 <- get.fd(P, df=f2$gr, rows2, cols2, W2, delta))[["elapsed"]]
+    H2 <- get.fd(P, df=f2$gr, rows2LT, cols2LT, W2, delta))[["elapsed"]]
 
 time["block","indirect","setup","old"] <- system.time(
     obj10 <- new("sparseHessianFD", nvars, f1$fn, f1$gr))[["elapsed"]]
 time["block","indirect","init","old"] <- system.time(
-    obj10$hessian.init(rows1, cols1, 0, delta))[["elapsed"]]
+    obj10$hessian.init(rows1LT, cols1LT, 0, delta))[["elapsed"]]
 
 time["block","direct","setup","old"] <- system.time(
     obj11 <- new("sparseHessianFD", nvars, f1$fn, f1$gr))[["elapsed"]]
 time["block","direct","init","old"] <- system.time(
-    obj11$hessian.init(rows1, cols1, 1, delta))[["elapsed"]]
+    obj11$hessian.init(rows1LT, cols1LT, 1, delta))[["elapsed"]]
 
 time["band","indirect","setup","old"] <- system.time(
     obj20 <- new("sparseHessianFD", nvars, f2$fn, f2$gr))[["elapsed"]]
 time["band","indirect","init","old"] <- system.time(
-    obj20$hessian.init(rows2, cols2, 0, delta))[["elapsed"]]
+    obj20$hessian.init(rows2LT, cols2LT, 0, delta))[["elapsed"]]
 
 time["band","direct","setup","old"] <- system.time(
     obj21 <- new("sparseHessianFD", nvars, f2$fn, f2$gr))[["elapsed"]]
 time["band","direct","init","old"] <- system.time(
-    obj21$hessian.init(rows2, cols2, 1, delta))[["elapsed"]]
+    obj21$hessian.init(rows2LT, cols2LT, 1, delta))[["elapsed"]]
 
 
 time["block","indirect","fd","old"] <- system.time(test.hess10 <- obj10$hessian(P))[["elapsed"]]

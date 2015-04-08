@@ -45,18 +45,20 @@ test_that("newmethod", {
     true.hess2 <- drop0(f2$hessian(P))
 
     ## Get hessian structure
-    pattern1 <- Matrix.to.Coord(tril(true.hess1))
-    pattern2 <- Matrix.to.Coord(tril(true.hess2))
+    pattern1LT <- Matrix.to.Coord(tril(true.hess1))
+    pattern2LT <- Matrix.to.Coord(tril(true.hess2))
 
-    W1 <- color.cols(pattern1$rows, pattern1$cols)
-    W2 <- color.cols(pattern2$rows, pattern2$cols)
+    pattern1 <- Matrix.to.Coord(true.hess1)
+    pattern2 <- Matrix.to.Coord(true.hess2)
+
+    W1 <- color.cols(pattern1LT$rows, pattern1LT$cols)
+    W2 <- color.cols(pattern2LT$rows, pattern2LT$cols)
 
     delta <- 1e-7
 
-    H1 <- get.fd(P, df=f1$gr, pattern1$rows, pattern1$cols, W1, delta)
-    H2 <- get.fd(P, df=f2$gr, pattern2$rows, pattern2$cols, W2, delta)
+    H1 <- get.fd(P, df=f1$gr, pattern1LT$rows, pattern1LT$cols, W1, delta)
+    H2 <- get.fd(P, df=f2$gr, pattern2LT$rows, pattern2LT$cols, W2, delta)
 
-    browser()
     expect_equal(true.hess1, H1)
     expect_equal(true.hess2, H2)
 

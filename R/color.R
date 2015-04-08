@@ -47,7 +47,11 @@ color.list2vec <- function(W, n) {
 
 
 color.cols <- function(rows, cols) {
-    G <- sparseMatrix(i=rows, j=cols)
+
+    A <- sparseMatrix(i=rows, j=cols) ## lower triangle
+    stopifnot(Matrix::isTriangular(A, upper=FALSE))
+    G <- as(tril(A) + Matrix::t(tril(A, k=-1)), "nMatrix") ## symmetric
+    stopifnot(Matrix::isSymmetric(G))
     nV <- NROW(G)
     dimnames(G) <- list(1:nV, 1:nV)
 
@@ -63,8 +67,8 @@ color.cols <- function(rows, cols) {
                 deg <- Matrix::rowSums(S)-1
                 r <- nm[which.max(deg)]
                 W[[k]] <- c(W[[k]], r)
-                S2 <- S %*% S
-                nei <- nm[S2[r,]]
+                S2 <- as.logical(S[r,,drop=FALSE] %*% S)
+                nei <- nm[S2]
                 d <- which(nm %in% nei)
                 S <- S[-d, -d, drop=FALSE]
                 nm <- rownames(S)
