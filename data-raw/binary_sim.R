@@ -38,4 +38,7 @@ devtools::use_data(binary_small, overwrite=TRUE)
 binary_large <- binary_sim(800, 3, 300)
 devtools::use_data(binary_large, overwrite=TRUE)
 
+binary_super <- binary_sim(1200, 3, 300)
+devtools::use_data(binary_super, overwrite=TRUE)
+
 

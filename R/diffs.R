@@ -59,7 +59,6 @@ get.indices <- function(k, Q) {
 #' @return Finite difference gradients, with each group in a column.
 get.fd <- function(x, df, rows, cols, W, delta, ...) {
 
-    k <- length(W)
     nvars <- length(x)
     stopifnot(nvars >= max(max(rows), max(cols)))
     nnz <- length(rows)
@@ -70,17 +69,14 @@ get.fd <- function(x, df, rows, cols, W, delta, ...) {
     ptr <- Matrix.to.Pointers(M, order="row")
     Sp <- lapply(1:nvars, get.indices, Q=ptr)
     colors <- as.integer(color.list2vec(W, nvars))
-    colsize <- diff(ptr$ipntr)
+
 
     gr <- df(x, ...) ## gradient at x
     D <- sapply(W, .coord2vec, nvars, delta)
 
     ## return gr(x+d) - gr(x) for each column of D
-    Y <- apply(D, 2, get.grad.delta, x=x, df=df, gr=gr)
-
-
-    ##    tt <- system.time(H <- subst_C(Y, colors, W, Sp, colsize, delta))
-    tt <- system.time(H <- subst2(Y, colors, W, Sp, delta, nnz))
+    Y <- apply(D, 2, get.grad.delta, x=x, df=df, gr=gr, ...)
+    H <- subst2(Y, colors, W, Sp, delta, nnz)
 
 
     return(H)

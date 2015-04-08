@@ -7,7 +7,7 @@
 using namespace Rcpp;
 
 // subst_C
-S4 subst_C(const NumericMatrix& Y, const IntegerVector& colors, const ListOf<IntegerVector>& W, const ListOf<IntegerVector>& Sp, const IntegerVector& colsize_, const double& delta);
+S4 subst_C(const NumericMatrix& Y, const IntegerVector& colors, const ListOf<IntegerVector>& W, const ListOf<IntegerVector>& Sp, IntegerVector& colsize_, const double& delta);
 RcppExport SEXP sparseHessianFD_subst_C(SEXP YSEXP, SEXP colorsSEXP, SEXP WSEXP, SEXP SpSEXP, SEXP colsize_SEXP, SEXP deltaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
@@ -16,7 +16,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const IntegerVector& >::type colors(colorsSEXP);
     Rcpp::traits::input_parameter< const ListOf<IntegerVector>& >::type W(WSEXP);
     Rcpp::traits::input_parameter< const ListOf<IntegerVector>& >::type Sp(SpSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type colsize_(colsize_SEXP);
+    Rcpp::traits::input_parameter< IntegerVector& >::type colsize_(colsize_SEXP);
     Rcpp::traits::input_parameter< const double& >::type delta(deltaSEXP);
     __result = Rcpp::wrap(subst_C(Y, colors, W, Sp, colsize_, delta));
     return __result;
