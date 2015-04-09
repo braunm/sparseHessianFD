@@ -7,15 +7,15 @@
 using namespace Rcpp;
 
 // color
-List color(const S4& G_, const int& nvars, const int& nnz);
-RcppExport SEXP sparseHessianFD_color(SEXP G_SEXP, SEXP nvarsSEXP, SEXP nnzSEXP) {
+List color(const IntegerVector& rows, const IntegerVector& cols, const int& nvars);
+RcppExport SEXP sparseHessianFD_color(SEXP rowsSEXP, SEXP colsSEXP, SEXP nvarsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< const S4& >::type G_(G_SEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rows(rowsSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type cols(colsSEXP);
     Rcpp::traits::input_parameter< const int& >::type nvars(nvarsSEXP);
-    Rcpp::traits::input_parameter< const int& >::type nnz(nnzSEXP);
-    __result = Rcpp::wrap(color(G_, nvars, nnz));
+    __result = Rcpp::wrap(color(rows, cols, nvars));
     return __result;
 END_RCPP
 }

@@ -2,17 +2,26 @@
 % Please edit documentation in R/diffs.R
 \name{get.fd}
 \alias{get.fd}
+\title{##}
 \usage{
 get.fd(x, df, rows, cols, W, delta, ...)
 }
 \arguments{
-  \item{x}{Value at which to evaluate Hessian}
+  \item{x}{Value at which to evaluate Hessian ##}
 
-  \item{df}{function that returns gradient at x}
+  \item{df}{function that returns gradient at x ##}
 
   \item{rows,cols}{row and column indices of non-zero
   elements in the lower triangle of the sparse Hessian
   matrix.}
+
+  \item{W}{coloring scheme from color.cols function ##}
+
+  \item{delta}{finite differencing factor ##}
+
+  \item{x}{Value at which to evaluate Hessian}
+
+  \item{df}{function that returns gradient at x}
 
   \item{W}{coloring scheme from color.cols function}
 
@@ -20,5 +29,10 @@ get.fd(x, df, rows, cols, W, delta, ...)
 }
 \value{
 Finite difference gradients, with each group in a column.
+
+Finite difference gradients, with each group in a column.
+}
+\description{
+##
 }
 

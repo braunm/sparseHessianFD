@@ -61,9 +61,9 @@ cols1LT <- pattern1LT$cols
 cols2LT <- pattern2LT$cols
 
 time["block","indirect","init","new"] <- system.time(
-    W1 <- color.cols(rows1LT, cols1LT))[["elapsed"]]
+    W1 <- color.cols.C(rows1LT, cols1LT, nvars))[["elapsed"]]
 time["band","indirect","init","new"] <- system.time(
-    W2 <- color.cols(rows2LT, cols2LT))[["elapsed"]]
+    W2 <- color.cols.C(rows2LT, cols2LT, nvars))[["elapsed"]]
 
 delta <- 1e-7
 

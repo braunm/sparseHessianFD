@@ -6,7 +6,7 @@ test_that("colors", {
 
     ## Test matrices H and L
     b <- 3
-    n <- 6
+    n <- 4
     p <- 2
 
     H <- Matrix(FALSE, nrow=n*b+p, ncol=n*b+p)
@@ -24,10 +24,18 @@ test_that("colors", {
 
     testmat <- L
     hs <- Matrix.to.Coord(tril(testmat))
+    nvars <- NROW(testmat)
+
+    browser()
 
     W <- color.cols(hs$rows, hs$cols)
-    print("test_colors")
+    print("test_colors_R")
     print(tril(testmat))
     print(W)
+
+    print("test_colors_C")
+    Z <- color.cols.C(hs$rows, hs$cols, nvars)
+    print(Z)
+
 
 })
