@@ -6,6 +6,19 @@
 
 using namespace Rcpp;
 
+// color
+List color(const S4& G_, const int& nvars, const int& nnz);
+RcppExport SEXP sparseHessianFD_color(SEXP G_SEXP, SEXP nvarsSEXP, SEXP nnzSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const S4& >::type G_(G_SEXP);
+    Rcpp::traits::input_parameter< const int& >::type nvars(nvarsSEXP);
+    Rcpp::traits::input_parameter< const int& >::type nnz(nnzSEXP);
+    __result = Rcpp::wrap(color(G_, nvars, nnz));
+    return __result;
+END_RCPP
+}
 // subst_C
 S4 subst_C(const NumericMatrix& Y, const IntegerVector& colors, const ListOf<IntegerVector>& W, const ListOf<IntegerVector>& Sp, IntegerVector& colsize_, const double& delta);
 RcppExport SEXP sparseHessianFD_subst_C(SEXP YSEXP, SEXP colorsSEXP, SEXP WSEXP, SEXP SpSEXP, SEXP colsize_SEXP, SEXP deltaSEXP) {
