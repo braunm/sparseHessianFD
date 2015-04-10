@@ -51,10 +51,11 @@ test_that("newmethod", {
     pattern1 <- Matrix.to.Coord(true.hess1)
     pattern2 <- Matrix.to.Coord(true.hess2)
 
-    W1 <- color.cols(pattern1LT$rows, pattern1LT$cols)
-    W2 <- color.cols(pattern2LT$rows, pattern2LT$cols)
+    W1 <- color.cols.C(pattern1LT$rows, pattern1LT$cols, nvars)
+    W2 <- color.cols.C(pattern2LT$rows, pattern2LT$cols, nvars)
 
     delta <- 1e-7
+##browser()
 
     H1 <- get.fd(P, df=f1$gr, pattern1LT$rows, pattern1LT$cols, W1, delta)
     H2 <- get.fd(P, df=f2$gr, pattern2LT$rows, pattern2LT$cols, W2, delta)

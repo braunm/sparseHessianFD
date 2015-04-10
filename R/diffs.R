@@ -54,7 +54,6 @@ get.fd <- function(x, df, rows, cols, W, delta, ...) {
     ptr <- Matrix.to.Pointers(M, order="row")
     colors <- as.integer(color.list2vec(W, nvars))
 
-
     gr <- df(x, ...) ## gradient at x
     D <- sapply(W, .coord2vec, nvars, delta)
 

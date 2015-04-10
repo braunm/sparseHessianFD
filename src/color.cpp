@@ -2,6 +2,7 @@
 #include <RcppEigen.h>
 #include <Eigen/Core>
 #include <Eigen/Sparse>
+#include <common_R.hpp>
 
 using Rcpp::S4;
 using Rcpp::List;
@@ -91,6 +92,7 @@ List color(const IntegerVector& rows,
     W.push_back(std::set<int>());
     //   Rcout << "track_S:\n";
     while (track_S.any()) {
+      check_interrupt();
       //      Rcout << "track_S start:\n" << track_S << "\n\n";
       deg.maxCoeff(&r);
       Srow = SR.row(r);      
@@ -130,8 +132,6 @@ List color(const IntegerVector& rows,
   for (int j=0; j<k; j++) {
     res[j] = W[j];
   }
-
-  Rcout << "Returning\n";
   
   return(Rcpp::wrap(res)); 
 }

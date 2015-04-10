@@ -45,10 +45,10 @@ color.cols <- function(rows, cols) {
 
 color.cols.C <- function(rows, cols, nvars) {
     diagElement <- rows == cols
- ##   rows2 <- c(rows, cols[!diagElement]) - 1
- ##   cols2 <- c(cols, rows[!diagElement]) - 1
-    rows2 <- rows-1
-    cols2 <- cols-1
+    rows2 <- c(rows, cols[!diagElement]) - 1
+    cols2 <- c(cols, rows[!diagElement]) - 1
+ ##   rows2 <- rows-1
+ ##   cols2 <- cols-1
     W <- color(as.integer(rows2), as.integer(cols2), nvars)
     return(W)
 }

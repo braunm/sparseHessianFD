@@ -83,8 +83,8 @@ S4 subst2(const NumericMatrix& Y,
   VectorXd B(nvars);
   B.setZero();
 
-  const Map<const VectorXi> jCol = VectorXi::Map(jCol_.begin(), nvars+1);
-  const Map<const VectorXi> ipntr = VectorXi::Map(ipntr_.begin(), nnz);
+  const Map<const VectorXi> jCol = VectorXi::Map(jCol_.begin(), nnz);
+  const Map<const VectorXi> ipntr = VectorXi::Map(ipntr_.begin(), nvars+1);
   
   for (int g=0; g<ngrp; g++) {
     B.setZero();

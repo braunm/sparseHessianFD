@@ -26,8 +26,6 @@ test_that("colors", {
     hs <- Matrix.to.Coord(tril(testmat))
     nvars <- NROW(testmat)
 
-    browser()
-
     W <- color.cols(hs$rows, hs$cols)
     print("test_colors_R")
     print(tril(testmat))

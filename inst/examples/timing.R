@@ -3,8 +3,8 @@ gc()
 library(testthat)
 
 set.seed(123)
-data(binary)
-binary <- binary
+data(binary_large)
+binary <- binary_large
 
 N <- length(binary$Y)
 k <- NROW(binary$X)
@@ -62,8 +62,11 @@ cols2LT <- pattern2LT$cols
 
 time["block","indirect","init","new"] <- system.time(
     W1 <- color.cols.C(rows1LT, cols1LT, nvars))[["elapsed"]]
+print("Color 1 complete")
+
 time["band","indirect","init","new"] <- system.time(
     W2 <- color.cols.C(rows2LT, cols2LT, nvars))[["elapsed"]]
+print("Color 2 complete")
 
 delta <- 1e-7
 
