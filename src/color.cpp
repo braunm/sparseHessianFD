@@ -27,62 +27,65 @@ typedef Eigen::Matrix<bool, Dynamic, 1> VectorXb;
 typedef Eigen::SparseMatrix<bool, Eigen::RowMajor> SparseMatrixXbRow;
 typedef Eigen::SparseMatrix<bool, Eigen::ColMajor> SparseMatrixXbCol;
 
+typedef std::set<int> S;
+
+
 //[[Rcpp::export]]
-List color(const IntegerVector& rows,
-	   const IntegerVector& cols,
-	   const int& nvars) {
+List color(const IntegerVector& ipntr,
+	   const IntegerVector& jCols,
+	   const IntegerVector& jpntr,
+	   const IntegerVector& iRows,
+	   const int nvars) {
 
   //  Rcout << "Starting\n";
-  int nnz = rows.size();
-
-  SparseMatrixXbRow GR(nvars, nvars);
-  SparseMatrixXbCol GC(nvars, nvars);
-
-  typedef Eigen::Triplet<bool> T;
-  std::vector<T> tripletList;
-  tripletList.reserve(nnz);
-  for(int i=0; i<nnz; i++) {
-    tripletList.push_back(T(rows(i), cols(i), true));
-  }
+  int nnz = jCols.size()-1;
+  assert(nnz == iRows.size()-1);
   
-  GR.setFromTriplets(tripletList.begin(), tripletList.end());
-  GR.makeCompressed();
-  GC.setFromTriplets(tripletList.begin(), tripletList.end());
-  GC.makeCompressed();
-  
-  
-  //  Rcout << "GR:\n" << GR << "\n";
-  // Rcout << "GC:\n" << GC << "\n";
+  std::vector<std::set<int> > W; // colorings
 
-  //  Rcout << "Sparse matrix is filled\n";
-  
-  int k = 0;
-
-  std::vector<std::set<int> > W;
-
-  std::set<int> track_G(nvars);
-  std::iota(track_G.begin(), track_G.end(), 0);
-  std::set<int> track_S(nvars);
-  std::iota(track_S.begin(), track_S.end(), 0);
+  S uncolored(nvars);
+  std::iota(uncolored.begin(), uncolored.end(), 0);
+  S A(nvars);
+  std::iota(A.begin(), A.end(), 0);
 
   VectorXi deg(nvars);
   std::set<int> common(nvars);
   int r;
 
-  //  const std::vector<int> nm(nvars);
-  //std::iota(nm.begin(), nm.end(), 0);
-  //  VectorXb nei(nvars);
 
-  Eigen::Matrix<bool,1,Dynamic> Srow(nvars);
+  //  Eigen::Matrix<bool,1,Dynamic> Srow(nvars);
   
   // Rcout << "Starting algorithm\n";
-  while (!track_G.empty()) {
+  int k = 0;
+  while (!uncolored.empty()) {
     k++;
-    check_interrupt();
     //  Rcout << "k = " << k << "\n";
-    //  Rcout << "track_G:\n" << track_G << "\n";
-  
-    for (int i=0; i<nvars; i++) {
+    W.push_back(std::set<int>());
+    A = uncolored; 
+    for (auto g = uncolored.begin(); g != uncolored.end(); ) {
+      int gstart = ipntr(g);
+      int gend = ipntr(g+1);
+      S gcols = S(jCols.begin()+gstart; jCols.begin()+gend()); // cols in row g
+      S A = uncolored;
+      while (!A.empty()) {
+	deg.maxCoeff(&r);
+	S rcols = S(jCols.begin()+ipntr(r); jCols.begin()+ipntr(r+1));
+	for (auto j=A.begin(); j != A.end(); ) {
+	  S jrows = S(iRows.begin()+jpntr(*j), iRows.begin()+jpntr(*j +1));
+	  S nei(A.size()); // set of neighborhood indices
+	  set_intersect(rcols.begin(), rcols.end(),
+			jrows.begin(), jrows.end(),
+			std::back_inserter(nei));
+	  
+
+
+	}
+
+
+      }
+      
+
+      
       VectorXb Gi = GR.row(i);
       std::set<int> Gi; // set of elements in row i (from pointer)
       std::set_intersection(track_G.begin(), track_G.end(),
@@ -94,25 +97,42 @@ List color(const IntegerVector& rows,
     std::vector<std::set> SC = GC;
     std::vector<std::set> SR = GR;
     track_S = track_G;
-    W.push_back(std::set<int>());
+ 
     while (!track_S.empty()) {
-      check_interrupt();
-      deg.maxCoeff(&r);
-      nei = any_common(SR[r], SC) %intersect% track_S;
-      for (int i : nei) {
+      for (auto Si=track_S.begin(); != track_S.end() ;) { // advance interator in loop
+	deg.maxCoeff(&r);
+	nei = any_common(SR[r], SC) %intersect% track_S;
+	for (int i : nei) {
 	  deg(i) = 0;
 	  track_S.erase(i); // remove neighbors of r from S
 	}	
       }
       W[k-1].insert(r+1);
       track_G.erase(r); // remove r from uncolored set
-  
+      
       for (int i=0; i<nvars; i++) {
       	GR[i].erase(r); // zero out column r in GR
       	GC[i].erase(r); // zero out row r in GC 
       }
     }
   }
+
+ SparseMatrixXbRow GR(nvars, nvars);
+  SparseMatrixXbCol GC(nvars, nvars);
+
+
+  GR.setFromTriplets(tripletList.begin(), tripletList.end());
+  GR.makeCompressed();
+  GC.setFromTriplets(tripletList.begin(), tripletList.end());
+  GC.makeCompressed();
+  
+  typedef Eigen::Triplet<bool> T;
+  std::vector<T> tripletList;
+  tripletList.reserve(nnz);
+  for(int i=0; i<nnz; i++) {
+    tripletList.push_back(T(rows(i), cols(i), true));
+  }
+  
 
   // Rcout << "Finished algorithm\n";
   
