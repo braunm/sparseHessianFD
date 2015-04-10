@@ -59,69 +59,58 @@ List color(const IntegerVector& rows,
   int k = 0;
 
   std::vector<std::set<int> > W;
-  Eigen::Matrix<bool,Dynamic,1> track_G;
-  track_G.resize(nvars);
-  track_G.setConstant(true);
 
-  Eigen::Matrix<bool,Dynamic,1> track_S;
-  track_S.resize(nvars);
-  track_S.setConstant(true);
+  std::set<int> track_G(nvars);
+  std::iota(track_G.begin(), track_G.end(), 0);
+  std::set<int> track_S(nvars);
+  std::iota(track_S.begin(), track_S.end(), 0);
 
   VectorXi deg(nvars);
+  std::set<int> common(nvars);
   int r;
 
-  VectorXb nei(nvars);
+  //  const std::vector<int> nm(nvars);
+  //std::iota(nm.begin(), nm.end(), 0);
+  //  VectorXb nei(nvars);
 
   Eigen::Matrix<bool,1,Dynamic> Srow(nvars);
   
   // Rcout << "Starting algorithm\n";
-  while (track_G.any()) {
+  while (!track_G.empty()) {
     k++;
-    //    Rcout << "k = " << k << "\n";
+    check_interrupt();
+    //  Rcout << "k = " << k << "\n";
     //  Rcout << "track_G:\n" << track_G << "\n";
-    //  Rcout << "GR:\n" << GR << "\n";
+  
     for (int i=0; i<nvars; i++) {
       VectorXb Gi = GR.row(i);
-      //   Rcout << "Gi :\n" << Gi << "\n"; 
-      deg(i) = Gi.count() * track_G(i);
-      //      Rcout << "\ti = " << i << "\tdeg = " << deg(i) << "\n";
+      std::set<int> Gi; // set of elements in row i (from pointer)
+      std::set_intersection(track_G.begin(), track_G.end(),
+			    Gi.begin(), Gi.end(),
+			    std::back_inserter(common));
+      deg(i) = common.size();
     }
-    SparseMatrixXbRow SR = GR;
-    SparseMatrixXbCol SC = GC;
+
+    std::vector<std::set> SC = GC;
+    std::vector<std::set> SR = GR;
     track_S = track_G;
     W.push_back(std::set<int>());
-    //   Rcout << "track_S:\n";
-    while (track_S.any()) {
+    while (!track_S.empty()) {
       check_interrupt();
-      //      Rcout << "track_S start:\n" << track_S << "\n\n";
       deg.maxCoeff(&r);
-      Srow = SR.row(r);      
-      nei = ((Srow * SC).transpose().array() *  track_S.array()).matrix();
-      //     Rcout << "\tr = " << r << "\n";
-      //   Rcout << "\tDeg\tSrow\ttrack_S\tNei\n";
-      //   for (int jj=0; jj<nvars; jj++) {
-      //	Rcout << "\t" << deg(jj) << "\t" <<  Srow(jj) << "\t" << track_S(jj) << "\t" << nei(jj) << "\n";
-      //  }
-      for (int i=0; i<nvars; i++) {
-	if (nei(i)) {
+      nei = any_common(SR[r], SC) %intersect% track_S;
+      for (int i : nei) {
 	  deg(i) = 0;
-	  track_S(i) = false;	    
+	  track_S.erase(i); // remove neighbors of r from S
 	}	
       }
       W[k-1].insert(r+1);
-      track_G(r) = false;
+      track_G.erase(r); // remove r from uncolored set
   
-      for (SparseMatrixXbRow::InnerIterator jt(GR, r); jt; ++jt) {
-      	jt.valueRef() = false;
-      }
-      for (SparseMatrixXbCol::InnerIterator it(GC, r); it; ++it) {
-      	it.valueRef() = false;
-      }
       for (int i=0; i<nvars; i++) {
-	GR.coeffRef(i,r) = false;
-	GC.coeffRef(r,i) = false;
+      	GR[i].erase(r); // zero out column r in GR
+      	GC[i].erase(r); // zero out row r in GC 
       }
-      //    Rcout << "\ttrack_S:\n" << track_S << "\n\n";
     }
   }
 

@@ -10,7 +10,7 @@ color.list2vec <- function(W, n) {
 }
 
 
-color.cols <- function(rows, cols) {
+color.cols <- function(rows, cols, ...) {
 
     A <- sparseMatrix(i=rows, j=cols) ## lower triangle
     stopifnot(Matrix::isTriangular(A, upper=FALSE))
