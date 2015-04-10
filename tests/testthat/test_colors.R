@@ -5,9 +5,9 @@ test_that("colors", {
     library(dplyr)
 
     ## Test matrices H and L
-    b <- 3
-    n <- 4
-    p <- 2
+    b <- 2
+    n <- 3
+    p <- 1
 
     H <- Matrix(FALSE, nrow=n*b+p, ncol=n*b+p)
     for (j in 1:b) {
@@ -24,6 +24,8 @@ test_that("colors", {
 
     testmat <- L
     hs <- Matrix.to.Coord(tril(testmat))
+
+
     nvars <- NROW(testmat)
 
     W <- color.cols(hs$rows, hs$cols)

@@ -44,13 +44,27 @@ color.cols <- function(rows, cols, ...) {
 
 
 color.cols.C <- function(rows, cols, nvars) {
-    diagElement <- rows == cols
-    rows2 <- c(rows, cols[!diagElement]) - 1
-    cols2 <- c(cols, rows[!diagElement]) - 1
- ##   rows2 <- rows-1
- ##   cols2 <- cols-1
-    W <- color(as.integer(rows2), as.integer(cols2), nvars)
+
+    R <- as(sparseMatrix(i=rows, j=cols, dims=c(nvars, nvars)), "nMatrix") ## LT
+    C <- as(sparseMatrix(i=cols, j=rows, dims=c(nvars, nvars)), "nMatrix") ## UT
+    A <- as(R + C, "ngCMatrix") ## symmetric , but stored as general CSC sparse
+
+    idx <- A@i
+    pntr <- A@p
+
+    browser()
+
+    W <- color(pntr, idx, nvars)
     return(W)
 }
+
+##     diagElement <- rows == cols
+##     rows2 <- c(rows, cols[!diagElement]) - 1
+##     cols2 <- c(cols, rows[!diagElement]) - 1
+##  ##   rows2 <- rows-1
+##  ##   cols2 <- cols-1
+##     W <- color(as.integer(rows2), as.integer(cols2), nvars)
+##     return(W)
+## }
 
 
