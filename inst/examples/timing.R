@@ -3,8 +3,8 @@
 library(testthat)
 
 set.seed(123)
-data(binary)
-binary <- binary
+data(binary_large)
+binary <- binary_large
 
 N <- length(binary$Y)
 k <- NROW(binary$X)
@@ -72,7 +72,6 @@ delta <- 1e-7
 
 time["block","indirect","fd","new"] <- system.time(
     H1 <- get.fd(P, df=f1$gr, rows1LT, cols1LT, W1, delta))[["elapsed"]]
-browser()
 time["band","indirect","fd","new"] <- system.time(
     H2 <- get.fd(P, df=f2$gr, rows2LT, cols2LT, W2, delta))[["elapsed"]]
 

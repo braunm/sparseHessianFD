@@ -52,7 +52,12 @@ color.cols.C <- function(rows, cols, nvars) {
     idx <- A@i
     pntr <- A@p
 
-    W <- color(pntr, idx, nvars)
+    tc <- system.time(W <- color(pntr, idx, nvars))
+    print(tc)
+
+    for (i in 1:length(W)) {
+        W[[i]] <- W[[i]]+1
+    }
     return(W)
 }
 

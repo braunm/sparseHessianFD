@@ -5,8 +5,8 @@ test_that("colors", {
     library(dplyr)
 
     ## Test matrices H and L
-    b <- 2
-    n <- 4
+    b <- 3
+    n <- 200
     p <- 2
 
     H <- Matrix(FALSE, nrow=n*b+p, ncol=n*b+p)
@@ -28,14 +28,14 @@ test_that("colors", {
 
     nvars <- NROW(testmat)
 
-    W <- color.cols(hs$rows, hs$cols)
-    print("test_colors_R")
-    print(tril(testmat))
-    print(W)
+##    W <- color.cols(hs$rows, hs$cols)
+##    print("test_colors_R")
+##    print(tril(testmat))
+##    print(W)
 
-    print("test_colors_C")
+    ##    print("test_colors_C")
     Z <- color.cols.C(hs$rows, hs$cols, nvars)
-    print(Z)
+##    print(Z)
 
 
 })
