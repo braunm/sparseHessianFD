@@ -30,16 +30,26 @@ typedef Eigen::SparseMatrix<bool, Eigen::ColMajor> SparseMatrixXbCol;
 typedef std::set<int> S;
 
 template<typename T>
-void print_set(const std::set<T>& X) {
-
+void print_container(const T& X) {
   int z = 0;
   for (auto i : X) {
-    Rcout << i << "\t";
+    Rcout << i << "   ";
     z++;
-    if (fmod(z,5) == 0) Rcout << "\n";
+    if (fmod(z,7) == 0) Rcout << "\n";
   }
   Rcout << "\n";
+}
 
+template<typename T>
+void print_vec(const Eigen::MatrixBase<T>& X) {
+  int z = 0;
+  int n = X.size();
+  for (int i=0; i<n; i++) {
+    Rcout << X(i) << "   ";
+    z++;
+    if (fmod(z,7) == 0) Rcout << "\n";
+  }
+  Rcout << "\n";
 }
 
 //[[Rcpp::export]]
@@ -71,23 +81,27 @@ List color(const IntegerVector& pntr, //row/col pointer
   std::vector<std::set<int> > P(nvars);  
   for (int m=0; m < nvars; m++) {
     P[m] = S(idx.begin()+pntr(m), idx.begin()+pntr(m+1));
-    deg(m) = P[m].size() - 1;
+    deg(m) = P[m].size();
   }
 
   Rcout << "Starting algorithm\n";
   int k = 0;
   while (!uncolored.empty() && (k < 6)) {
     Rcout << "k = " << k << ".  Uncolored:\n";
-    print_set(uncolored);
+    print_container(uncolored);
     W.push_back(std::set<int>()); // initialize bin for color k    
     S A(uncolored); // all uncolored are candidates
     while (!A.empty()) { // while there are still candidates
+      Rcout << "Degrees:\n";
+      print_vec(deg);
       Rcout << "Candidates-start:\n";
-      print_set(A);
+      print_container(A);
       deg.maxCoeff(&r); // chose r,  candidate with highest degree
       W[k].insert(r+1); // put r in color k (returning 1-based indices)
-      S rcols = S(idx.begin()+pntr(r), idx.begin()+pntr(r+1)); // cols in row r
-      Rcout << "\tr = " << r << "\n";
+      uncolored.erase(r);      
+      S rcols = S(P[r].begin(), P[r].end());
+      Rcout << "\tr = " << r << "  cols: \n";
+      print_container(rcols);
       S nei;
       for (auto j : A) { // fill the neighborhood
 	Rcout << "\tj = " << j << "\n";
@@ -98,28 +112,34 @@ List color(const IntegerVector& pntr, //row/col pointer
 			 jrows.begin(), jrows.end(),
 			 std::inserter(in_nei, in_nei.begin()));
 	Rcout << "in_nei:\n";
-	print_set(in_nei);
-	//	Rcout << "\tIs " << j << " in neighborhood? " << in_nei.empty() << "\n";
+	print_container(in_nei);
 	if (!in_nei.empty()) nei.insert(j);
       }
+      Rcout << "The Neighborhood:\n";
+      print_container(nei);
       for (auto j : nei) {
 	  deg(j) = 0;
 	  A.erase(j); // remove from candidate set and move to next candidate
-      } 
-    }
+      }
+      P[r].clear();
+    } // until no more candidates
     // remove r as neighbor for everyone else, and recompute degrees
     deg.setZero();
-    for (auto i : uncolored) {
-      for (auto rr : W[k]) {
-	P[i].erase(rr);
-      }
-    }
     for (int i : uncolored) {
-      deg[i] = P[i].size(); // self has already been removed
+      for (int rr : W[k]) {
+	P[i].erase(rr-1);
+      }
+      deg[i] = P[i].size();      
     }
-    Rcout << "Candidates-end:\n";
-    print_set(A);
-    uncolored.erase(r);     
+    //    for (int i : uncolored) {
+    //   }
+
+    // Rcout << "P.rows:\n";
+    // for (int i=0; i<nvars; i++) {
+    //   Rcout << i << ": ";
+    //   print_container(P[i]);
+    // }
+
     k++; // advance to next color
   } // end loop on uncolored
   Rcout << "Finished algorithm\n";

@@ -52,8 +52,6 @@ color.cols.C <- function(rows, cols, nvars) {
     idx <- A@i
     pntr <- A@p
 
-    browser()
-
     W <- color(pntr, idx, nvars)
     return(W)
 }

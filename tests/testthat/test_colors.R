@@ -6,8 +6,8 @@ test_that("colors", {
 
     ## Test matrices H and L
     b <- 2
-    n <- 3
-    p <- 1
+    n <- 4
+    p <- 2
 
     H <- Matrix(FALSE, nrow=n*b+p, ncol=n*b+p)
     for (j in 1:b) {
@@ -22,7 +22,7 @@ test_that("colors", {
       rBind(matrix(TRUE, p,n*b)) %>%
       cBind(matrix(TRUE, b*n+p,p))
 
-    testmat <- L
+    testmat <- H
     hs <- Matrix.to.Coord(tril(testmat))
 
 
