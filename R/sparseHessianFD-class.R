@@ -4,7 +4,7 @@
 ##' @title sparseHessianFD
 ##' @name sparseHessianFD-class
 ##' @description A reference class for computing sparse Hessians
-##' @doctype class
+##' @docType class
 ##' @field fn1 A closure for calling fn(x, ...).
 ##' @field gr1 A closure for calling gr(x, ...).
 ##' @field rows,cols Numeric vectors with row and column indices of sparse Hessian. May be just the lower triangle elements or full Hessian, depending on indexLT.  Diagonal elements must be included.
@@ -29,12 +29,16 @@ sparseHessianFD <-
                     D = "matrix",
                     nvars = "integer",
                     nnz = "integer",
-                    ready = "logical"),
+                    ready = "logical",
+                    idx = "integer",
+                    pntr = "integer",
+                    colors = "list",
+                    colors_vec = "integer"),
                 methods = list(
                     initialize = function(x, fn, gr, rows, cols, direct=NULL,
                                           eps=sqrt(.Machine$double.eps),
                                           index1 = TRUE, indexLT = TRUE, ...) {
-                        "Initialize object with functions to compute the objective function and gradient (\code[fn} and \code{gr}), row and column indices of non-zero elements (\code{rows} and \code{cols}), an initial variable vector \code{x} at which \code{fn} and  \code{gr} can be evaluated, a finite differencing parameter \code{eps}, flags for 0 or 1-based indexing (\code{index1}), whether sparsity pattern is just for the lower triangle (\code{indexLT}), and other arguments (...) to be passed to \code{fn} and \code{gr}."
+                        "Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter eps, flags for 0 or 1-based indexing (index1), whether sparsity pattern is just for the lower triangle (indexLT), and other arguments (...) to be passed to fn and gr."
 
                         if (!is.null(direct)) {
                             warning(" 'direct' argument is ignored. Only indirect method is, and will be, supported.")
@@ -43,7 +47,6 @@ sparseHessianFD <-
 
                         initFields(fn1 = function(y) fn(y, ...),
                                    gr1 = function(y) gr(y, ...),
-                                   init.x = x,
                                    rows = as.integer(rows),
                                    cols = as.integer(cols),
                                    eps = eps,
@@ -54,8 +57,12 @@ sparseHessianFD <-
                                    ready = FALSE)
 
 
-                        ptr <- make_pointers(rows, cols, nvars,
-                                             indexLT, index1, out.index1=FALSE)
+                        ptr <- Coord.to.Pointers(rows, cols, c(nvars, nvars),
+                                                 triangle=indexLT,
+                                                 lower=TRUE,
+                                                 order="symmetric",
+                                                 index1=TRUE)
+
                         idx <<- ptr$idx
                         pntr <<- ptr$pntr
 
@@ -64,8 +71,8 @@ sparseHessianFD <-
                         for (i in 1:length(colors)) {
                             color_vec[colors[[i]]] <- as.integer(i)
                         }
-
-                        D <<- sapply(colors, .coord2vec, nvars, eps)
+                        .self$usingMethods("coord2vec")
+                        D <<- sapply(colors, coord2vec)
                         ready <<- TRUE
                     },
 
@@ -87,7 +94,7 @@ sparseHessianFD <-
                     },
 
                     validate = function(fn, gr, rows, cols, x,
-                                        eps, index1, indexLT) {
+                                        eps, index1, indexLT, ...) {
 
                         stopifnot(is.numeric(x),
                                   is.function(fn),
@@ -99,7 +106,6 @@ sparseHessianFD <-
                                   all(is.finite(rows)),
                                   all(is.finite(cols)))
 
-                        nvars <- length(x)
                         gradient <- gr(x, ...)
 
                         I1 <- as.integer(index1)
@@ -121,10 +127,10 @@ sparseHessianFD <-
 
                     fd = function(d, x, grad.x) {
                         gr1(x+d) - grad.x
-                    }
+                    },
 
                     hessian = function(x) {
-                        "Return sparse Hessian, evaluated at \code{x}, as a \code{dgCMatrix} object."
+                        "Return sparse Hessian, evaluated at x, as a dgCMatrix object."
                         if (ready) {
                             grad.x <- gr1(x)
                             Y <- apply(D, 2, fd, x = x, grad.x = grad.x)
@@ -138,22 +144,22 @@ sparseHessianFD <-
                     },
 
                     fn = function(x) {
-                        "Return function value, evaluated at \code{x}: \code{fn(x, ...)}"
+                        "Return function value, evaluated at x: fn(x, ...)"
                         fn1(x)
                     },
 
                     gr = function(x) {
-                        "Return gradient, evaluated at \code{x}:  \code{gr(x,...)}"
+                        "Return gradient, evaluated at x:  gr(x,...)"
                         gr1(x)
                     },
 
                     fngr = function(x) {
-                        "Return list of function value and gradient, evaluated at \code{x}"
+                        "Return list of function value and gradient, evaluated at x"
                         list(fn = fn(x), gr = gr(x))
                     },
 
                     fngrhs = function(x) {
-                        "Return list of function value, gradient, and Hessian, evaluated at \code{x}"
+                        "Return list of function value, gradient, and Hessian, evaluated at x"
                         list(fn = fn(x),
                              gr = gr(x),
                              hessian=hessian(x))
@@ -161,7 +167,7 @@ sparseHessianFD <-
 
 
                     pointers = function(index1=TRUE) {
-                        "Return list with indices (\code{idx}) and pointers (\code{pntr}) for sparsity pattern of the compressed sparse Hessian.  Since the Hessian is symmetric, the indices and pointers for row-oriented and column-oriented storage patterns are the same."
+                        "Return list with indices (idx) and pointers (pntr) for sparsity pattern of the compressed sparse Hessian.  Since the Hessian is symmetric, the indices and pointers for row-oriented and column-oriented storage patterns are the same."
                         if (ready){
                             res <- list(idx = idx + as.integer(index1),
                                         pntr = pntr + as.integer(index1)
@@ -171,7 +177,14 @@ sparseHessianFD <-
                             res <- NULL
                         }
                         return(res)
-                    }
-                })
+                    },
+
+                    coord2vec = function(j) {
+                        z <- rep(0,nvars)
+                        z[ind] <- eps
+                        return(z)
+                    })
+                )
 
 
+sparseHessianFD$usingMethods(coord2vec)

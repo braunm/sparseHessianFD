@@ -4,11 +4,14 @@
 \alias{Matrix.to.Coord}
 \title{Row and column indices from sparse matrix.}
 \usage{
-Matrix.to.Coord(M)
+Matrix.to.Coord(M, index1 = TRUE)
 }
 \arguments{
   \item{M}{A sparse Matrix, as defined in the Matrix
   package.}
+
+  \item{index1}{TRUE if the index of the first element
+  should be 1, and FALSE if 0.}
 }
 \value{
 A list with two named elements. \describe{ \item{rows}{

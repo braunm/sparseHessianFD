@@ -77,24 +77,27 @@ Coord.to.Pattern.Matrix <- function(rows, cols, dims, compressed=TRUE,
 #' @export
 Matrix.to.Pointers <- function(M, order=c("column", "row", "symmetric"),
                                index1=TRUE, out.index1=index1) {
+
+
+    stopifnot(order %in% c("column","row","symmetric"))
     res <- vector("list",length=2)
     if (order == "symmetric") {
-        stopifnot(isSymmetric(M))
+        stopifnot(Matrix::isSymmetric(M))
         M <- as(M,"dgCMatrix")
         names(res) <- c("idx","pntr")
-        res$idx <- as.integer(M@j) + as.integer(out.index1) - as.integer(index1)
-        res$pntr <- as.integer(M@p) + as.integer(out.index1) - as.integer(index1)
+        res$idx <- as.integer(M@i) + as.integer(out.index1)
+        res$pntr <- as.integer(M@p) + as.integer(out.index1)
     } else {
         if (order == "row") {
             M <- as(M,"RsparseMatrix")
             names(res) <- c("jCol","ipntr")
-            res$jCol <- as.integer(M@j) + as.integer(out.index1) - as.integer(index1)
-            res$ipntr <- as.integer(M@p) + as.integer(out.index1) - as.integer(index1)
+            res$jCol <- as.integer(M@j) + as.integer(out.index1)
+            res$ipntr <- as.integer(M@p) + as.integer(out.index1)
         } else {
             M <- as(M,"CsparseMatrix")
             names(res) <- c("iRow","jpntr")
-            res$iRow <- as.integer(M@i) + as.integer(out.index1) - as.integer(index1)
-            res$jpntr <- as.integer(M@p) + as.integer(out.index1) - as.integer(index1)
+            res$iRow <- as.integer(M@i) + as.integer(out.index1)
+            res$jpntr <- as.integer(M@p) + as.integer(out.index1)
         }
     }
     return(res)

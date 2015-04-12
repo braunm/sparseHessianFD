@@ -4,17 +4,38 @@
 \alias{Matrix.to.Pointers}
 \title{Column (row) indices and row (column) pointers from sparse matrix.}
 \usage{
-Matrix.to.Pointers(M, order = c("column", "row"))
+Matrix.to.Pointers(M, order = c("column", "row", "symmetric"),
+  index1 = TRUE, out.index1 = index1)
 }
 \arguments{
   \item{M}{A sparse Matrix, as defined in the Matrix
   package.}
+
+  \item{order}{Pointers can be ordered according to a
+  row-oriented or column-oriented compression pattern.  If
+  symmetric is chosen, the compression method does not
+  matter.  The input matrix must be symmetric (although not
+  necessarily stored that way) to get symmetric output.
+  The only difference between "symmetric," and either "row"
+  or "column," is the names of the elements in the list.}
+
+  \item{index1}{TRUE if the index of the first element
+  should be 1, and FALSE if 0.}
 }
 \value{
-A list with two named elements. \describe{ \item{rows}{
-Integer vector containing row indices of non-zero elements}
-\item{cols}{ Integer vector containing column indices of
-non-zero elements} }
+A list with two named elements. If matrix is row-oriented,
+\describe{ \item{jCol}{ Integer vector containing column
+indices of non-zero elements} \item{ipntr}{ Integer vector
+containing pointers to elements of jCol at which the next
+row begins.} } If matrix is column-oriented, \describe{
+\item{iRow}{ Integer vector containing row indices of
+non-zero elements} \item{jpntr}{ Integer vector containing
+pointers to elements of iRow at which the next column
+begins.} } If the matrix is symmetric, then the row/column
+orientation does not matter.  \describe{ \item{idx}{
+Integer vector containing indices of non-zero elements}
+\item{pntr}{ Integer vector containing pointers to elements
+of idx at which the next row or column begins.} }
 }
 \description{
 Returns list of column (row) indices row (column) pointers

@@ -2,33 +2,53 @@
 % Please edit documentation in R/sparseHessianFD-class.R
 \docType{class}
 \name{sparseHessianFD-class}
-\alias{Rcpp_sparseHessianFD-class}
 \alias{sparseHessianFD}
 \alias{sparseHessianFD-class}
 \title{sparseHessianFD}
 \description{
-This class provides methods to estimate the Hessian of an
-objective function.
+A reference class for computing sparse Hessians
 }
-\details{
-Methods to estimate the Hessian of an objective function
-using finite ifferencing of gradients. An object is created
-with the names of R functions that return the value and the
-gradient, and initialized with the row and column indices
-of the non-zero elements in the lower triangle of the
-Hessian. The class contains the following methods.  See
-vignette for usage. \describe{
-\item{$fn(x)}{\code{signature(x="numeric")}: returns fn(x)}
-\item{$gr(x)}{\code{signature(x="numeric")}: returns gr(x)}
-\item{$fngr(x)}{\code{signature(x="numeric")}: returns list
-of fn(x) and gr(x)}
-\item{$hessian(x)}{\code{signature(x="numeric")}: returns
-sparse Hessian as dgCMatrix object}
-\item{$hessian.init(rows, cols, direct, eps)}{ Used
-internally to initialize Hessian with sparsity pattern}
-\item{$nnz()}{ Number of non-zero elements in lower
-triangle of Hessian, as provided by sparsity pattern}
-\item{$nvars()}{ Length of parameter vector that was
-provided to constructor} }
-}
+\section{Fields}{
+
+\describe{
+\item{\code{fn1}}{A closure for calling fn(x, ...).}
+
+\item{\code{gr1}}{A closure for calling gr(x, ...).}
+
+\item{\code{rows,cols}}{Numeric vectors with row and column indices of sparse Hessian. May be just the lower triangle elements or full Hessian, depending on indexLT.  Diagonal elements must be included.}
+
+\item{\code{eps}}{The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).}
+
+\item{\code{index1}}{TRUE if rows and cols use 1-based (R format) indexing (FALSE for 0-based (C format) indexing.  Internal storage is always 0-based}
+
+\item{\code{indexLT}}{TRUE (default) if rows and cols index only the lower triangle of the Hessian.  FALSE if the entire Hessian is indexed.}
+
+\item{\code{D}}{raw finite differences (internal use only)}
+
+\item{\code{nvars}}{Number of variables (length of x)}
+
+\item{\code{nnz}}{Number of non-zero elements in the full Hessian (not just the lower triangle)}
+
+\item{\code{ready}}{TRUE if object has been initialized, and Hessian has been partitioned according to the sparsity pattern.}
+}}
+\section{Methods}{
+
+\describe{
+\item{\code{fn(x)}}{Return function value, evaluated at x: fn(x, ...)}
+
+\item{\code{fngr(x)}}{Return list of function value and gradient, evaluated at x}
+
+\item{\code{fngrhs(x)}}{Return list of function value, gradient, and Hessian, evaluated at x}
+
+\item{\code{gr(x)}}{Return gradient, evaluated at x:  gr(x,...)}
+
+\item{\code{hessian(x)}}{Return sparse Hessian, evaluated at x, as a dgCMatrix object.}
+
+\item{\code{initialize(x, fn, gr, rows, cols, direct = NULL,
+  eps = sqrt(.Machine$double.eps), index1 = TRUE, indexLT = TRUE, ...)}}{Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter eps, flags for 0 or 1-based indexing (index1), whether sparsity pattern is just for the lower triangle (indexLT), and other arguments (...) to be passed to fn and gr.}
+
+\item{\code{partition()}}{Return the partitioning used to compute finite differences}
+
+\item{\code{pointers(index1 = TRUE)}}{Return list with indices (idx) and pointers (pntr) for sparsity pattern of the compressed sparse Hessian.  Since the Hessian is symmetric, the indices and pointers for row-oriented and column-oriented storage patterns are the same.}
+}}
 

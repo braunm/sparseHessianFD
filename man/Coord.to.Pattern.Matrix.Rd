@@ -5,7 +5,7 @@
 \title{Pattern matrix from row and column indices.}
 \usage{
 Coord.to.Pattern.Matrix(rows, cols, dims, compressed = TRUE,
-  symmetric = FALSE)
+  symmetric = FALSE, index1 = TRUE)
 }
 \arguments{
   \item{rows,cols}{row and column indices of non-zero
