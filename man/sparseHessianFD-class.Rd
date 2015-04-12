@@ -15,21 +15,25 @@ A reference class for computing sparse Hessians
 
 \item{\code{gr1}}{A closure for calling gr(x, ...).}
 
-\item{\code{rows,cols}}{Numeric vectors with row and column indices of sparse Hessian. May be just the lower triangle elements or full Hessian, depending on indexLT.  Diagonal elements must be included.}
+\item{\code{iRow,jCol}}{Numeric vectors with row and column indices of the non-zero elements in the lower triangle (including diagonal) of the Hessian.}
 
 \item{\code{eps}}{The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).}
 
-\item{\code{index1}}{TRUE if rows and cols use 1-based (R format) indexing (FALSE for 0-based (C format) indexing.  Internal storage is always 0-based}
-
-\item{\code{indexLT}}{TRUE (default) if rows and cols index only the lower triangle of the Hessian.  FALSE if the entire Hessian is indexed.}
+\item{\code{index1}}{TRUE if rows and cols use 1-based (R format) indexing (FALSE for 0-based (C format) indexing.}
 
 \item{\code{D}}{raw finite differences (internal use only)}
 
 \item{\code{nvars}}{Number of variables (length of x)}
 
-\item{\code{nnz}}{Number of non-zero elements in the full Hessian (not just the lower triangle)}
+\item{\code{nnz}}{Number of non-zero elements in the lower triangle of the Hessian.}
 
-\item{\code{ready}}{TRUE if object has been initialized, and Hessian has been partitioned according to the sparsity pattern.}
+\item{\code{ready}}{TRUE if object has been initialized, and Hessian has been partitioned.}
+
+\item{\code{idx,pntr}}{Column indices and row pointers for non-zero elements in lower triangle of the Hessian.  Row-oriented compressed storage.}
+
+\item{\code{colors}}{A list representation of the partitioning of the columns of the Hessian.  This is used as part of the estimation algorithm.  Specifically, each list element is a "color," and each element in the corresponding vector is a column with that color.  See references.}
+
+\item{\code{colors_vec}}{A vector representation of the partitioning of the columns.  There are nvars elements, one for each column of the Hessian.  The value corresponds to the "color" for that column.}
 }}
 \section{Methods}{
 
@@ -45,10 +49,10 @@ A reference class for computing sparse Hessians
 \item{\code{hessian(x)}}{Return sparse Hessian, evaluated at x, as a dgCMatrix object.}
 
 \item{\code{initialize(x, fn, gr, rows, cols, direct = NULL,
-  eps = sqrt(.Machine$double.eps), index1 = TRUE, indexLT = TRUE, ...)}}{Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter eps, flags for 0 or 1-based indexing (index1), whether sparsity pattern is just for the lower triangle (indexLT), and other arguments (...) to be passed to fn and gr.}
+  eps = sqrt(.Machine$double.eps), index1 = TRUE, ...)}}{Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter eps, flags for 0 or 1-based indexing (index1), whether sparsity pattern is just for the lower triangle (indexLT), and other arguments (...) to be passed to fn and gr.}
 
 \item{\code{partition()}}{Return the partitioning used to compute finite differences}
 
-\item{\code{pointers(index1 = TRUE)}}{Return list with indices (idx) and pointers (pntr) for sparsity pattern of the compressed sparse Hessian.  Since the Hessian is symmetric, the indices and pointers for row-oriented and column-oriented storage patterns are the same.}
+\item{\code{pointers(out.index1 = index1)}}{Return list with indices (idx) and pointers (pntr) for sparsity pattern of the compressed sparse Hessian.  Since the Hessian is symmetric, the indices and pointers for row-oriented and column-oriented storage patterns are the same.}
 }}
 

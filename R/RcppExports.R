@@ -5,7 +5,7 @@ color_graph <- function(pntr, idx, nvars) {
     .Call('sparseHessianFD_color_graph', PACKAGE = 'sparseHessianFD', pntr, idx, nvars)
 }
 
-subst <- function(Y, colors, W, jCol_, ipntr_, delta, nvars, nnz) {
-    .Call('sparseHessianFD_subst', PACKAGE = 'sparseHessianFD', Y, colors, W, jCol_, ipntr_, delta, nvars, nnz)
+subst <- function(Y, colors, W, jCol, ipntr, delta, nvars, nnz) {
+    .Call('sparseHessianFD_subst', PACKAGE = 'sparseHessianFD', Y, colors, W, jCol, ipntr, delta, nvars, nnz)
 }
 

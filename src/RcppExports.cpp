@@ -20,20 +20,20 @@ BEGIN_RCPP
 END_RCPP
 }
 // subst
-Rcpp::S4 subst(const NumericMatrix& Y, const IntegerVector& colors, const ListOf<IntegerVector>& W, const IntegerVector& jCol_, const IntegerVector& ipntr_, const double& delta, const int& nvars, const int& nnz);
-RcppExport SEXP sparseHessianFD_subst(SEXP YSEXP, SEXP colorsSEXP, SEXP WSEXP, SEXP jCol_SEXP, SEXP ipntr_SEXP, SEXP deltaSEXP, SEXP nvarsSEXP, SEXP nnzSEXP) {
+Rcpp::S4 subst(const Rcpp::NumericMatrix& Y, const Rcpp::IntegerVector& colors, const Rcpp::ListOf<Rcpp::IntegerVector>& W, const Rcpp::IntegerVector& jCol, const Rcpp::IntegerVector& ipntr, const double& delta, const int& nvars, const int& nnz);
+RcppExport SEXP sparseHessianFD_subst(SEXP YSEXP, SEXP colorsSEXP, SEXP WSEXP, SEXP jColSEXP, SEXP ipntrSEXP, SEXP deltaSEXP, SEXP nvarsSEXP, SEXP nnzSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type colors(colorsSEXP);
-    Rcpp::traits::input_parameter< const ListOf<IntegerVector>& >::type W(WSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type jCol_(jCol_SEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type ipntr_(ipntr_SEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type colors(colorsSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::ListOf<Rcpp::IntegerVector>& >::type W(WSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type jCol(jColSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type ipntr(ipntrSEXP);
     Rcpp::traits::input_parameter< const double& >::type delta(deltaSEXP);
     Rcpp::traits::input_parameter< const int& >::type nvars(nvarsSEXP);
     Rcpp::traits::input_parameter< const int& >::type nnz(nnzSEXP);
-    __result = Rcpp::wrap(subst(Y, colors, W, jCol_, ipntr_, delta, nvars, nnz));
+    __result = Rcpp::wrap(subst(Y, colors, W, jCol, ipntr, delta, nvars, nnz));
     return __result;
 END_RCPP
 }
