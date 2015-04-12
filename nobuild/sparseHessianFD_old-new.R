@@ -60,7 +60,6 @@
 sparseHessianFD.new <- function(x, fn, gr, rows, cols, direct=FALSE,
                             eps=sqrt(.Machine$double.eps), ...) {
 
-
     stopifnot(is.function(fn))
     stopifnot(is.function(gr))
 

@@ -2,7 +2,6 @@
 % Please edit documentation in R/diffs.R
 \name{get.grad.delta}
 \alias{get.grad.delta}
-\title{Compute finite difference}
 \usage{
 get.grad.delta(d, x, df, gr, ...)
 }

@@ -1,10 +1,10 @@
-##rm(list=ls())
-##gc()
-library(testthat)
+rm(list=ls())
+gc()
+##library(testthat)
 
-set.seed(123)
-data(binary_large)
-binary <- binary_large
+set.seed(1234)
+data(binary_super)
+binary <- binary_super
 
 N <- length(binary$Y)
 k <- NROW(binary$X)
@@ -62,11 +62,9 @@ cols2LT <- pattern2LT$cols
 
 time["block","indirect","init","new"] <- system.time(
     W1 <- color.cols.C(rows1LT, cols1LT, nvars))[["elapsed"]]
-print("Color 1 complete")
 
 time["band","indirect","init","new"] <- system.time(
     W2 <- color.cols.C(rows2LT, cols2LT, nvars))[["elapsed"]]
-print("Color 2 complete")
 
 delta <- 1e-7
 
@@ -102,11 +100,11 @@ time["band","indirect","fd","old"] <- system.time(test.hess20 <- obj20$hessian(P
 time["band","direct","fd","old"] <- system.time(test.hess21 <- obj21$hessian(P))[["elapsed"]]
 
 
-expect_equivalent(true.hess1, drop0(H1))
-expect_equivalent(true.hess2, drop0(H2))
-expect_equivalent(drop0(H1), test.hess10)
-expect_equivalent(drop0(H1), test.hess11)
-expect_equivalent(drop0(H2), test.hess20)
-expect_equivalent(drop0(H2), test.hess21)
+print(all.equal(true.hess1, drop0(H1)))
+print(all.equal(true.hess2, drop0(H2)))
+print(all.equal(drop0(H1), test.hess10))
+print(all.equal(drop0(H1), test.hess11))
+print(all.equal(drop0(H2), test.hess20))
+print(all.equal(drop0(H2), test.hess21))
 
 

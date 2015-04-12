@@ -1,4 +1,4 @@
-## deprecated.R -- Part of the sparseHessianFD package 
+## deprecated.R -- Part of the sparseHessianFD package
 ## Copyright (C) 2013-2015 Michael Braun
 ## See LICENSE file for details.
 
@@ -26,7 +26,7 @@ NULL
 Sym.CSC.to.Matrix <- function(H,nvars) {
 
     .Deprecated("Matrix::spMatrix")
-    
+
   M <- new("dsCMatrix", i = H$indrow, p = H$jpntr, x = H$vals, Dim=c(nvars, nvars),uplo="L")
   return(M)
 }
@@ -46,8 +46,8 @@ Coord.to.Sym.Pattern.Matrix <- function(H, nvars) {
 ## coords are for lower triangle, but coerces to symmetric pattern matrix
 ## H is a list with two integer vectors:  iRow and jCol
 
-  
-    
+
+
     res <- new("nsTMatrix",i=as.integer(H$iRow-1), j=as.integer(H$jCol-1),
                Dim=c(as.integer(nvars), as.integer(nvars)),uplo="L")
 
@@ -92,6 +92,9 @@ new.sparse.hessian.obj <- function(x, fn, gr, hs, fd.method=0L, eps=sqrt(.Machin
     if (!all.equal(names(hs),c("rows","cols"))) {
         stop ("sparseHessianFD:  Names of hs must be either (\"iRow, jCol\") or (\"rows, cols\")")
     }
-    direct <- as.logical(fd.method)        
+    direct <- as.logical(fd.method)
     return(sparseHessianFD.new(x, fn, gr, hs$rows, hs$cols, direct, eps, ...))
 }
+
+
+

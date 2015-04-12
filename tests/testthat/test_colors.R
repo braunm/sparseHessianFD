@@ -22,7 +22,7 @@ test_that("colors", {
       rBind(matrix(TRUE, p,n*b)) %>%
       cBind(matrix(TRUE, b*n+p,p))
 
-    testmat <- H
+    testmat <- L
     hs <- Matrix.to.Coord(tril(testmat))
 
 
@@ -35,7 +35,8 @@ test_that("colors", {
 
     ##    print("test_colors_C")
     Z <- color.cols.C(hs$rows, hs$cols, nvars)
-##    print(Z)
+
+  ##  print(Z)
 
 
 })

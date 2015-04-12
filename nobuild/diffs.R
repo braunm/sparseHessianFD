@@ -1,4 +1,4 @@
-
+#' @name coord2vec
 #' @return vector of length n, with delta in each element
 #' indexed by j, and zeros elsewhere.
 #' @param j Indices of non-zero elements
@@ -11,7 +11,8 @@
     return(z)
 }
 
-#' Compute finite difference
+#' @name get.grad.delta
+#' @description Compute finite difference
 get.grad.delta <- function(d, x, df, gr, ...) {
     df(x + d, ...) - gr
 }
@@ -42,25 +43,28 @@ get.grad.delta <- function(d, x, df, gr, ...) {
 #' @param W coloring scheme from color.cols function
 #' @param delta finite differencing factor
 #' @return Finite difference gradients, with each group in a column.
-get.fd <- function(x, df, rows, cols, W, delta, ...) {
+## get.fd <- function(x, df, rows, cols, W, delta, ...) {
 
-    nvars <- length(x)
-    stopifnot(nvars >= max(max(rows), max(cols)))
-    nnz <- length(rows)
-
-
-    ## things that can happen at initialization
-    M <- sparseMatrix(i=rows, j=cols)
-    ptr <- Matrix.to.Pointers(M, order="row")
-    colors <- as.integer(color.list2vec(W, nvars))
-
-    gr <- df(x, ...) ## gradient at x
-    D <- sapply(W, .coord2vec, nvars, delta)
-
-    ## return gr(x+d) - gr(x) for each column of D
-    Y <- apply(D, 2, get.grad.delta, x=x, df=df, gr=gr, ...)
-    H <- subst2(Y, colors, W, ptr$jCol, ptr$ipntr, delta, nvars, nnz)
+##     nvars <- length(x)
+##     stopifnot(nvars >= max(max(rows), max(cols)))
+##     nnz <- length(rows)
 
 
-    return(H)
-}
+##     ## things that can happen at initialization
+##     M <- sparseMatrix(i=rows, j=cols)
+##     ptr <- Matrix.to.Pointers(M, order="row")
+##     colors <- as.integer(color.list2vec(W, nvars))
+
+##     gr <- df(x, ...) ## gradient at x
+##     D <- sapply(W, .coord2vec, nvars, delta)
+
+##     ## return gr(x+d) - gr(x) for each column of D
+##     ty <- system.time(Y <- apply(D, 2, get.grad.delta, x=x, df=df, gr=gr, ...))
+##     print(ty)
+
+##     ts <- system.time(H <- subst2(Y, colors, W, ptr$jCol, ptr$ipntr, delta, nvars, nnz))
+##     print(ts)
+
+
+##     return(H)
+## }
