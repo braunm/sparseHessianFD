@@ -7,7 +7,8 @@ context("binary example")
 test_that("binary_example", {
 
     set.seed(123)
-    data(binary)
+    data(binary_small)
+    binary <- binary_small
 
     N <- length(binary$Y)
     k <- NROW(binary$X)
@@ -51,7 +52,7 @@ test_that("binary_example", {
     pat2 <- Matrix.to.Coord(tril(true.hess2))
 
     obj1 <- new("sparseHessianFD", P, f1$fn, f1$gr, pat1$rows, pat1$cols)
-    obj2 <- new("sparseHessianFD", P, f1$fn, f1$gr, pat1$rows, pat1$cols)
+    obj2 <- new("sparseHessianFD", P, f2$fn, f2$gr, pat2$rows, pat2$cols)
 
     test.val1 <- obj1$fn(P)
     test.grad1 <- obj1$gr(P)
@@ -60,7 +61,7 @@ test_that("binary_example", {
     test.val2 <- obj2$fn(P)
     test.grad2 <- obj2$gr(P)
     test.hess2 <- obj2$hessian(P)
-
+browser()
 
     expect_equal(test.val1, true.val1)
     expect_equal(test.grad1, true.grad1)

@@ -45,14 +45,14 @@ Rcpp::S4 subst(const NumericMatrix& Y,
   for (int g=0; g<ngrp; g++) {
     B.setZero();
     for (int k = W[g].size()-1; k >= 0; --k){
-      int i = W[g](k)-1;
+      int i = W[g](k);
       for (int m = ipntr(i); m<ipntr(i+1); m++) {
-	int j = jCol(m-1)-1;
-	double z = Y(j, colors(i)-1) * inv_delta;
+	int j = jCol(m);
+	double z = Y(j, colors(i)) * inv_delta;
 	z -= B(j);
 	B(j) += z;
 	Trips.emplace_back(i, j, z);
-	if (i != j) Trips.emplace_back(j, i, z);
+	//	if (i != j) Trips.emplace_back(j, i, z);
 	
       }
     } // move up a row
@@ -60,6 +60,7 @@ Rcpp::S4 subst(const NumericMatrix& Y,
   
   SparseMatrix<double> M(nvars, nvars);
   M.setFromTriplets(Trips.begin(), Trips.end());
+  M.makeCompressed();
   return(Rcpp::wrap(M)); 
 }
 

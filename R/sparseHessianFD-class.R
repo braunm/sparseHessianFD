@@ -60,20 +60,27 @@ sparseHessianFD <-
                         ptr <- Coord.to.Pointers(rows, cols, c(nvars, nvars),
                                                  triangle=indexLT,
                                                  lower=TRUE,
-                                                 order="symmetric",
+                                                 order="column",
                                                  index1=TRUE)
 
-                        idx <<- ptr$idx
-                        pntr <<- ptr$pntr
-
-                        colors <<- color_graph(pntr, idx, nvars)
-                        color_vec <- rep(0, nvars)
+                        idx <<- ptr[[1]]
+                        pntr <<- ptr[[2]]
+browser()
+                        colors <<- color_graph(pntr-1, idx-1, nvars)
+                        colors_vec <<- rep(0L, nvars)
                         for (i in 1:length(colors)) {
-                            color_vec[colors[[i]]] <- as.integer(i)
+                            colors_vec[colors[[i]]+1] <<- as.integer(i-1)
                         }
-                        .self$usingMethods("coord2vec")
+
+                        coord2vec <- function(j) {
+                            z <- rep(0,nvars)
+                            z[j+1] <- eps
+                            return(z)
+                        }
+
                         D <<- sapply(colors, coord2vec)
                         ready <<- TRUE
+
                     },
 
                     partition = function() {
@@ -131,10 +138,11 @@ sparseHessianFD <-
 
                     hessian = function(x) {
                         "Return sparse Hessian, evaluated at x, as a dgCMatrix object."
+                        usingMethods(fd)
                         if (ready) {
                             grad.x <- gr1(x)
                             Y <- apply(D, 2, fd, x = x, grad.x = grad.x)
-                            res <- subst(Y, color_vec, colors, idx, pntr, eps, nvars, nnz)
+                            res <- subst(Y, colors_vec, colors, idx-1, pntr-1, eps, nvars, nnz)
                             return(res)
                         } else {
                             stop("sparseHessianFD object not initialized")
@@ -165,7 +173,6 @@ sparseHessianFD <-
                              hessian=hessian(x))
                     },
 
-
                     pointers = function(index1=TRUE) {
                         "Return list with indices (idx) and pointers (pntr) for sparsity pattern of the compressed sparse Hessian.  Since the Hessian is symmetric, the indices and pointers for row-oriented and column-oriented storage patterns are the same."
                         if (ready){
@@ -177,14 +184,7 @@ sparseHessianFD <-
                             res <- NULL
                         }
                         return(res)
-                    },
-
-                    coord2vec = function(j) {
-                        z <- rep(0,nvars)
-                        z[ind] <- eps
-                        return(z)
                     })
                 )
 
 
-sparseHessianFD$usingMethods(coord2vec)
