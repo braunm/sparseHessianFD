@@ -69,7 +69,7 @@
                         firstinits=false
 			]{biblatex}
 
- \addbibresource{./sparseHessianFD.bib}
+ \addbibresource{~/OneDriveBusiness/References/Papers/braun_refs.bib}
 
  \setlength{\bibitemsep}{1em}
 \AtEveryCitekey{\ifciteseen{}{\defcounter{maxnames}{2}}}
@@ -123,59 +123,66 @@
 \maketitle
 
 <<setup1, echo=FALSE, cache=FALSE>>=
+library(devtools)
 library(methods, quietly = TRUE)
-library(sparseHessianFD, quietly = TRUE)
+library(numDeriv, quietly = TRUE)
 knitr::opts_chunk[["set"]](collapse = FALSE, eval=TRUE, echo=TRUE, comment = "#",
-                           message=FALSE, tidy=FALSE, cache = TRUE) #
+                           message=FALSE, tidy=FALSE, cache = FALSE) #
 @
 
-The Hessian matrix of a log likelihood or log posterior density plays
+The Hessian matrix of a log likelihood function or log posterior
+density function plays
 an important role in statistics.  From a frequentist point of view,
 the inverse of the negative Hessian is the asymptotic covariance of the sampling distribution of a maximum
 likelihood estimator.  In Bayesian analysis, when evaluated at the
 posterior mode, it is the covariance of a Gaussian approximation to
-the posterior distribution.  Also, many numerical optimization
+the posterior distribution.  More broadly, many numerical optimization
 algorithms require repeated computation, estimation or approximation
 of the Hessian or its inverse; see \citet{NocedalWright2006}.
 
 The Hessian of an objective function with $p$ variables has $p^2$
 elements, of which $p(p+1)/2$ are unique.  Thus, the storage
 requirements of the Hessian, and computational cost of many linear
-algebra operations on it, grow quadratically with the size of the
-problem.  Even if the Hessian were needed just once, computing it for
-functions with hundreds of thousands of variables might not be
-practical, given available time and processing power.
+algebra operations on it, grow quadratically with the number of
+decision variables.   For
+functions with hundreds of thousands of variables, computing the
+Hessian just once might not be practical for applications constrained
+by time, storage or processor limitations.
 
 However, for a large general class of problems, the Hessian is
 \emph{sparse}, meaning that the proportion of non-zero elements in the
-Hessian is small.  The most prominent example of this class is the log
+Hessian is small.  Consider a log
 posterior density of unknown parameters in a Bayesian hierarchical
-model, under the mild condition of conditional independence.  If two
-heterogeneous units are conditionally independent, the observed
-outcome from one unit provides no information about the outcome from
-the other, except for whatever inference we can make about the
-distribution of unit-specific parameters.  In that case, the cross-partial derivatives across
-unit-level parameters are zero.  As the number of heterogeneous units
-increases, the size of the Hessian grows quadratically, but the number
-of \emph{non-zero} elements grows only linearly.  For large datasets,
-the Hessian becomes increasingly sparse.  Furthermore, if we know
-which variables are conditionally independent, we know the
-\emph{sparsity pattern} (which elements are zero and which
-are not).  The sparsity pattern typically does not change when
-evaluating the Hessian at different variable values.
+model.  If the outcomes across heterogeneous units are conditionally
+independent, the cross-partial derivatives with respect to those
+parameters are zero.  As the number of units
+increases, the size of the Hessian still grows quadratically, but the number
+of \emph{non-zero} elements grows only linearly, and the Hessian
+becomes increasingly sparse.  Under this hierarchical structure, we
+know that parameters within a unit may be correlated, but parameters
+across units are not.  Thus, we can determine exactly which elements
+of the Hessian are non-zero.  The row and column indices of the
+non-zero elements comprise the \emph{sparsity pattern} of the Hessian.
 
-The \pkg{sparseHessianFD} package is a tool for estimation
-of a Hessian when the sparsity pattern is known in advance.  The
+The \pkg{sparseHessianFD} package is a tool for estimating
+sparse Hessians. The
 method is efficient for models and datasets with a large number of
 conditionally independent heterogeneous units, a small
 number of parameters specific to each unit, and a relatively small
 number of population-level parameters.  Such hierarchical models with
-``high $N$, low $k$'' appear frequently in fields like marketing
+``high $N$, low $k$'' appear frequently in business-related fields like marketing
 research, in which databases record transactions for a massive
 number of households, but each household's activity is governed by a
 small number of randomly distributed latent parameters.
 
-\pkg{sparseHessianFD} uses finite differencing (FD) to generate a numerical
+\pkg{sparseHessianFD} estimates the Hessian numerically, through computing finite
+differences of gradients. It exploits the sparsity of the Hessian by
+partitioning decision variables into what we will colloquially call
+``colors.''  Two variables can have the same color only if perturbing
+their first derivatives simultaneously does
+
+
+uses finite differencing (FD) to generate a numerical
 estimate of the Hessian.  FD is a well-known method for estimating
 derivatives of functions, and we explain it in Section \ref{sec:FD}.
 Using FD, approximating the first derivative of $f(x)$ with respect to
@@ -251,6 +258,129 @@ workflow of the user.
   available, one would need to derive the gradient symbolically.
 
 
+  \section{Background}
+
+  \subsection{Numerical differentiation}
+
+
+  The use of finite differences for approximating derivatives
+  numerically starts with a Taylor series approximation to a
+  scalar-valued function.  Because the highest-order derivative we
+  will consider in this paper is the second, we will truncate our
+  Taylor series there.
+
+  \begin{align}
+    \label{eq:1}
+    f(x+h)&=f(x) + f'(x)h + \frac{1}{2}f''(x)h^2 + o(h^3)\\
+  \end{align}
+  After rearranging terms, we can see that we can approximate $f(x)$
+  by choosing and arbitrarily small $h>0$.
+  \begin{align}
+    \label{eq:2}
+    f'(x)&\approx\frac{f(x+h)-f(x)}{h}
+  \end{align}
+
+By differentiating the Taylor series, we see that we can approximate a
+second derivative by estimate a finite difference of the first
+derivative.
+
+\begin{align}
+  \label{eq:3}
+  f'(x+h)&=f'(x) + f''(x)h + o(h^2)\\
+ f''(x)&\approx\frac{f'(x+h)-f'(x)}{j}
+\end{align}
+
+If $x$ is a vector of length $K$, we can compute each element of the gradient of
+$f(x)$ separately.  Suppose we can
+compute partial derivatives $f'_k(x)$ exactly for all
+$k=1\mathellipsis K$, and let $e_k$ be the $k^{th}$ coordinate vector. We can then approximate each column of the
+Hessian via finite differencing of the gradients.
+\begin{align}
+  \label{eq:4}
+  H_k&\approx\frac{f'(x + he_k)-f'(x)}{h}
+\end{align}
+Using forward differencing, estimating the entire Hessian requires $K+1$ evaluations of
+the gradient.  This is why estimating a Hessian can be expensive for
+large-scale problems.
+
+However, if we know that some of the cross-partial derivatives are
+zero, we can estimate the Hessian with fewer gradient evaluations.
+Suppose $K=2$.  The Hessian matrix is
+
+\begin{align}
+  \label{eq:5}
+  H=
+  \begin{pmatrix}
+    f'_1(x_1+h,x_2) -f'_1(x_1,x_2)& f'_1(x_1, x_2+h) -f'_1(x_1,x_2)\\
+    f'_2(x_1+h, x_2) -f'_2(x_1,x_2) & f'_2(x_1, x_2+h) -f'_2(x_1,x_2)
+    \end{pmatrix}            /h
+\end{align}
+Of course, the off-diagonal elements are equal.  If the cross-partial derivatives are zero, then
+\begin{align}
+  \label{eq:6}
+   f'_1(x_1, x_2+h) -f'_1(x_1,x_2)&=0\\
+  f'_2(x_1+h, x_2) -f'_2(x_1,x_2)&=0\\
+\text{and}\\
+     f'_1(x_1+h, x_2+h) -f'_1(x_1+h,x_2)&=0\\
+  f'_2(x_1+h, x_2+h) -f'_2(x_1,x_2+h)&=0\\
+\end{align}
+
+By substitution,
+\begin{align}
+  \label{eq:6}
+  H=
+  \begin{pmatrix}
+    f'_1(x_1+h,x_2+h) -f'_1(x_1,x_2)& 0\\
+   0& f'_2(x_1+h, x_2+h) -f'_2(x_1,x_2)
+    \end{pmatrix}            /h
+\end{align}
+A single evaluation of the gradient $f'(x_1+h, x_2+h)$, and a single
+evaluation of the gradient at $f'(x_1, x_2)$, provide enough
+information to extract the non-zero elements of the Hessian.  Reducing
+the number of gradient evaluations from 3 to 2 depends on knowing that
+the cross-partial derivatives are zero.
+
+
+Now let's consider a more general case.  Suppose the Hessian has the
+following sparsity pattern.
+
+\begin{align}
+  \label{eq:7}
+  \begin{pmatrix}
+    X&X&X&X&X\\
+    X&X&X&0&0\\
+    X&X&X&0&0\\
+    X&0&0&X&X\\
+    X&0&0&X&X
+  \end{pmatrix}
+\end{align}
+
+First, note that because the Hessian is symmetric, we need to compute
+only the elements in the lower triangle.  By perturbing the first
+variable, we immediately get values for the first column of the
+triangle. We could continue by perturbing each subsequent variable
+separately, but what would happen if we perturbed variables 2 and 4 together?
+
+
+The fundamental idea behind \pkg{sparseHessianFD} is that when some
+elements of the Hessian are known to be zero, we do not need to
+evaluate $K$ gradients by perturbing each variable one at a time.
+If we can perturb several variables at once, we \emph{might} be able
+to extract the full Hessian. But there are two difficult tasks at hand.
+\begin{enumerate}
+\item Which variables can we perturb together in a single gradient
+  evaluation, and which need to be perturbed separately?
+\item Once we get the gradient evaluations, how do we recover the Hessian?
+\end{enumerate}
+
+
+
+
+
+
+
+
+
 \section{Example function}
 
 Before going into the details of how to use the package, let's
@@ -277,9 +407,8 @@ The log posterior density, ignoring any normalization constants, is
 -\frac{1}{2}\mu'\Omega_0^{-1}\mu
 \end{align}
 
-<<setup1 echo=FALSE>>=
-require(Matrix)
-require(sparseHessianFD)
+<<setup2, echo=FALSE>>=
+load_all()
 N <- 6
 k <- 2
 nv1 <- (N+1)*k
@@ -306,7 +435,7 @@ coefficients for each unit together.
 \end{align}
 
 In this case, the Hessian has a "block-arrow" structure.  For example,
-if $N=`r N`$ and $k=`r k`$, then there are `r nv1` total variables, and the Hessian will have the following pattern.
+if $N=\Sexpr{N}$ and $k=\Sexpr{k}$, then there are `\Sexpr{nv1}` total variables, and the Hessian will have the following pattern.
 
 <<>>=
 M <- as(kronecker(diag(N),matrix(1,k,k)),"lMatrix")
@@ -316,15 +445,14 @@ print(M)
 @
 
 
-There are `r nels1` elements in this symmetric matrix, but only  `r nnz1` are
-non-zero, and only `r nnz1LT` values are unique.  Although the reduction in
+There are \Sexpr{nels1} elements in this symmetric matrix, but only \Sexpr{nnz1} are
+non-zero, and only \Sexpr{nnz1LT} values are unique.  Although the reduction in
 RAM from using a sparse matrix structure for the Hessian may be
-modest, consider what would happen if $N=`r Q`$ instead.  In that case,
-there are `r nv2` variables in the problem, and more than $`r
-floor(nels2/10^6)`$ million
-elements in the Hessian.  However, only $`r nnz2`$ of those elements are
+modest, consider what would happen if $N=\Sexpr{Q}$ instead.  In that case,
+there are \Sexpr{nv2} variables in the problem, and more than $\Sexpr{floor(nels2/10^6)}$ million
+elements in the Hessian.  However, only $\Sexpr{nnz2}$ of those elements are
 non-zero.  If we work with only the lower triangle of the Hessian we only need to work with
-only `r nnz2LT` values.
+only \Sexpr{nnz2LT} values.
 
 
 Another possibility is to group coefficients for each covariate
@@ -352,7 +480,7 @@ with the "off-diagonal" case.
 \section{Using the package}
 
 The functions for computing the objective function, gradient and
-Hessian for this example are in the R/binary.R file.  The package
+Hessian for this example are in the \filename{R/binary.R} file.  The package
 also includes a sample dataset with simulated data from the binary choice example.
 
 To start, we load the data, set some dimension parameters, set prior
@@ -375,12 +503,12 @@ priors <- list(inv.Sigma = rWishart(1,k+5,diag(k))[,,1],
 options(scipen=-999)
 @
 
-This dataset represents the simulated choices for $N= `r N`$ customers
-over $T= `r T`$ purchase opportunties, where the probability of purchase
-is influenced by $k= `r k`$ covariates.
+This dataset represents the simulated choices for $N= \Sexpr{N}$ customers
+over $T= \Sexpr{T}$ purchase opportunties, where the probability of purchase
+is influenced by $k= \Sexpr{k}$ covariates.
 
-The objective function for the binary choice example is `binary.f` and the gradient function is
-`binary.grad`.  The first argument to both is the variable vector, and
+The objective function for the binary choice example is \func{binary.f} and the gradient function is
+\func{binary.grad}.  The first argument to both is the variable vector, and
 the argument lists must be the same for both.  For this example, we
 need to provide the data list ($X$, $Y$ and $T$) and the prior
 parameter list
@@ -400,7 +528,7 @@ true.grad <- binary.grad(P, binary, priors, order.row=FALSE)
 true.hess <- binary.hess(P, binary, priors, order.row=FALSE)
 @
 
-The sparsity pattern of the Hessian is specified by two **integer**
+The sparsity pattern of the Hessian is specified by two integer
 vectors:  one each for the row and column indices of the non-zero
 elements of the ***lower triangular part*** of the Hessian.  If you
 happen have have an example of a matrix with the same sparsity pattern
@@ -415,7 +543,7 @@ str(pattern)
 Next, we create a new instance of a sparseHessianFD object with an
 "initial variable" $P$, and the row and column indices of the non-zero
 elements in the lower triangle of the Hessian.  We also pass in any
-other arguments for `binary.f` and `binary.grad`.  We accept the default
+other arguments for \func{binary.f} and \func{binary.grad}.  We accept the default
 values for other arguments to `sparseHessianFD.new`.
 
 <<>>=
@@ -431,14 +559,14 @@ Now we can evaluate the function value, gradient and Hessian through
 <<>>=
 f <- obj$fn(P)
 gr <- obj$gr(P)
-hs <- obj$hessian(P) #$
+hs <- obj$hessian(P)
 @
 
 Note that the member functions in the sparseHessianFD class take only
 one argument:  the variable vector.  All of the other arguments are
 stored in `obj`.
 
-Do we get the same results that we would get after calling `binary.f`,
+Do we get the same results that we would get after calling \func{binary.f},
 `binary.grad` and `binary.hess` directly?  Let's see.
 
 
@@ -464,7 +592,6 @@ options(scipen=0)
 @
 
 <<>>=
-library(numDeriv)
 hess.time <- system.time(H1 <- obj$hessian(P))
 fd.time <- system.time(H2 <- hessian(obj$fn, P))
 H2 <- drop0(H2, 1e-7) ## treat values < 1e-8 as zero
@@ -491,5 +618,7 @@ the lower triangle of the Hessian.
     elements are all finite.
   \item Create a new sparseHessianFD object using the sparseHessianFD.new
 function.  For this example, call that object F.
-\item Compute Hessian at x by calling F$hessian(x). %$
+\item Compute Hessian at x by calling F\$hessian(x).
+  \end{enumerate}
+
 \end{document}

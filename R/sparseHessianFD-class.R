@@ -44,7 +44,7 @@ sparseHessianFD <-
                         if (!is.null(direct)) {
                             warning(" 'direct' argument is ignored. Only indirect method is, and will be, supported.")
                         }
-                        validate(fn, gr, rows, cols, x, eps, index1)
+                        validate(fn, gr, rows, cols, x, eps, index1, ...)
                         ww <- which(cols <= rows)
 
                         initFields(fn1 = function(y) fn(y, ...),
@@ -122,14 +122,14 @@ sparseHessianFD <-
                         stopifnot(is.numeric(x),
                                   is.function(fn),
                                   is.function(gr),
-                                  is.finite(fn(x, ...)),
                                   !is.null(rows),
                                   !is.null(cols),
                                   length(rows)==length(cols),
                                   all(is.finite(rows)),
                                   all(is.finite(cols)))
 
-                        gradient <- gr(x, ...)
+                        gradient <- gr(x,...)
+                        val <- fn(x,...)
 
                         I1 <- as.integer(index1)
                         check.index1.row <- min(rows) >= I1 &
@@ -140,7 +140,8 @@ sparseHessianFD <-
                         stopifnot(all(is.finite(gradient)),
                                   length(gradient)==nvars,
                                   check.index1.row,
-                                  check.index1.col
+                                  check.index1.col,
+                                  is.finite(val)
                                   )
                     },
 
