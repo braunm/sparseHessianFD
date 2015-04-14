@@ -194,12 +194,12 @@ variables $K$, and that as $h$ approaches zero, the result is
 increasingly unstable.
 
 The problem is even worse when computing a
-dense Hessian.  The $k^{th}$ column of the Hessian, $H_k$, can be approximated
-by a difference in the gradients.  Let $e_k$ be the $k^{th}$
+dense Hessian.  The $k$th column of the Hessian, $H_k$, can be approximated
+by a difference in the gradients.  Let $e_k$ be the $k$th
 coordinate vector, so
 
 \begin{align}
-  H_k &\approx\frac{f'(x+he_k)-f'(x)}{h}
+  H_k &\approx\frac{f'(x+\delta e_k)-f'(x)}{\delta}
 \end{align}
 
 If $f'(x)$ is estimated using FD, then the complexity of estimating
@@ -271,13 +271,13 @@ workflow of the user.
 
   \begin{align}
     \label{eq:1}
-    f(x+h)&=f(x) + f'(x)h + \frac{1}{2}f''(x)h^2 + o(h^3)\\
+    f(x+h)&=f(x) + f'(x)\delta + \frac{1}{2}f''(x)\delta^2 + o(\delta^3)\\
   \end{align}
   After rearranging terms, we can see that we can approximate $f(x)$
   by choosing and arbitrarily small $h>0$.
   \begin{align}
     \label{eq:2}
-    f'(x)&\approx\frac{f(x+h)-f(x)}{h}
+    f'(x)&\approx\frac{f(x+\delta)-f(x)}{\delta}
   \end{align}
 
 By differentiating the Taylor series, we see that we can approximate a
@@ -286,43 +286,43 @@ derivative.
 
 \begin{align}
   \label{eq:3}
-  f'(x+h)&=f'(x) + f''(x)h + o(h^2)\\
- f''(x)&\approx\frac{f'(x+h)-f'(x)}{j}
+  f'(x+\delta)&=f'(x) + f''(x)\delta + o(\delta^2)\\
+ f''(x)&\approx\frac{f'(x+\delta)-f'(x)}{\delta}
 \end{align}
 
 If $x$ is a vector of length $K$, we can compute each element of the gradient of
 $f(x)$ separately.  Suppose we can
 compute partial derivatives $f'_k(x)$ exactly for all
-$k=1\mathellipsis K$, and let $e_k$ be the $k^{th}$ coordinate vector. We can then approximate each column of the
+$k=1\mathellipsis K$, and let $e_k$ be the $k$th coordinate vector. We can then approximate each column of the
 Hessian via finite differencing of the gradients.
 \begin{align}
   \label{eq:4}
-  H_k&\approx\frac{f'(x + he_k)-f'(x)}{h}
+  H_k&\approx\frac{f'(x + \delta e_k)-f'(x)}{\delta}
 \end{align}
 Using forward differencing, estimating the entire Hessian requires $K+1$ evaluations of
 the gradient.  This is why estimating a Hessian can be expensive for
 large-scale problems.
 
-However, if we know that some of the cross-partial derivatives are
-zero, we can estimate the Hessian with fewer gradient evaluations.
+If we know that some of the cross-partial derivatives are
+zero, we \emph{might} be able to estimate the Hessian with fewer gradient evaluations.
 Suppose $K=2$.  The Hessian matrix is
 
 \begin{align}
   \label{eq:5}
   H=
   \begin{pmatrix}
-    f'_1(x_1+h,x_2) -f'_1(x_1,x_2)& f'_1(x_1, x_2+h) -f'_1(x_1,x_2)\\
-    f'_2(x_1+h, x_2) -f'_2(x_1,x_2) & f'_2(x_1, x_2+h) -f'_2(x_1,x_2)
-    \end{pmatrix}            /h
+    f'_1(x_1+\delta,x_2) -f'_1(x_1,x_2)& f'_1(x_1, x_2+\delta) -f'_1(x_1,x_2)\\
+    f'_2(x_1+\delta, x_2) -f'_2(x_1,x_2) & f'_2(x_1, x_2+\delta) -f'_2(x_1,x_2)
+    \end{pmatrix}            /\delta
 \end{align}
 Of course, the off-diagonal elements are equal.  If the cross-partial derivatives are zero, then
 \begin{align}
   \label{eq:6}
-   f'_1(x_1, x_2+h) -f'_1(x_1,x_2)&=0\\
-  f'_2(x_1+h, x_2) -f'_2(x_1,x_2)&=0\\
-\text{and}\\
-     f'_1(x_1+h, x_2+h) -f'_1(x_1+h,x_2)&=0\\
-  f'_2(x_1+h, x_2+h) -f'_2(x_1,x_2+h)&=0\\
+   f'_1(x_1, x_2+\delta) -f'_1(x_1,x_2)&=0\\
+  f'_2(x_1+\delta, x_2) -f'_2(x_1,x_2)&=0\\
+\text{and, therefore,}\nonumber\\
+     f'_1(x_1+\delta, x_2+\delta) -f'_1(x_1+\delta,x_2)&=0\\
+  f'_2(x_1+\delta, x_2+\delta) -f'_2(x_1,x_2+\delta)&=0\\
 \end{align}
 
 By substitution,
@@ -330,54 +330,161 @@ By substitution,
   \label{eq:6}
   H=
   \begin{pmatrix}
-    f'_1(x_1+h,x_2+h) -f'_1(x_1,x_2)& 0\\
-   0& f'_2(x_1+h, x_2+h) -f'_2(x_1,x_2)
-    \end{pmatrix}            /h
+    f'_1(x_1+\delta,x_2+h) -f'_1(x_1,x_2)& 0\\
+   0& f'_2(x_1+\delta, x_2+\delta) -f'_2(x_1,x_2)
+    \end{pmatrix}            /\delta
 \end{align}
-A single evaluation of the gradient $f'(x_1+h, x_2+h)$, and a single
+A single evaluation of the gradient $f'(x_1+\delta, x_2+\delta)$, and a single
 evaluation of the gradient at $f'(x_1, x_2)$, provide enough
 information to extract the non-zero elements of the Hessian.  Reducing
 the number of gradient evaluations from 3 to 2 depends on knowing that
 the cross-partial derivatives are zero.
 
+Now let's consider a general case, starting with a ``direct'' method
+first proposed in \citet{CurtisPowell1974} for Jacobian matrices, and described in \citet{PowellToint1979}. To begin, partition the variables
+into $G$ mutually exclusive groups, or ``colors,'' so $g_k$ indexes
+the color of variable $k$. Let $D$ and $Y$ be $K\times G$
+matrices, where $D_{kg}=\delta$ if variable $k$ belongs to group $g$, and zero
+otherwise, and let $D_g$ be the $g$th column of $D$.  Each column in $Y$ is defined as
+\begin{align}
+  \label{eq:Yg}
+  Y_g&=f'(x+D_g)-f'(x)
+\end{align}
 
-Now let's consider a more general case.  Suppose the Hessian has the
-following sparsity pattern.
+If $G=K$ and $g_k=k$, then $D$ is a diagonal matrix with $\delta$ in each
+diagonal element.  The matrix equation $HD=Y$ represents the Taylor
+series approximation
+$H_{ik}\delta\approx y_k$, and we can solve for all elements of $H$
+just by computing $Y$. But if $G<K$,
+there must be at least one column of $D$ with $\delta$ in at least two
+elements. Column $Y_g$ is computed by perturbing two variables at
+once, and a particular $Y_{ig}$ would be equal to $\delta$ times a
+\emph{sum} of multiple elements in row $H_i$.  Without further restrictions on values in
+$H$, $HD=Y$ is an underdetermined system of linear equations, and we
+would not be able to compute $H$ by computing a $Y$ with
+fewer than $K$ columns.
+
+The necessary restrictions on $H$ come from the sparsity pattern.  We
+know which $h_{ik}=0$, so we can add those equations to $HD=Y$.  For
+example, consider a function with the following Hessian.
 
 \begin{align}
   \label{eq:7}
-  \begin{pmatrix}
-    X&X&X&X&X\\
-    X&X&X&0&0\\
-    X&X&X&0&0\\
-    X&0&0&X&X\\
-    X&0&0&X&X
+ H= \begin{pmatrix}
+    h_{11}&0&h_{31}&0&0\\
+    0&h_{22}&0&h_{42}&0\\
+    h_{31}&0&h_{33}&0&h_{53}\\
+    0&h_{42}&0&h_{44}&0\\
+    0&0&h_{53}&0&h_{55}
   \end{pmatrix}
 \end{align}
+Note the subscripts on the elements take the symmetry of $H$ into account.
 
-First, note that because the Hessian is symmetric, we need to compute
-only the elements in the lower triangle.  By perturbing the first
-variable, we immediately get values for the first column of the
-triangle. We could continue by perturbing each subsequent variable
-separately, but what would happen if we perturbed variables 2 and 4 together?
+Suppose $G=2$, and define the colors through the following $D$ matrix.
 
+\begin{align}
+  \label{eq:7}
+ D= \delta\begin{pmatrix}
+   1&0\\
+   1&0\\
+   0&1\\
+   0&1\\
+   1&0
+  \end{pmatrix}
+\end{align}
+Variables 1 and 2 have color 1, and variables 3, 4 and 5 have color
+2.  For the moment, we will postpone the discussion of how to
+choose $G$ and how to color the variables.
 
-The fundamental idea behind \pkg{sparseHessianFD} is that when some
-elements of the Hessian are known to be zero, we do not need to
-evaluate $K$ gradients by perturbing each variable one at a time.
-If we can perturb several variables at once, we \emph{might} be able
-to extract the full Hessian. But there are two difficult tasks at hand.
-\begin{enumerate}
-\item Which variables can we perturb together in a single gradient
-  evaluation, and which need to be perturbed separately?
-\item Once we get the gradient evaluations, how do we recover the Hessian?
-\end{enumerate}
+Next, compute the columns of $Y$ using Equation \ref{eq:Yg}.  We now
+have the following system of linear equations from $HD=Y$.
+\begin{align}
+  \label{eq:11}
+  \begin{aligned}[c]
+  h_{11}&=y_{11}\\
+  h_{22}&=y_{21}\\
+  h_{31}+h_{53}&=y_{31}\\
+  h_{42}&=y_{41}\\
+  h_{55}&=y_{51}\\
+  \end{aligned}
+  \qquad
+  \begin{aligned}[c]
+  h_{31}&=y_{12}\\
+  h_{42}&=y_{22}\\
+  h_{33}&=y_{32}\\
+  h_{44}&=y_{42}\\
+  h_{53}&=y_{52}
+  \end{aligned}
+\end{align}
 
+Note that this system is overdetermined; \citet{CurtisPowell1974} did
+not assume that their Jacobian is symmetric.  Both $h_{31}=y_{12}$ and $h_{53}=y_{52}$
+can be determined directly, but $h_{31}+h_{53}=y_{31}$, and $h_{42}$
+could be either $y_{41}$ or $y_{22}$.  \Citet{PowellToint1979} prove
+that it is sufficient to solve $LD=Y$ via a substitution method, where $L$ is the lower
+triangular part of $H$.  This has the effect of removing the equations
+$h_{42}=y_{22}$ and $h_{31}=y_{12}$ from the system, but retaining
+$h_{53}=y_{52}$.  We can then solve for
+$h_{31}=y_{31}-h_{53}=y_{31}-y_{52}$. Thus, we have determined a
+$5\times 5$ Hessian matrix with only three gradient evaluations, in
+contrast with the six that would have been needed had $H$ been treated
+as dense.
 
+Solving $HD=Y$, using the full Hessian is known as a ``direct''
+method, because the elements of the Hessian can be determined directly
+from $Y$, as long as an appropriate coloring of the variables is
+used.  Solving $LD=Y$ is known as either an ``indirect,'' or
+``triangular substitution'' method, for obvious reasons.  The
+substitution method is often preferred over direct methods for
+symmetric matrices because we can partition the
+variables with a lower $G$, and estimate the Hessian with fewer
+evaluations of the gradient.
+Direct methods will not necessarily be able to exploit the fact that
+the Hessian is symmetric. This is particularly true for banded
+Hessians, which was described by \citet{ColemanMore1984}, and reveal
+in the preceding example.  Therefore, we will restrict our attention
+in the subsequent sections to triangular substitution methods.
+to
 
+\subsection{Coloring the variables}
 
+Both \citet{CurtisPowell1974} (for direct methods) and
+\citet{PowellToint1979} (for substitution methods) propose the
+following rule for partitioning the variables:  two variables cannot
+have the same color if their respective columns of the Hessian
+(direct) or lower triangle of the Hessian (substitution) have a
+non-zero element in the same row.  In the example above, variables 1
+and 3 cannot be in the same group because columns 1 and 3 both have
+non-zero elements in row 3.  But this is not a positive rule.  It
+tells us how to exclude certain partitons, but not how to find one
+that is optimal, with the fewest possible number of colors.
 
+\Citet{ColemanMore1984} were the first to recognize that this partitioning problem
+is analogous to the famous graph coloring problems in
+graph theory (finally, we learn why we use the term ``color'' to
+describe a partition). We can think of the sparsity pattern of $L$
+as an adjacency matrix in an undirected graph.  If $h_{i,j}\neq 0$ ,
+then variables $i$ and $j$ are ``neighbors'' in the graph, and they
+cannot have the same color.  Now, let's introduce a new variable $k$,
+where $j$ and $k$ are neighbors, but $i$ and $k$ are not.  The colors
+of $i$ and $k$ still have to be different, because they have a common
+neighbor in $j$.
 
+For a partition to be compatible with estimating a Hessian via
+substitution, it is sufficient, but not necessary, that no variable
+have the same color as any other variable with which it shares a
+common neighbor.  That is, no variable within two ``steps'' on the
+undirected graph may have the same color.  But in the example above,
+variables 1 and 5 have the same color, even though 1 is connected to
+3, and 3 is connected to 5.  \Citet{ColemanCai1986} prove that the
+rule that no same-colored columns may have non-zero elements in the
+same row is equivalent to an ``acyclic'' graph coloring scheme, and
+that coloring the variables in this way is also sufficient for
+estimating a sparse Hessian.  Thus, as \citet{GebremedhinTarafdar2009}
+point out, minimizing the number of partitions is equivalent to
+minimizing the number of colors in an acyclic graph.
+
+Define acyclic.
 
 
 
