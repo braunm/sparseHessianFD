@@ -36,15 +36,15 @@ sparseHessianFD <-
                     colors = "list",
                     colors_vec = "integer"),
                 methods = list(
-                    initialize = function(x, fn, gr, rows, cols, direct=NULL,
+                    initialize = function(x.init, fn, gr, rows, cols, direct=NULL,
                                           eps=sqrt(.Machine$double.eps),
                                           index1 = TRUE, ...) {
-                        "Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter eps, flags for 0 or 1-based indexing (index1), whether sparsity pattern is just for the lower triangle (indexLT), and other arguments (...) to be passed to fn and gr."
+                        "Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x.init at which fn and gr can be evaluated, a finite differencing parameter eps, flags for 0 or 1-based indexing (index1), whether sparsity pattern is just for the lower triangle (indexLT), and other arguments (...) to be passed to fn and gr."
 
                         if (!is.null(direct)) {
                             warning(" 'direct' argument is ignored. Only indirect method is, and will be, supported.")
                         }
-                        validate(fn, gr, rows, cols, x, eps, index1, ...)
+                        validate(fn, gr, rows, cols, x.init, eps, index1, ...)
                         ww <- which(cols <= rows)
 
                         initFields(fn1 = function(y) fn(y, ...),
@@ -53,7 +53,7 @@ sparseHessianFD <-
                                    jCol = as.integer(cols[ww]),
                                    eps = eps,
                                    index1 = index1,
-                                   nvars = length(x),
+                                   nvars = length(x.init),
                                    nnz = length(iRow),
                                    ready = FALSE)
                         if (any(cols > rows)) {

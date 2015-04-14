@@ -4,8 +4,8 @@
 \alias{Matrix.to.Pointers}
 \title{Column (row) indices and row (column) pointers from sparse matrix.}
 \usage{
-Matrix.to.Pointers(M, order = c("column", "row", "symmetric"),
-  index1 = TRUE, out.index1 = index1)
+Matrix.to.Pointers(M, order = "symmetric", index1 = TRUE,
+  out.index1 = index1)
 }
 \arguments{
   \item{M}{A sparse Matrix, as defined in the Matrix

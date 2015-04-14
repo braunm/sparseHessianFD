@@ -48,8 +48,8 @@ A reference class for computing sparse Hessians
 
 \item{\code{hessian(x)}}{Return sparse Hessian, evaluated at x, as a dgCMatrix object.}
 
-\item{\code{initialize(x, fn, gr, rows, cols, direct = NULL,
-  eps = sqrt(.Machine$double.eps), index1 = TRUE, ...)}}{Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter eps, flags for 0 or 1-based indexing (index1), whether sparsity pattern is just for the lower triangle (indexLT), and other arguments (...) to be passed to fn and gr.}
+\item{\code{initialize(x.init, fn, gr, rows, cols, direct = NULL,
+  eps = sqrt(.Machine$double.eps), index1 = TRUE, ...)}}{Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x.init at which fn and gr can be evaluated, a finite differencing parameter eps, flags for 0 or 1-based indexing (index1), whether sparsity pattern is just for the lower triangle (indexLT), and other arguments (...) to be passed to fn and gr.}
 
 \item{\code{partition()}}{Return the partitioning used to compute finite differences}
 

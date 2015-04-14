@@ -127,7 +127,7 @@ library(devtools)
 library(methods, quietly = TRUE)
 library(numDeriv, quietly = TRUE)
 knitr::opts_chunk[["set"]](collapse = FALSE, eval=TRUE, echo=TRUE, comment = "#",
-                           message=FALSE, tidy=FALSE, cache = FALSE) #
+                           message=FALSE, tidy=FALSE, cache = TRUE) #
 @
 
 The Hessian matrix of a log likelihood function or log posterior
@@ -341,7 +341,7 @@ the number of gradient evaluations from 3 to 2 depends on knowing that
 the cross-partial derivatives are zero.
 
 Now let's consider a general case, starting with a ``direct'' method
-first proposed in \citet{CurtisPowell1974} for Jacobian matrices, and described in \citet{PowellToint1979}. To begin, partition the variables
+first proposed in \citet{CurtisPowellReid1974} for Jacobian matrices, and described in \citet{PowellToint1979}. To begin, partition the variables
 into $G$ mutually exclusive groups, or ``colors,'' so $g_k$ indexes
 the color of variable $k$. Let $D$ and $Y$ be $K\times G$
 matrices, where $D_{kg}=\delta$ if variable $k$ belongs to group $g$, and zero
@@ -417,7 +417,7 @@ have the following system of linear equations from $HD=Y$.
   \end{aligned}
 \end{align}
 
-Note that this system is overdetermined; \citet{CurtisPowell1974} did
+Note that this system is overdetermined; \citet{CurtisPowellReid1974} did
 not assume that their Jacobian is symmetric.  Both $h_{31}=y_{12}$ and $h_{53}=y_{52}$
 can be determined directly, but $h_{31}+h_{53}=y_{31}$, and $h_{42}$
 could be either $y_{41}$ or $y_{22}$.  \Citet{PowellToint1979} prove
@@ -448,7 +448,7 @@ to
 
 \subsection{Coloring the variables}
 
-Both \citet{CurtisPowell1974} (for direct methods) and
+Both \citet{CurtisPowellReid1974} (for direct methods) and
 \citet{PowellToint1979} (for substitution methods) propose the
 following rule for partitioning the variables:  two variables cannot
 have the same color if their respective columns of the Hessian
@@ -586,6 +586,132 @@ with the "off-diagonal" case.
 
 \section{Using the package}
 
+\subsection{The \class{sparseHessianFD} class}
+
+The package functionality is implemented as a reference class
+\class{sparseHessianFD}.  The initializer takes the following arguments.
+\begin{itemize}
+\item[x.init] A numeric vector of variables at which the object will be
+  initialized and tested.  It is not stored in the object, so it can
+  really be any value, as long as the objective function, gradient and
+  Hessian are all finite.
+\item[fn,gr] \proglang{R} functions that return the value of the
+  objective function, and its gradient. The first argument is the numeric
+  variable vector.  Other arguments can be passed as ... .
+\item[rows, cols] Integer vectors of the row and column indices of
+  the non-zero elements in the lower triangle of the Hessian.
+\item[direct] This argument is deprecated, and is included only for
+  backwards compatibility with earlier versions.
+\item[eps] The perturbation amount for finite differencing of the
+  gradient to compute the Hessian. Defaults to
+  sqrt(.Machine\$double.eps)
+\item [index1] If TRUE (the default), \funcarg{row} and \funcarg{col} use one-based
+  indexing.  If FALSE, zero-based indexing is used (which is the
+  internal storage format for matrix classes in the \pkg{Matrix}
+  package).
+\item [...] Additional arguments to be passed to \func{fn} and \func{gr}.
+\end{itemize}
+
+To create a \class{sparseHessianFD} object, just call
+\func{sparseHessianFD}.  If you are accepting all of the default
+arguments, and not passing additional arguments to \func{fn} and
+\func{gr}, the call will look like:
+
+<<eval=FALSE>>=
+obj <- sparseHessianFD(x.init, fn, gr, rows, cols)
+@
+
+The class defines a number of different fields, none of which should
+be accessed directly.    The initializer automatically calls the graph
+coloring subroutine, and evaluates the Hessian at $x$, so it may take
+some time to create the object.
+
+
+\subsection{Evaluating the Hessian}
+
+The \func{fn}, \func{gr} and \func{hessian} methods respectively evaluate the
+function, gradient and Hessian at a variable vector $x$.
+
+<<eval=FALSE>>=
+f <- obj$fn(x)
+df <- obj$gr(x)
+hess <- obj$hessian(x)
+@
+
+The \func{fn} and \func{gr} methods are simply closures around the
+functions that were provided to the class initializer.  Since the
+additional arguments were already supplied as \texttt{...}, they do
+not need to be supplied again.  This feature makes subsequent calling
+of \func{fn} and \func{gr} simpler, because only the variable is
+included in the call.
+
+Similarly, the \func{hessian} method takes the single argument $x$.
+The return value is always a \class{dgCMatrix} object (defined in the
+\pkg{Matrix} package).  \class{dgCMatrix} objects are sparse matrices,
+stored in a compressed, column-oriented format, and includes all
+non-zero elements in both the upper and lower triangles.  One could
+coerce the Hessian into a symmetric \class{dsCMatrix} if necessary.
+
+The \class{sparseHessianFD} class also provides methods \func{fngr}
+and \func{fngrhs} that return the function, gradient and possibly the
+Hessian, in a single list.
+
+
+\subsection{Providing the sparsity pattern}
+
+The sparsity pattern of the Hessian is defined as the row and column
+indices of the non-zero elements in the \emph{lower triangle} the Hessian.  Internally, this
+pattern is stored in a compressed format, but the
+\class{sparseHessianFD} initializer requires rows and columns, to keep
+things simple.  It is the responsibility of the user to ensure that
+the sparsity pattern is correct. Any elements in the upper triangle
+will be automatically removed, but there is no check that a
+corresponding element in the lower triangle exists.
+
+The \func{Matrix.to.Coord} function extracts
+row and column indices from a sparse matrix.  The argument $M$ is a
+matrix that could be coerced to a \pkg{Matrix} object that is derived
+from the \class{TsparseMatrix} class (a virtual class that defines
+sparse matrices stored in row-column format).  Standard base
+\proglang{R} matrices, and most \pkg{Matrix} matrices, fall into this
+category.  If the \funcarg{index1} argument is \code{TRUE} (the
+default), then \func{Matrix.to.Coord} returns 1-based indexes.
+
+The input matrix to \func{Matrix.to.Coord} does not have to include
+the values (if the full Hessian were known, that would possibly defeat the
+purpose of this package).  It is sufficient to supply a logical
+or pattern matrix, such as \class{lgCMatrix} or \class{ngCMatrix}.
+Rather than trying to keep track of the row and column indices
+directly, it might be easier to construct a pattern matrix first,
+check visually that the matrix has the right pattern, and then extract
+the indices.
+
+The following code constructs a block diagonal matrix, and extracts
+the sparsity pattern from its lower triangle.
+
+<<exPattern>>=
+M <- as(kronecker(Diagonal(3), Matrix(T,2,2)),"nMatrix")
+M
+tril(M)
+mc <- Matrix.to.Coord(tril(M))
+mc
+@
+We then use \funcarg{mc\$row} and \funcarg{mc\$col} to construct the
+\class{sparseHessianFD} object.
+
+To visually check that a proposed sparsity pattern represents the
+intended matrix, use the \func{Coord.to.Pattern.Matrix} function,
+which is just a wrapper to \pkg{Matrix}'s \func{sparseMatrix} constructor.
+
+<<>>=
+M2 <- Coord.to.Pattern.Matrix(mc$rows, mc.cols, dims=dim(M))
+M2
+@
+
+
+One could
+
+
 The functions for computing the objective function, gradient and
 Hessian for this example are in the \filename{R/binary.R} file.  The package
 also includes a sample dataset with simulated data from the binary choice example.
@@ -596,7 +722,8 @@ vector of variables at which to evaluate the function.
 
 <<>>=
 set.seed(123)
-data(binary)
+data(binary_small)
+binary <- binary_small
 str(binary)
 N <- length(binary$Y)
 k <- NROW(binary$X)

@@ -60,37 +60,42 @@
 sparseHessianFD.new <- function(x, fn, gr, rows, cols, direct=FALSE,
                             eps=sqrt(.Machine$double.eps), ...) {
 
-
-    stopifnot(is.function(fn))
-    stopifnot(is.function(gr))
-
-    fn1 <- function(x) fn(x,...)  ## create closure
-    gr1 <- if (!is.null(gr)) function(x) gr(x,...)
-
-    ## test fn and gr
-
-    stopifnot(is.finite(fn1(x)))
-    gradient <- gr1(x)
-    stopifnot(all(is.finite(gradient)))
-    stopifnot(length(gradient)==length(x))
-    stopifnot(!is.null(rows))
-    stopifnot(!is.null(cols))
-
-    obj <- new("sparseHessianFD", length(x), fn1, gr1)
-    rows <- as.integer(rows)
-    cols <- as.integer(cols)
-    stopifnot(length(rows)==length(cols))
-    stopifnot(all(is.finite(rows)) & all(is.finite(cols)))
-    if (any(cols > rows)) {
-        warning("sparseHessianFD:  Some elements are in upper triangle and will be deleted.")
-        cat("Provide lower triangle only.\n")
-        ww <- which(cols > rows)
-        rows <- rows[-ww]
-        cols <- cols[-ww]
-    }
-    obj$hessian.init(rows, cols, as.integer(direct), eps)
-
-    return(obj)
-
+    .Deprecated("sparseHessianFD")
+    sparseHessianFD(x, fn=fn, gr=gr,
+                           rows=rows, cols=cols, eps=eps,
+                           index1=TRUE, ...)
 }
+
+ ##    stopifnot(is.function(fn))
+##     stopifnot(is.function(gr))
+
+##     fn1 <- function(x) fn(x,...)  ## create closure
+##     gr1 <- if (!is.null(gr)) function(x) gr(x,...)
+
+##     ## test fn and gr
+
+##     stopifnot(is.finite(fn1(x)))
+##     gradient <- gr1(x)
+##     stopifnot(all(is.finite(gradient)))
+##     stopifnot(length(gradient)==length(x))
+##     stopifnot(!is.null(rows))
+##     stopifnot(!is.null(cols))
+
+##     obj <- new("sparseHessianFD", length(x), fn1, gr1)
+##     rows <- as.integer(rows)
+##     cols <- as.integer(cols)
+##     stopifnot(length(rows)==length(cols))
+##     stopifnot(all(is.finite(rows)) & all(is.finite(cols)))
+##     if (any(cols > rows)) {
+##         warning("sparseHessianFD:  Some elements are in upper triangle and will be deleted.")
+##         cat("Provide lower triangle only.\n")
+##         ww <- which(cols > rows)
+##         rows <- rows[-ww]
+##         cols <- cols[-ww]
+##     }
+##     obj$hessian.init(rows, cols, as.integer(direct), eps)
+
+##     return(obj)
+
+## }
 

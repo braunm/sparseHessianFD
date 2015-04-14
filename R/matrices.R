@@ -6,7 +6,7 @@
 #' @title Row and column indices from sparse matrix.
 #' @description Returns list of row and column indices of the non-zero
 #' elements of a sparse matrix.
-#' @param M A sparse Matrix, as defined in the Matrix package.
+#' @param M A matrix that can be coerced into a \code{TsparseMatrix} object, as defined in the Matrix package.  Base R matrices, and most Matrix matrices, are valid.
 #' @param index1 TRUE if the index of the first element should be 1, and FALSE if 0.
 #' @return A list with two named elements.
 #' \describe{
@@ -75,7 +75,7 @@ Coord.to.Pattern.Matrix <- function(rows, cols, dims, compressed=TRUE,
 #' \item{pntr}{ Integer vector containing pointers to elements of idx at which the next row or column begins.}
 #' }
 #' @export
-Matrix.to.Pointers <- function(M, order=c("column", "row", "symmetric"),
+Matrix.to.Pointers <- function(M, order="symmetric",
                                index1=TRUE, out.index1=index1) {
 
 

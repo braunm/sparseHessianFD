@@ -7,8 +7,10 @@
 Matrix.to.Coord(M, index1 = TRUE)
 }
 \arguments{
-  \item{M}{A sparse Matrix, as defined in the Matrix
-  package.}
+  \item{M}{A matrix that can be coerced into a
+  \code{TsparseMatrix} object, as defined in the Matrix
+  package.  Base R matrices, and most Matrix matrices, are
+  valid.}
 
   \item{index1}{TRUE if the index of the first element
   should be 1, and FALSE if 0.}
