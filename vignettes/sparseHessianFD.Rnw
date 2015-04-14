@@ -704,7 +704,7 @@ intended matrix, use the \func{Coord.to.Pattern.Matrix} function,
 which is just a wrapper to \pkg{Matrix}'s \func{sparseMatrix} constructor.
 
 <<>>=
-M2 <- Coord.to.Pattern.Matrix(mc$rows, mc.cols, dims=dim(M))
+M2 <- Coord.to.Pattern.Matrix(mc$rows, mc$cols, dims=dim(M))
 M2
 @
 

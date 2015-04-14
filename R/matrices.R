@@ -34,6 +34,7 @@ Matrix.to.Coord <- function(M, index1=TRUE) {
 #' @param compressed If TRUE, returns a matrix is compressed column (default=TRUE)
 #' @param symmetric If TRUE, matrix will be symmetric, and only the
 #' lower triangular elements need to be provided (default=FALSE)
+#' @param index1 TRUE if input row and col use 1-based indexing, and FALSE for 0-based indexing.
 #' @return A sparse pattern matrix
 #' @details This function is useful to prototype a sparsity pattern.
 #' No assumptions are made about symmetry.
@@ -58,7 +59,7 @@ Coord.to.Pattern.Matrix <- function(rows, cols, dims, compressed=TRUE,
 #' compressed format.
 #' @param M A sparse Matrix, as defined in the Matrix package.
 #' @param order Pointers can be ordered according to a row-oriented or column-oriented compression pattern.  If symmetric is chosen, the compression method does not matter.  The input matrix must be symmetric (although not necessarily stored that way) to get symmetric output.  The only difference between "symmetric," and either "row" or "column," is the names of the elements in the list.
-#' @param index1 TRUE if the index of the first element should be 1, and FALSE if 0.
+#' @param index1 TRUE if return values use 1-based indexing, and FALSE for 0-based indexing.
 #' @return A list with two named elements. If matrix is row-oriented,
 #' \describe{
 #' \item{jCol}{ Integer vector containing column indices of non-zero elements}
@@ -76,7 +77,7 @@ Coord.to.Pattern.Matrix <- function(rows, cols, dims, compressed=TRUE,
 #' }
 #' @export
 Matrix.to.Pointers <- function(M, order="symmetric",
-                               index1=TRUE, out.index1=index1) {
+                               index1=TRUE) {
 
 
     stopifnot(order %in% c("column","row","symmetric"))
@@ -85,19 +86,19 @@ Matrix.to.Pointers <- function(M, order="symmetric",
         stopifnot(Matrix::isSymmetric(M))
         M <- as(M,"dgCMatrix")
         names(res) <- c("idx","pntr")
-        res$idx <- as.integer(M@i) + as.integer(out.index1)
-        res$pntr <- as.integer(M@p) + as.integer(out.index1)
+        res$idx <- as.integer(M@i) + as.integer(index1)
+        res$pntr <- as.integer(M@p) + as.integer(index1)
     } else {
         if (order == "row") {
             M <- as(M,"RsparseMatrix")
             names(res) <- c("jCol","ipntr")
-            res$jCol <- as.integer(M@j) + as.integer(out.index1)
-            res$ipntr <- as.integer(M@p) + as.integer(out.index1)
+            res$jCol <- as.integer(M@j) + as.integer(index1)
+            res$ipntr <- as.integer(M@p) + as.integer(index1)
         } else {
             M <- as(M,"CsparseMatrix")
             names(res) <- c("iRow","jpntr")
-            res$iRow <- as.integer(M@i) + as.integer(out.index1)
-            res$jpntr <- as.integer(M@p) + as.integer(out.index1)
+            res$iRow <- as.integer(M@i) + as.integer(index1)
+            res$jpntr <- as.integer(M@p) + as.integer(index1)
         }
     }
     return(res)
