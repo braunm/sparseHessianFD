@@ -127,7 +127,7 @@ Matrix.to.Pointers <- function(M, order="symmetric",
 Coord.to.Pointers <- function(rows, cols, dims,
                               triangle=TRUE, lower=TRUE,
                               order=c("column", "row", "symmetric"),
-                              index1=TRUE, out.index1=index1) {
+                              index1=TRUE) {
 
     stopifnot(is.logical(triangle),
               is.logical(index1),
@@ -151,7 +151,7 @@ Coord.to.Pointers <- function(rows, cols, dims,
     } else {
         A <- R
     }
-    Matrix.to.Pointers(A, order, index1, out.index1)
+    Matrix.to.Pointers(A, order, index1, index1)
 }
 
 

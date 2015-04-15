@@ -4,8 +4,7 @@
 \alias{Matrix.to.Pointers}
 \title{Column (row) indices and row (column) pointers from sparse matrix.}
 \usage{
-Matrix.to.Pointers(M, order = "symmetric", index1 = TRUE,
-  out.index1 = index1)
+Matrix.to.Pointers(M, order = "symmetric", index1 = TRUE)
 }
 \arguments{
   \item{M}{A sparse Matrix, as defined in the Matrix
@@ -19,8 +18,8 @@ Matrix.to.Pointers(M, order = "symmetric", index1 = TRUE,
   The only difference between "symmetric," and either "row"
   or "column," is the names of the elements in the list.}
 
-  \item{index1}{TRUE if the index of the first element
-  should be 1, and FALSE if 0.}
+  \item{index1}{TRUE if return values use 1-based indexing,
+  and FALSE for 0-based indexing.}
 }
 \value{
 A list with two named elements. If matrix is row-oriented,

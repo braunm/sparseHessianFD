@@ -20,6 +20,9 @@ Coord.to.Pattern.Matrix(rows, cols, dims, compressed = TRUE,
   \item{symmetric}{If TRUE, matrix will be symmetric, and
   only the lower triangular elements need to be provided
   (default=FALSE)}
+
+  \item{index1}{TRUE if input row and col use 1-based
+  indexing, and FALSE for 0-based indexing.}
 }
 \value{
 A sparse pattern matrix

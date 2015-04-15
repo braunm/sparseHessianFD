@@ -5,8 +5,7 @@
 \title{Column (row) indices and row (column) pointers from sparse matrix.}
 \usage{
 Coord.to.Pointers(rows, cols, dims, triangle = TRUE, lower = TRUE,
-  order = c("column", "row", "symmetric"), index1 = TRUE,
-  out.index1 = index1)
+  order = c("column", "row", "symmetric"), index1 = TRUE)
 }
 \arguments{
   \item{rows,cols}{row and column indices of non-zero
