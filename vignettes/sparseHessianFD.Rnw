@@ -364,26 +364,61 @@ only \Sexpr{nnz2LT} values.
   \subsection{Numerical differentiation}
 
 
-  The use of finite differences for approximating derivatives
+Finite differencing (FD) is a numerical differentiation method that
+operationalizes a Taylor series approximation to a differentiable
+function.  Let $f(x)$ be the scalar-valued function to be
+differentiated, and let $\delta$ be some small, positive, scalar
+value.  For scalar $x$, the second order
+approximation to $f(x)$ is
+  \begin{align}
+    \label{eq:1}
+  f(x+\delta)  &=f(x) + f'(x)\delta + \frac{1}{2}f''(x)\delta^2 +\mathcal{O}(\delta^2) \qquad\text{ as
+                 }\delta\rightarrow 0
+  \end{align}
+Dropping the terms of second order and above,
+    \begin{align}
+    \label{eq:FD1}
+    f'(x)&\approx\frac{f(x+\delta)-f(x)}{\delta}
+  \end{align}
+
+  The dividing the difference between $f(x+\delta)$ and $f(x)$ by a
+  suitably small $\delta$ is a first-order numerical approximation to
+  the derivative.
+
+ Define $D(x)$ as the gradient of $f(x)$ at $x$,
+  and define $H(x)$ as the Hessian matrix. Let $\iota$ be a vector of ones. The multivariate Taylor series is
+
+  \begin{align}
+    \label{eq:2}
+    f(x+\delta\iota)=f(x) + \delta\iota' D(x) + \frac{1}{2}\delta\iota'H(x) \delta\iota+\mathcal{O}(\delta^2)
+  \end{align}
+
+The gradient can be computed by adding $\delta$ successively to each
+element of $x$, so the partial derivative with respect to $x_k$ is
+
+      \begin{align}
+    \label{eq:FD1K}
+    f_k'(x)&\approx\frac{f(x+\delta e_k)-f(x)}{\delta}\\
+        D(x)&=\left(f_1'(x), f_2'(x),\mathellipsis f_K'(x)\right)
+  \end{align}
+
+
+
+  a describes methods of approximating
+  derivates The use of finite differences for approximating derivatives
   numerically starts with a Taylor series approximation to a
   scalar-valued function.  Because the highest-order derivative we
   will consider in this paper is the second, we will truncate our
   Taylor series there.
 
-  \begin{align}
-    \label{eq:1}
-    f(x+h)&=f(x) + f'(x)\delta + \frac{1}{2}f''(x)\delta^2 + O(\delta^2)\\
-  \end{align}
+
 
   \subsubsection{First order}
 
 
   After rearranging terms, we can see that we can approximate $f(x)$
   by choosing and arbitrarily small $h>0$.
-  \begin{align}
-    \label{eq:FD1}
-    f'(x)&\approx\frac{f(x+\delta)-f(x)}{\delta}
-  \end{align}
+
 
 For a multivariate $x$, with length $K$, estimating $f'(x)$ involves
 computing $f(x)$ once, and then Equation \ref{eq:FD1} $K$ times by
