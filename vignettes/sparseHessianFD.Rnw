@@ -143,8 +143,8 @@ the posterior distribution.  More broadly, many numerical optimization
 algorithms require repeated computation, estimation or approximation
 of the Hessian or its inverse; see \citet{NocedalWright2006}.
 
-The Hessian of an objective function with $p$ variables has $p^2$
-elements, of which $p(p+1)/2$ are unique.  Thus, the storage
+The Hessian of an objective function with $K$ variables has $K^2$
+elements, of which $\binom{K}{2}+K$ are unique.  Thus, the storage
 requirements of the Hessian, and computational cost of many linear
 algebra operations on it, grow quadratically with the number of
 decision variables.   For
@@ -152,7 +152,7 @@ functions with hundreds of thousands of variables, computing the
 Hessian even once might not be practical for applications constrained
 by time, storage or processor availability.
 
-However, for a large general class of problems, the Hessian is
+For many problems, the Hessian is
 \emph{sparse}, meaning that the proportion of non-zero elements in the
 Hessian is small.  Consider a log
 posterior density in a Bayesian hierarchical
@@ -161,44 +161,61 @@ independent, the cross-partial derivatives with respect to those
 parameters are zero.  As the number of units
 increases, the size of the Hessian still grows quadratically, but the number
 of \emph{non-zero} elements grows only linearly, and the Hessian
-becomes increasingly sparse.  Under this hierarchical structure, we
-know that parameters within a unit may be correlated, but parameters
-across units are not.  Exactly which elements are  Thus, we can determine exactly which elements
-of the Hessian are non-zero.  The row and column indices of the
+becomes increasingly sparse.  Under this hierarchical structure,
+parameters within a unit may be correlated, but parameters
+across units are not.  The row and column indices of the
 non-zero elements comprise the \emph{sparsity pattern} of the Hessian.
 
 The \pkg{sparseHessianFD} package is a tool for estimating
-sparse Hessians using finite differences.  The specifics of the method
-are discussed in Section XX, but the basic idea is as follows.  Let
-$f(x)$ be a function to be differentiated, let $D(x)$ be the gradient,
-and let $H(x)$ be the Hessian.  Also, let $e_k$ be the $k$th
+sparse Hessians using \emph{finite differencing}.  Section XX will
+cover the specifics, but the basic idea is as follows.  Consider a
+function $f(x)$ and its derivative $Df(x)$.  Let $e_k$ be the $k$th
 coordinate vector, and let $\delta$ be a sufficiently small scalar
-constant.  One can approximate the $k$th column of an otherwise
-unstructured dense Hessian as $\left(G(x+\delta
-  e_k)-G(x)\right)/\delta$.  Estimating the $K$ columns of the fill
-Hessian involves $K+1$ evaluations of the gradient.  If, however, we
-know that some elements of the Hessian are zero, we can perturb more
-than one elements of $x$ at once, and extract the non-zero values by
-solving a system of linear equations.  Not all sparsity patterns lend
-themselves to reducing the number of gradient evaluations, but for
-hierarchical models with conditionally independent units, the number
-of gradient evaluations is \emph{constant}, no matter how many heterogeneous
-units are in the dataset.
+constant. The vector $\left(Df(x+\delta e_k) - Df(x)\right)/\delta$ is
+a linear approximation of the $k$th column of the Hessian matrix
+$Hf(x)$. Estimating a dense Hessian involves $K+1$ calculations of the
+derivative.  If the Hessian is sufficiently sparse, we can perturb
+more than one element of $x$ at a time and still recover the non-zero
+Hessian values.   Not all sparsity patterns allow for fewer than $K$
+perturbations, but for others, exploiting sparsity can be profoundly
+efficient.  In fact, for the hierarchical models that we consider in
+this paper, the number of derivative evaluations is \emph{constant},
+even as additional heterogeneous units are added to the model.
+
+At the
+outset, we have to mention that there may be some applications for
+which \pkg{sparseHessianFD} is not an appropriate package to use. To
+extract the maximum benefit from using \pkg{sparseHessianFD}, we need
+to accept a few conditions or assumptions.
+
+\begin{enumerate}
+\item The objective function should be twice differentiable, and can be
+  computed ``quickly and easily,'' even for a large number of
+  variables.  We leave the definition of ``quickly and easily''
+  intentionally murky, since no method of differentiation can overcome
+  pathologies in an objective function that itself is hard to compute.
+\item The first derivative vector (or its transpose, the gradient) can
+  be computed quickly, easily and \emph{exactly} (within machine
+  precision, of course).  This means that while we are using finite
+  differencing to estimate the Hessian matrix, we should not use it to
+  compute the gradient.  Otherwise, the Hessian is approximated using
+  finite differences of finite differences, and the approximation
+  error is compounded.
+
+\item Preferred alternatives to computing the Hessian are not
+  available.  Finite differencing is not generally a ``first choice''
+  method.  Deriving a gradient or Hessian symbolically, and writing a
+  subroutine to compute it, will give an exact answer, but might be
+  tedious or difficult to implement. Algorithmic differentiation
+  should also be considered first.  \pkg{sparseHessianFD} makes the
+  most sense when the gradient is easy to get, but the Hessian is
+  not.
+  \item The sparsity pattern is known in advance, and does not depend
+    on the values of the variables.
+  \item
+\end{enumerate}
 
 
-
-
-
-uses finite differencing (FD) to generate a numerical
-estimate of the Hessian.  FD is a well-known method for estimating
-derivatives of functions, and we explain it in Section \ref{sec:FD}.
-Using FD, approximating the first derivative of $f(x)$ with respect to
-$x_k$, for $k=1,...,K$ variables, is
-conceptually simple:  the slope between $(x_k, f(x_k))$ and $(x_k+h,
-f(x_k+h))$ approaches the derivate as $h$ gets arbitrarily close to
-zero. The disadvantages are that the cost of FD grows with the number of
-variables $K$, and that as $h$ approaches zero, the result is
-increasingly unstable.
 
 The problem is even worse when computing a
 dense Hessian.  The $k$th column of the Hessian, $H_k$, can be approximated
@@ -221,42 +238,7 @@ In order to justify the use of \pkg{sparseHessianFD}, we need to
 maintain a set of assumptions about the underlying model, and the
 workflow of the user.
 
-\begin{enumerate}
-\item The objective function is twice differentiable, and can be
-  computed ``quickly and easily,'' even for a large number of
-  variables.  We leave the definition of ``quickly and easily''
-  intentionally murky, since no method of differentiation can overcome
-  pathologies in an objective function that itself is hard to compute.
-\item The gradient can be computed exactly (within machine precision,
-  of course), and that computation time is a small, constant multiple of
-  the time to compute the objective function, regardless of the number
-  of variables.
-\item Preferred alternatives to computing the Hessian are not
-  available.  Examples include computing the Hessian directly from a
-  symbolic derivation, or using AD software, as with the gradient.
-  Direct computation of the Hessian will be numerically exact, but not necessarily
-  easier or faster than \pkg{sparseHessianFD} when
-  \pkg{sparseHessianFD} can exploit the sparsity in the Hessian.  AD
-  can be used to compute the Hessian as well as the gradient, and many
-  modern AD libraries are facile with sparse matrices.  But AD is not
-  always available, hence the need for \pkg{sparseHessianFD}.
-  \item The sparsity pattern is known in advance, and does not depend
-    on the values of the variables.  The user must be able to provide
-    the row and column indices of the non-zero elements in the lower
-    triangle of the Hessian.  This should be easy to do for
-    hierarchical Bayesian models.
-  \item The user can accept some small amount of approximation error.
-    Since FD is a numerical approximation technique, the estimate of the Hessian
-    will not be exact as either computing the Hessian directly from a
-    symbolic derivation, or using AD.  By ``small,'' we mean a
-    relative error roughly on the order of $10^{-6}$ or less.  In our
-    experience should be widely achievable on double-precision machines.   If such errors are
-    too large for a particular application, then \pkg{sparseHessianFD}
-    may not be the best tool for the job. Exceptions
-    would be cases of objective functions that are poorly conditioned,
-    with ridges, plateaus or other pathologies, or cases for which
-    such tiny errors will incur large costs.
-\end{enumerate}
+
 
 
   The ``time to compute the gradient'' restriction is surprisingly weak,
@@ -630,8 +612,7 @@ in the preceding example.  Therefore, we will restrict our attention
 in the subsequent sections to triangular substitution methods.
 to
 
-
-\subsection{Note:  Who proved what}
+ \subsection{Note:  Who proved what}
 
 Consistent partitioning of $L$:  No column in the same group has a
 non-zero element in the same row.
@@ -654,8 +635,10 @@ method if and only if the mapping is a cyclic coloring.
 Cyclic coloring:  At least 3 colors in every cycle.
 
 From \citet{ColemanCai1986}, general result of substitutable
-(beyond \citet{PowellToint1979).  Order nonzero elements
+(beyond \citet{PowellToint1979}.  Order nonzero elements
   $1\mathellipsis M$. If, for nonzero element $(i_m, j_m)$,
+
+
   \begin{enumerate}
 \item  columns  $j_m$ and another other $j_{m'}$ are in the same
   group, and both $j_m$ and $j_{m'}$ have a nonzero in row $i_m$, then
@@ -681,13 +664,6 @@ From \citet{ColemanCai1986}, general result of substitutable
   graph.  Just using a different heuristic for the coloring.
 
 
-
-  ordering induces a substitution
-  method if and only if either
-  \begin{itemize}
-  \item if two columns with the same color have an element in the same
-    row,
-  \end{itemize}
 
 
 \subsection{Partitioning the variables}
@@ -1068,5 +1044,18 @@ the lower triangle of the Hessian.
 function.  For this example, call that object F.
 \item Compute Hessian at x by calling F\$hessian(x).
   \end{enumerate}
+
+
+  The user can accept some small amount of approximation error.
+    Since FD is a numerical approximation technique, the estimate of the Hessian
+    will not be exact as either computing the Hessian directly from a
+    symbolic derivation, or using AD.  By ``small,'' we mean a
+    relative error roughly on the order of $10^{-6}$ or less.  In our
+    experience should be widely achievable on double-precision machines.   If such errors are
+    too large for a particular application, then \pkg{sparseHessianFD}
+    may not be the best tool for the job. Exceptions
+    would be cases of objective functions that are poorly conditioned,
+    with ridges, plateaus or other pathologies, or cases for which
+    such tiny errors will incur large costs.
 
 \end{document}
