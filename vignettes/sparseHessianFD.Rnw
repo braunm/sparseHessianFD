@@ -15,12 +15,14 @@
 
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{tikz}
+\usepackage{colortbl}
 
 \usepackage{parskip}
 \usepackage{setspace}
 \linespread{1.1}
 
-\usepackage[dvipsnames,svgnames,x11names,hyperref]{xcolor}
+
 \usepackage[colorlinks=true, urlcolor=NavyBlue]{hyperref}
 
 %%make knitr environment line spacing separate from LaTeX
@@ -117,6 +119,7 @@
 \title{\pkg{sparseHessianFD}: An \proglang{R} Package for Estimating Sparse Hessian Matrices}
 \author{Michael Braun\\Cox School of Business\\Southern Methodist University}
 \date{April 12, 2015}
+%\usepackage[dvipsnames,svgnames,x11names,hyperref]{xcolor}
 
 \begin{document}
 
@@ -146,13 +149,13 @@ requirements of the Hessian, and computational cost of many linear
 algebra operations on it, grow quadratically with the number of
 decision variables.   For
 functions with hundreds of thousands of variables, computing the
-Hessian just once might not be practical for applications constrained
-by time, storage or processor limitations.
+Hessian even once might not be practical for applications constrained
+by time, storage or processor availability.
 
 However, for a large general class of problems, the Hessian is
 \emph{sparse}, meaning that the proportion of non-zero elements in the
 Hessian is small.  Consider a log
-posterior density of unknown parameters in a Bayesian hierarchical
+posterior density in a Bayesian hierarchical
 model.  If the outcomes across heterogeneous units are conditionally
 independent, the cross-partial derivatives with respect to those
 parameters are zero.  As the number of units
@@ -160,26 +163,30 @@ increases, the size of the Hessian still grows quadratically, but the number
 of \emph{non-zero} elements grows only linearly, and the Hessian
 becomes increasingly sparse.  Under this hierarchical structure, we
 know that parameters within a unit may be correlated, but parameters
-across units are not.  Thus, we can determine exactly which elements
+across units are not.  Exactly which elements are  Thus, we can determine exactly which elements
 of the Hessian are non-zero.  The row and column indices of the
 non-zero elements comprise the \emph{sparsity pattern} of the Hessian.
 
 The \pkg{sparseHessianFD} package is a tool for estimating
-sparse Hessians. The
-method is efficient for models and datasets with a large number of
-conditionally independent heterogeneous units, a small
-number of parameters specific to each unit, and a relatively small
-number of population-level parameters.  Such hierarchical models with
-``high $N$, low $k$'' appear frequently in business-related fields like marketing
-research, in which databases record transactions for a massive
-number of households, but each household's activity is governed by a
-small number of randomly distributed latent parameters.
+sparse Hessians using finite differences.  The specifics of the method
+are discussed in Section XX, but the basic idea is as follows.  Let
+$f(x)$ be a function to be differentiated, let $D(x)$ be the gradient,
+and let $H(x)$ be the Hessian.  Also, let $e_k$ be the $k$th
+coordinate vector, and let $\delta$ be a sufficiently small scalar
+constant.  One can approximate the $k$th column of an otherwise
+unstructured dense Hessian as $\left(G(x+\delta
+  e_k)-G(x)\right)/\delta$.  Estimating the $K$ columns of the fill
+Hessian involves $K+1$ evaluations of the gradient.  If, however, we
+know that some elements of the Hessian are zero, we can perturb more
+than one elements of $x$ at once, and extract the non-zero values by
+solving a system of linear equations.  Not all sparsity patterns lend
+themselves to reducing the number of gradient evaluations, but for
+hierarchical models with conditionally independent units, the number
+of gradient evaluations is \emph{constant}, no matter how many heterogeneous
+units are in the dataset.
 
-\pkg{sparseHessianFD} estimates the Hessian numerically, through computing finite
-differences of gradients. It exploits the sparsity of the Hessian by
-partitioning decision variables into what we will colloquially call
-``colors.''  Two variables can have the same color only if perturbing
-their first derivatives simultaneously does
+
+
 
 
 uses finite differencing (FD) to generate a numerical
@@ -259,7 +266,7 @@ workflow of the user.
 
 
 
-  \section{Example function}
+
 
 
 
@@ -272,14 +279,17 @@ Hessian.
  opportunities to purchase a particular product.  Let $y_i$ be the
  number of times household $i$ purchases the product, out of the $T$
  purchase opportunities, and let $p_i$ be the probability of
- purchase.  The heterogeneous parameter $p_i$ is the same for all $T$ opportunities, so we can
- treat $y_i$ as a binomial random variable.  Define $p_i$ such that it depends on both $k$ continuous covariates
+ purchase.  The heterogeneous parameter $p_i$ is the same for all $T$
+ opportunities, so $y_i$ is a binomial random variable.  Define each $p_i$ such that it depends on both $k$ continuous covariates
  $x_i$, and a heterogeneous coefficient vector $\beta_i$.
 \begin{align}
   p_i=\frac{\exp(x_i'\beta_i)}{1+\exp(x_i'\beta_i)},~i=1 ... N
 \end{align}
 
-The coefficients can be thought of as sensitivities to the covariates, and they are distributed across the population of households following a multivariate normal distribution with mean $\mu$ and covariance $\Sigma$.   We assume that we know $\Sigma$, but we do not know $\mu$.  Instead, we place a multivariate normal prior on $\mu$, with mean $0$ and covariance $\Omega_0$.  Thus, each $\beta_i$, and $\mu$ are $k-$dimensional vectors, and the total number of unknown variables in the model is $(N+1)k$.
+The coefficients are distributed across the population of households
+following a multivariate normal distribution with mean $\mu$ and
+covariance $\Sigma$.   Assume that we know $\Sigma$, but not $\mu$.
+Instead, place a multivariate normal prior on $\mu$, with mean $0$ and covariance $\Omega_0$.  Thus, each $\beta_i$, and $\mu$ are $k-$dimensional vectors, and the total number of unknown variables in the model is $(N+1)k$.
 
 The log posterior density, ignoring any normalization constants, is
 \begin{align}
@@ -312,7 +322,7 @@ options(scipen=999)
 The log posterior density in Equation \ref{eq:LPD} has a sparse
 Hessian.  Since the $\beta_i$ are drawn iid from a multivariate
 normal, and the $y_i$ are conditionally independent,
-$\dfrac{\partial^2\log\pi }{\partial\beta_i\beta_j}=0$ for all $i\neq
+$H_{ij}=\dfrac{\partial^2\log\pi }{\partial\beta_i\beta_j}=0$ for all $i\neq
 j$.  However, all of the $\beta_i$ are correlated with
 $\mu$.
 
@@ -385,7 +395,25 @@ Dropping the terms of second order and above,
   suitably small $\delta$ is a first-order numerical approximation to
   the derivative.
 
- Define $D(x)$ as the gradient of $f(x)$ at $x$,
+  Differentiating the Taylor series, and rearranging terms,
+
+    \begin{align}
+    \label{eq:1}
+  f''(x)  &\approx \frac{f'(x+\delta) - f'(x)}{\delta}
+  \end{align}
+
+The second derivative is approximated by a difference in the first derivatives.
+
+For multivariate $x$, the Taylor series is
+
+\begin{align}
+  \label{eq:8}
+  f(x+\iota\delta)=f(x) +
+  \delta\iota'D{x}+\frac{1}{2}\delta\iota'H{x}\delta\iota + \mathcal{O}(\delta^2)
+\end{align}
+
+
+  Define $D(x)$ as the gradient of $f(x)$ at $x$,
   and define $H(x)$ as the Hessian matrix. Let $\iota$ be a vector of ones. The multivariate Taylor series is
 
   \begin{align}
@@ -602,24 +630,146 @@ in the preceding example.  Therefore, we will restrict our attention
 in the subsequent sections to triangular substitution methods.
 to
 
-\subsection{Coloring the variables}
+
+\subsection{Note:  Who proved what}
+
+Consistent partitioning of $L$:  No column in the same group has a
+non-zero element in the same row.
+
+\Citet{PowellToint1979} showed that a consistent partitioning of $L$
+allows for a substitution method (mentioned by
+\citet{ColemanMore1984}.  This is a substitutable partition.
+
+\Citet{PowellToint1979} show that the order in which variables are
+assigned to partitions affects the partition.
+
+\Citet{ColemanMore1984} characterize \cite{PowellToint1979} as a graph
+coloring problem.  Also justify using the smalest-last ordering on the lower
+triangle to color the variables
+
+\Citet{ColemanCai1986}:  there are other substitutable partitions than
+lower triangular.  Theorem 2.2.  A mapping induces a substitution
+method if and only if the mapping is a cyclic coloring.
+
+Cyclic coloring:  At least 3 colors in every cycle.
+
+From \citet{ColemanCai1986}, general result of substitutable
+(beyond \citet{PowellToint1979).  Order nonzero elements
+  $1\mathellipsis M$. If, for nonzero element $(i_m, j_m)$,
+  \begin{enumerate}
+\item  columns  $j_m$ and another other $j_{m'}$ are in the same
+  group, and both $j_m$ and $j_{m'}$ have a nonzero in row $i_m$, then
+  $i_{m'}, j_{m'}$ must be ordered before $i_m, j_m$; \emph{or}
+\item  columns  $i_m$ and another other $i_{m'}$ are in the same
+  group, and both $i_m$ and $i_{m'}$ have a nonzero in row $j_m$, then
+  $j_{m'}, i_{m'}$ must be ordered before $j_m, i_m$
+  \end{enumerate}
+
+  What this means is that we can ignore column intersections that
+  occur in lower rows (what?).
+
+  The point is that lower triangular substitution qualifies, which
+  means that we just need a cyclic coloring of the graph.
+
+
+  Note:  My coloring algorithm is a smallest last ordering of the full
+  symmetric Hessian  This is \emph{slpt} in \citet{ColemanMore1984}.
+  What I should really do is a smallest-last on the lower triangle
+  (\emph{slsl} in citet{ColemanMore1984}.  So I need to change that.
+
+  In any event, it's still finding a cyclic coloring of the adjacency
+  graph.  Just using a different heuristic for the coloring.
+
+
+
+  ordering induces a substitution
+  method if and only if either
+  \begin{itemize}
+  \item if two columns with the same color have an element in the same
+    row,
+  \end{itemize}
+
+
+\subsection{Partitioning the variables}
+
 
 Both \citet{CurtisPowellReid1974} (for direct methods) and
 \citet{PowellToint1979} (for substitution methods) propose the
 following rule for partitioning the variables:  two variables cannot
-have the same color if their respective columns of the Hessian
-(direct) or lower triangle of the Hessian (substitution) have a
+be in the same group if their respective columns of the Hessian
+(direct) or its lower triangle (substitution) have a
 non-zero element in the same row.  In the example above, variables 1
 and 3 cannot be in the same group because columns 1 and 3 both have
-non-zero elements in row 3.  But this is not a positive rule.  It
-tells us how to exclude certain partitons, but not how to find one
-that is optimal, with the fewest possible number of colors.
+non-zero elements in row 3.
 
-\Citet{ColemanMore1984} were the first to recognize that this partitioning problem
-is analogous to the famous graph coloring problems in
-graph theory (finally, we learn why we use the term ``color'' to
-describe a partition). We can think of the sparsity pattern of $L$
-as an adjacency matrix in an undirected graph.  If $h_{i,j}\neq 0$ ,
+This rule tells us how to exclude certain groupings, but not how to
+find an optimal one, with the fewest possible number of groups.
+\Citet{ColemanMore1984} were the first to recognize that the
+partitioning task is actually a graph coloring problem.  The sparsity pattern of $L$
+is an adjacency matrix in an undirected graph.
+
+\begin{figure}
+  \begin{tabular}{r|c|c|c|c|c|c|c}
+   & 1&2&3&4&5&6&7\\
+    \hline
+    1& 1&&&&&&\\
+    2&1&1&&&&&\\
+    3&0&0&1&&&&\\
+    4&0&0&1&1&&&\\
+    5&0&0&0&0&1&&\\
+    6&0&0&0&0&1&1&\\
+    7&1&1&1&1&1&1&1
+  \end{tabular}
+\end{figure}
+
+
+
+\begin{figure}
+  \begin{subfigure}[b]{.5\textwidth}
+  \begin{tabular}{r|>{\columncolor{red!20}}c%
+    >{\columncolor{blue!20}}c%
+    >{\columncolor{red!20}}c%
+    >{\columncolor{blue!20}}c%
+    >{\columncolor{red!20}}c%
+    >{\columncolor{blue!20}}c%
+    >{\columncolor{green!20}}c}
+   & 1&2&3&4&5&6&7\\
+    \hline
+    1& 1&&&&&&\\
+    2&1&1&&&&&\\
+    3&0&0&1&&&&\\
+    4&0&0&1&1&&&\\
+    5&0&0&0&0&1&&\\
+    6&0&0&0&0&1&1&\\
+    7&1&1&1&1&1&1&1
+  \end{tabular}
+\end{subfigure}
+\begin{subfigure}[b]{.5\textwidth}\centering
+\begin{tikzpicture}
+\tikzstyle{every node}=[draw, shape=circle]
+\path node at (0.5,1.5) [fill=red!20] (v1) {1};
+\path node at  (1.5,1.5) [fill=blue!20] (v2) {2};
+\path node at  (2.5,1.5) [fill=red!20] (v3) {3};
+\path node at  (3.5,1.5) [fill=blue!20] (v4) {4};
+\path node at  (4.5,1.5) [fill=red!20] (v5) {5};
+\path node at  (5.5,1.5) [fill=blue!20] (v6) {6};
+\path node at  (3,0)  [fill=green!20] (v7) {7};
+\draw (v1) -- (v2)
+(v1) -- (v7)
+(v2) -- (v7)
+(v3) -- (v4)
+(v3) -- (v7)
+(v4) -- (v7)
+(v5) -- (v6)
+(v5) -- (v7)
+(v6) -- (v7);
+\end{tikzpicture}
+\end{subfigure}
+\end{figure}
+
+
+
+If $h_{i,j}\neq 0$ ,
 then variables $i$ and $j$ are ``neighbors'' in the graph, and they
 cannot have the same color.  Now, let's introduce a new variable $k$,
 where $j$ and $k$ are neighbors, but $i$ and $k$ are not.  The colors
