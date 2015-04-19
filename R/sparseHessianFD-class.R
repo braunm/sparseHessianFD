@@ -60,8 +60,6 @@ sparseHessianFD <-
                             warning("Some elements are in upper triangle, and will be ignored.")
                         }
 
-print("Break 1")
-
                         ptr <- Coord.to.Pointers(iRow, jCol, c(nvars, nvars),
                                                  triangle=TRUE,
                                                  lower=TRUE,
@@ -101,8 +99,6 @@ print("Break 1")
 
                     partition = function() {
                         "Return the partitioning used to compute finite differences"
-
-                        print("Break 3")
                         if (ready) {
                             res <- colors
                             if (index1) {

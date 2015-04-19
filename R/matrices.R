@@ -151,7 +151,7 @@ Coord.to.Pointers <- function(rows, cols, dims,
     } else {
         A <- R
     }
-    Matrix.to.Pointers(A, order, index1, index1)
+    Matrix.to.Pointers(A, order, index1)
 }
 
 

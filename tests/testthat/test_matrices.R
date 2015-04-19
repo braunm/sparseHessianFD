@@ -62,8 +62,8 @@ test_that("Matrix.to.Pointers", {
     cols <- c(1,2,2,3,4,4,5)
 
     M1.true <- sparseMatrix(i=rows, j=cols, dims=c(k,k) )
-    C1r <- Matrix.to.Pointers(M1.true, order="row")
-    C1c <- Matrix.to.Pointers(M1.true, order="column")
+    C1r <- Matrix.to.Pointers(M1.true, order="row", index1=TRUE)
+    C1c <- Matrix.to.Pointers(M1.true, order="column", index1=TRUE)
     expect_equal(names(C1r), c("jCol","ipntr"))
     expect_equal(names(C1c), c("iRow","jpntr"))
 
@@ -73,8 +73,8 @@ test_that("Matrix.to.Pointers", {
     expect_equal(M1.true, M1c)
 
     M2.true <- sparseMatrix(i=rows, j=cols, dims=c(k,k))
-    C2r <- Matrix.to.Pointers(M2.true, order="row", out.index1=FALSE)
-    C2c <- Matrix.to.Pointers(M2.true, order="column", out.index1=FALSE)
+    C2r <- Matrix.to.Pointers(M2.true, order="row", index1=FALSE)
+    C2c <- Matrix.to.Pointers(M2.true, order="column", index1=FALSE)
     M2r <- sparseMatrix(j=C2r$jCol, p=C2r$ipntr, dims=c(k,k), index1=FALSE)
     M2c <- sparseMatrix(i=C2c$iRow, p=C2c$jpntr, dims=c(k,k), index1=FALSE)
 
