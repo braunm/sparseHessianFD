@@ -17,7 +17,6 @@
 \usepackage{algorithmic}
 \usepackage{tikz}
 \usepackage{colortbl}
-
 \usepackage{parskip}
 \usepackage{setspace}
 \linespread{1.1}
@@ -123,6 +122,8 @@
 \date{April 12, 2015}
 %\usepackage[dvipsnames,svgnames,x11names,hyperref]{xcolor}
 
+
+
 \begin{document}
 
 \maketitle
@@ -131,8 +132,8 @@
 library(devtools)
 library(methods, quietly = TRUE)
 library(numDeriv, quietly = TRUE)
-knitr::opts_chunk[["set"]](collapse = FALSE, eval=TRUE, echo=TRUE, comment = "#",
-                           message=FALSE, tidy=FALSE, cache = TRUE) #
+knitr::opts_chunk[["set"]](collapse = FALSE, eval=TRUE, echo=TRUE,
+                          message=FALSE, tidy=FALSE, cache = TRUE)
 @
 
 The Hessian matrix of a log likelihood function or log posterior
@@ -186,11 +187,10 @@ efficient.  In fact, for the hierarchical models that we consider in
 this paper, the number of derivative evaluations is \emph{constant},
 even as additional heterogeneous units are added to the model.
 
-At the
-outset, we have to mention that there may be some applications for
-which \pkg{sparseHessianFD} is not an appropriate package to use. To
-extract the maximum benefit from using \pkg{sparseHessianFD}, we need
-to accept a few conditions or assumptions.
+%% At the outset, we have to mention that there may be some applications for
+%% which \pkg{sparseHessianFD} is not an appropriate package to use. To
+%% extract the maximum benefit from using \pkg{sparseHessianFD}, we need
+%% to accept a few conditions or assumptions. $\alpha$.
 
 \begin{enumerate}
 \item The objective function $f(x)$ should be twice differentiable, and can be
@@ -217,11 +217,9 @@ to accept a few conditions or assumptions.
   libraries that, at this moment, are not yet available in \proglang{R}.
  \pkg{sparseHessianFD} makes the most sense when the gradient is easy to get, but the Hessian is
   not.
-  \item The sparsity pattern is known in advance, and does not depend
+\item The sparsity pattern is known in advance, and does not depend
     on the values of the variables.
-  \item
 \end{enumerate}
-
 
 
   \section{Background}
@@ -412,11 +410,11 @@ The second differential is the differential of the first differential.
 \begin{align}
   \label{eq:17}
   \mathsf{d}^2f(x;u)&=\mathsf{d}\left(\mathsf{d}f\left(x;u\right);u\right)\\
-  &=\mathsf{d}\left(\parD{}{}{x}u\right;u)\\
-  &=\mathsf{D}\left(\parD{}{}{x}u\right)u\\
-  &=\mathsf{D}\left(\sum_{j=1}^K\parD{}{j}{x}u_j\right)u\\
-  &=\sum_{i,j=1}^Ku_iu_j\parD{2}{ij}{x}\\
-  &=u'\left(\mathsf{H}f(x)\right)u
+ &=\mathsf{d}\left(\parD{}{}{x}u\right);u\\
+ &=\mathsf{D}\left(\parD{}{}{x}u\right)u\\
+ &=\mathsf{D}\left(\sum_{j=1}^K\parD{}{j}{x}u_j\right)u\\
+ &=\sum_{i,j=1}^Ku_iu_j\parD{2}{ij}{x}\\
+ &=u'\left(\mathsf{H}f(x)\right)u
 \end{align}
 
 The ``Second Identification Theorem'' in \citet{MagnusNeudecker2007}
@@ -873,7 +871,7 @@ Define acyclic.
 
 \section{Using the package}
 
-\subsection{The \class{sparseHessianFD} class}
+\subsection{The sparseHessianFD class}
 
 The package functionality is implemented as a reference class
 \class{sparseHessianFD}.  The initializer takes the following arguments.
