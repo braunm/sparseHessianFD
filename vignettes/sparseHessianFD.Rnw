@@ -48,6 +48,8 @@
  \newcommand{\Phitheta}{\Phi(\theta|y)}
  \newcommand{\Ly}{\mathcal{L}(y)}
  \newcommand{\Dy}{\mathcal{D}(\theta,y)}
+ \newcommand{\df}[3]{\mathsf{d}^{#1}f(#2;#3)}
+ \newcommand{\parD}[3]{\mathsf{D}^{#1}_{#2}f(#3)}
 
 
 \usepackage[style=authoryear,%
@@ -171,12 +173,14 @@ sparse Hessians using \emph{finite differencing}.  Section XX will
 cover the specifics, but the basic idea is as follows.  Consider a
 function $f(x)$ and its derivative $Df(x)$.  Let $e_k$ be the $k$th
 coordinate vector, and let $\delta$ be a sufficiently small scalar
-constant. The vector $\left(Df(x+\delta e_k) - Df(x)\right)/\delta$ is
+constant. The vector $H_kf(x)=\left(Df(x+\delta e_k) - Df(x)\right)/\delta$ is
 a linear approximation of the $k$th column of the Hessian matrix
 $Hf(x)$. Estimating a dense Hessian involves $K+1$ calculations of the
-derivative.  If the Hessian is sufficiently sparse, we can perturb
-more than one element of $x$ at a time and still recover the non-zero
-Hessian values.   Not all sparsity patterns allow for fewer than $K$
+derivative: one for the derivative at $x$, and $K$ after perturbing each
+of the elements of $x$ one at a time.  However, if the Hessian is sufficiently sparse, we can perturb
+more than one element of $x$ at a time, and still recover the non-zero
+Hessian values with fewer than $K$ derivative
+evaluations.  Not all sparsity patterns allow for fewer than $K$
 perturbations, but for others, exploiting sparsity can be profoundly
 efficient.  In fact, for the hierarchical models that we consider in
 this paper, the number of derivative evaluations is \emph{constant},
@@ -189,26 +193,29 @@ extract the maximum benefit from using \pkg{sparseHessianFD}, we need
 to accept a few conditions or assumptions.
 
 \begin{enumerate}
-\item The objective function should be twice differentiable, and can be
+\item The objective function $f(x)$ should be twice differentiable, and can be
   computed ``quickly and easily,'' even for a large number of
   variables.  We leave the definition of ``quickly and easily''
   intentionally murky, since no method of differentiation can overcome
   pathologies in an objective function that itself is hard to compute.
-\item The first derivative vector (or its transpose, the gradient) can
+\item The gradient (the transpose of the first derivative vector) $Df(x)^\top$ can
   be computed quickly, easily and \emph{exactly} (within machine
   precision, of course).  This means that while we are using finite
   differencing to estimate the Hessian matrix, we should not use it to
-  compute the gradient.  Otherwise, the Hessian is approximated using
-  finite differences of finite differences, and the approximation
-  error is compounded.
-
+  compute the gradient.  The time required to finite-difference
+  $Df(x)$ grows with $K$, while for algorithmic differentiation, the
+  time is a small constant multiple of the time required to compute
+  $f(x)$.  Also, the estimate of each $H_kf(x)$ would be a
+  finite difference of finite differences, and the approximation
+  error would be compounded.
 \item Preferred alternatives to computing the Hessian are not
   available.  Finite differencing is not generally a ``first choice''
   method.  Deriving a gradient or Hessian symbolically, and writing a
   subroutine to compute it, will give an exact answer, but might be
-  tedious or difficult to implement. Algorithmic differentiation
-  should also be considered first.  \pkg{sparseHessianFD} makes the
-  most sense when the gradient is easy to get, but the Hessian is
+  tedious or difficult to implement. Algorithmic differentiation is
+  probably the most efficient method, but requires specialized
+  libraries that, at this moment, are not yet available in \proglang{R}.
+ \pkg{sparseHessianFD} makes the most sense when the gradient is easy to get, but the Hessian is
   not.
   \item The sparsity pattern is known in advance, and does not depend
     on the values of the variables.
@@ -217,47 +224,11 @@ to accept a few conditions or assumptions.
 
 
 
-The problem is even worse when computing a
-dense Hessian.  The $k$th column of the Hessian, $H_k$, can be approximated
-by a difference in the gradients.  Let $e_k$ be the $k$th
-coordinate vector, so
-
-\begin{align}
-  H_k &\approx\frac{f'(x+\delta e_k)-f'(x)}{\delta}
-\end{align}
-
-If $f'(x)$ is estimated using FD, then the complexity of estimating
-the Hessian is quadratic, and numerical error from the gradient and
-Hessian computations are combined.  In many cases, the gradient is
-computed quickly and accurately by other means, such as through
-deriving it analytically or using automatic differentiation (more on
-that later).  In that case, numerical error comes from only the
-Hessian computation, and complexity is only linear.
-
-In order to justify the use of \pkg{sparseHessianFD}, we need to
-maintain a set of assumptions about the underlying model, and the
-workflow of the user.
-
-
-
-
-  The ``time to compute the gradient'' restriction is surprisingly weak,
-  since XXX show that gradients computed via a reverse mode automatic
-  differentiation meet this restriction.  When AD computation is not
-  available, one would need to derive the gradient symbolically.
-
-
-
-
-
-
-
   \section{Background}
 
 Before going into the details of how to use the package, let's
 consider the following example of an objective function with a sparse
-Hessian.
- Suppose we have a dataset of $N$ households, each with $T$
+Hessian.  Suppose we have a dataset of $N$ households, each with $T$
  opportunities to purchase a particular product.  Let $y_i$ be the
  number of times household $i$ purchases the product, out of the $T$
  purchase opportunities, and let $p_i$ be the probability of
@@ -271,7 +242,9 @@ Hessian.
 The coefficients are distributed across the population of households
 following a multivariate normal distribution with mean $\mu$ and
 covariance $\Sigma$.   Assume that we know $\Sigma$, but not $\mu$.
-Instead, place a multivariate normal prior on $\mu$, with mean $0$ and covariance $\Omega_0$.  Thus, each $\beta_i$, and $\mu$ are $k-$dimensional vectors, and the total number of unknown variables in the model is $(N+1)k$.
+Instead, place a multivariate normal prior on $\mu$, with mean $0$ and
+covariance $\Omega_0$.  Thus, each $\beta_i$, and $\mu$ are
+$k-$dimensional vectors, and the total number of unknown variables in the model is $(N+1)k$.
 
 The log posterior density, ignoring any normalization constants, is
 \begin{align}
@@ -354,6 +327,130 @@ only \Sexpr{nnz2LT} values.
 
 
   \subsection{Numerical differentiation}
+
+
+  In this section, we review the theoretical basis for approximating
+  derivatives using finite differences.  To facilitate this
+  discussion, we use the notation of \citet{MagnusNeudecker2007}, and
+  their notion of the differential, but we will not be as formal in
+  our proofs.
+
+  Let $f(x)$ be a scalar-valued function, and let $x$ and $u$ be
+  $K$-dimensional vectors.  Let $u$ be a sufficiently small positive
+  real value.  If $k=1$, then the definition of the first \emph{derivative} of $f(x)$ is
+  \begin{align}
+    \label{eq:9}
+    f'(x)=\lim\limits_{u\to 0}\frac{f(x+u)-f(x)}{u}
+  \end{align}
+
+which is equivalent to
+\begin{align}
+  \label{eq:10}
+  f(x+u)=f(x)+uf'(x)+o(u)
+\end{align}
+
+For $K\ge 1$, \citet{MagnusNeudecker2007} define the first \emph{differential} of
+$f(x)$, with increment $u$, as
+\begin{align}
+  \label{eq:12}
+  \df{}{x}{u}=uf'(x)
+\end{align}
+The differential $\df{}{x}{u}$ is the linear component of the difference between
+$f(x+u)$ and $f(x)$, and $o(u)$ is a error term that goes to zero as
+$\|u\|\to 0$.
+
+The \emph{partial} derivative of $f(x)$ with respect to $x_j$ (the $j$th
+component of $x$) is defined as
+\begin{align}
+  \label{eq:13}
+\parD{}{j}{x}=\lim\limits_{t\to 0}\frac{f(x+te_j)-f(x)}{t}
+\end{align}
+with $\parD{}{}{x}=\left(\parD{}{1}{x},\mathellipsis,\parD{}{K}{x}\right)$ as
+the vector of all partial derivatives.
+
+By the \citet{MagnusNeudecker2007} ``First Identification Theorem'',
+$\df{x}{u}=\left(\parD{}{}{x}\right)u$, for
+$x,u\in\mathbb{R}^K$. Thus, as $\|u\|\to 0$, we can solve for each
+partial derivative by computing a finite difference between $f(x)$ and
+$f(x+u_je_j)$ and dividing by $u_j$.
+The \emph{gradient} is defined
+as $\nabla f(x)=\left(\parD{}{}{x}\right)^\top$.
+
+The second-order partial derivative is defined as
+\begin{align}
+  \label{eq:14}
+  \parD{2}{jk}{x}=\lim\limits_{t\to 0}\frac{\parD{}{j}{x+te_k}-\parD{}{j}{x}}{t}
+\end{align}
+and the Hessian matrix is defined as
+\begin{align}
+  \label{eq:15}
+  \mathsf{H}f(x)=
+  \begin{pmatrix}
+    \parD{2}{11}{x}&  \parD{2}{12}{x}&  \mathellipsis &  \parD{2}{1K}{x}\\
+    \parD{2}{21}{x}&  \parD{2}{22}{x}&  \mathellipsis &  \parD{2}{2K}{x}\\
+    \vdots&\vdots&&\vdots\\
+    \parD{2}{K1}{x}&  \parD{2}{K2}{x}&  \mathellipsis &  \parD{2}{KK}{x}
+    \end{pmatrix}
+\end{align}
+
+
+A second-order approximation to $f(x)$ is
+\begin{align}
+  \label{eq:16}
+  f(x+u)=f(x)+\left(\parD{}{}{x}\right)u+\frac{1}{2}u^\top \mathsf{H}f(x)u+o\left(\|u\|^2\right).
+\end{align}
+
+Differentiating this approximation,
+
+\begin{align}
+  \label{eq:16a}
+  \parD{}{}{x+u}=\parD{}{}{x}+\left(\parD{}{}{x}\right)u+\frac{1}{2}u^\top \mathsf{H}f(x)u+o\left(\|u\|^2\right).
+\end{align}
+
+
+The second differential is the differential of the first differential.
+\begin{align}
+  \label{eq:17}
+  \mathsf{d}^2f(x;u)&=\mathsf{d}\left(\mathsf{d}f\left(x;u\right);u\right)\\
+  &=\mathsf{d}\left(\parD{}{}{x}u\right;u)\\
+  &=\mathsf{D}\left(\parD{}{}{x}u\right)u\\
+  &=\mathsf{D}\left(\sum_{j=1}^K\parD{}{j}{x}u_j\right)u\\
+  &=\sum_{i,j=1}^Ku_iu_j\parD{2}{ij}{x}\\
+  &=u'\left(\mathsf{H}f(x)\right)u
+\end{align}
+
+The ``Second Identification Theorem'' in \citet{MagnusNeudecker2007}
+states that, for $x,u\in\mathbb{R}^K$,
+\begin{align}
+  \label{eq:ID2}
+  f(x+u)=f(x)+\df{}{x}{u}+\frac{1}{2}\df{2}{x}{u}+o\left(\|u\|^2\right)
+\end{align}
+
+Taylor's Theorem (MN, theorem 12): for some $\theta\in\left[0,1\right]$,
+
+\begin{align}
+  \label{eq:Taylors}
+  f(x+u)=f(x)+\df{}{x}{u}+\frac{1}{2}\df{2}{x+\theta u}{u}
+\end{align}
+
+Rearranging some stuff,
+
+\begin{align}
+  \label{eq:18}
+  \parD{}{}{x}u&=
+\end{align}
+
+
+
+By differentiating Taylors Theorem,
+
+\begin{align}
+  \label{eq:19}
+  \df{}{x+u}{v}-\df{}{x}{v}&\approx\mathsf{d}\left(\df{}{x}{u};v\right)\\
+\end{align}
+
+Somehow, we want to get from here to how a finite difference of first
+derivatives is a valid approximation to second derivatives.
 
 
 Finite differencing (FD) is a numerical differentiation method that
