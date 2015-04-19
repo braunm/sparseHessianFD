@@ -49,7 +49,8 @@
  \newcommand{\Dy}{\mathcal{D}(\theta,y)}
  \newcommand{\df}[3]{\mathsf{d}^{#1}f(#2;#3)}
  \newcommand{\parD}[3]{\mathsf{D}^{#1}_{#2}f(#3)}
-
+\newcommand{\hess}[2]{\mathsf{H}_{#1}f(#2)}
+\newcommand{\Mat}[1]{#1}
 
 \usepackage[style=authoryear,%
 			backend=biber,%
@@ -174,9 +175,9 @@ sparse Hessians using \emph{finite differencing}.  Section XX will
 cover the specifics, but the basic idea is as follows.  Consider a
 function $f(x)$ and its derivative $Df(x)$.  Let $e_k$ be the $k$th
 coordinate vector, and let $\delta$ be a sufficiently small scalar
-constant. The vector $H_kf(x)=\left(Df(x+\delta e_k) - Df(x)\right)/\delta$ is
+constant. The vector $\hess{k}{x}=\left(\parD{}{}{x+\delta e_k}- \parD{}{}{x}\right)/\delta$ is
 a linear approximation of the $k$th column of the Hessian matrix
-$Hf(x)$. Estimating a dense Hessian involves $K+1$ calculations of the
+$\hess{}{x}$. Estimating a dense Hessian involves $K+1$ calculations of the
 derivative: one for the derivative at $x$, and $K$ after perturbing each
 of the elements of $x$ one at a time.  However, if the Hessian is sufficiently sparse, we can perturb
 more than one element of $x$ at a time, and still recover the non-zero
@@ -203,7 +204,7 @@ even as additional heterogeneous units are added to the model.
   precision, of course).  This means that while we are using finite
   differencing to estimate the Hessian matrix, we should not use it to
   compute the gradient.  The time required to finite-difference
-  $Df(x)$ grows with $K$, while for algorithmic differentiation, the
+  $\parD{}{x}$ grows with $K$, while for algorithmic differentiation, the
   time is a small constant multiple of the time required to compute
   $f(x)$.  Also, the estimate of each $H_kf(x)$ would be a
   finite difference of finite differences, and the approximation
@@ -275,7 +276,7 @@ options(scipen=999)
 The log posterior density in Equation \ref{eq:LPD} has a sparse
 Hessian.  Since the $\beta_i$ are drawn iid from a multivariate
 normal, and the $y_i$ are conditionally independent,
-$H_{ij}=\dfrac{\partial^2\log\pi }{\partial\beta_i\beta_j}=0$ for all $i\neq
+$\mathsf{H}_{ij}=\dfrac{\partial^2\log\pi }{\partial\beta_i\beta_j}=0$ for all $i\neq
 j$.  However, all of the $\beta_i$ are correlated with
 $\mu$.
 
@@ -333,56 +334,49 @@ only \Sexpr{nnz2LT} values.
   their notion of the differential, but we will not be as formal in
   our proofs.
 
+  \subsubsection{Definitions of derivatives}
+
   Let $f(x)$ be a scalar-valued function, and let $x$ and $u$ be
   $K$-dimensional vectors.  Let $u$ be a sufficiently small positive
   real value.  If $k=1$, then the definition of the first \emph{derivative} of $f(x)$ is
   \begin{align}
-    \label{eq:9}
+    \label{eq:defDeriv1}
     f'(x)=\lim\limits_{u\to 0}\frac{f(x+u)-f(x)}{u}
   \end{align}
 
 which is equivalent to
 \begin{align}
-  \label{eq:10}
+  \label{eq:defDeriv2}
   f(x+u)=f(x)+uf'(x)+o(u)
 \end{align}
-
-For $K\ge 1$, \citet{MagnusNeudecker2007} define the first \emph{differential} of
-$f(x)$, with increment $u$, as
-\begin{align}
-  \label{eq:12}
-  \df{}{x}{u}=uf'(x)
-\end{align}
-The differential $\df{}{x}{u}$ is the linear component of the difference between
-$f(x+u)$ and $f(x)$, and $o(u)$ is a error term that goes to zero as
-$\|u\|\to 0$.
 
 The \emph{partial} derivative of $f(x)$ with respect to $x_j$ (the $j$th
 component of $x$) is defined as
 \begin{align}
-  \label{eq:13}
-\parD{}{j}{x}=\lim\limits_{t\to 0}\frac{f(x+te_j)-f(x)}{t}
+  \label{eq:defParD}
+\parD{}{j}{x}=\lim\limits_{\delta\to 0}\frac{f(x+\delta e_j)-f(x)}{\delta}
 \end{align}
 with $\parD{}{}{x}=\left(\parD{}{1}{x},\mathellipsis,\parD{}{K}{x}\right)$ as
-the vector of all partial derivatives.
+the vector of all partial derivatives.  Thus, we can compute a linear
+approximation to $\parD{}{j}{x}$ by computing
 
-By the \citet{MagnusNeudecker2007} ``First Identification Theorem'',
-$\df{x}{u}=\left(\parD{}{}{x}\right)u$, for
-$x,u\in\mathbb{R}^K$. Thus, as $\|u\|\to 0$, we can solve for each
-partial derivative by computing a finite difference between $f(x)$ and
-$f(x+u_je_j)$ and dividing by $u_j$.
-The \emph{gradient} is defined
-as $\nabla f(x)=\left(\parD{}{}{x}\right)^\top$.
+\begin{align}
+  \label{eq:25}
+  \parD{}{j}{x}\approx\frac{f(x+\delta e_j)-f(x)}{\delta}
+\end{align}
+for a sufficiently small $t$.
+
+The \emph{gradient} is defined as $\nabla f(x)=\left(\parD{}{}{x}\right)^\top$.
 
 The second-order partial derivative is defined as
 \begin{align}
   \label{eq:14}
-  \parD{2}{jk}{x}=\lim\limits_{t\to 0}\frac{\parD{}{j}{x+te_k}-\parD{}{j}{x}}{t}
+  \parD{2}{jk}{x}=\lim\limits_{\delta\to 0}\frac{\parD{}{j}{x+\delta e_k}-\parD{}{j}{x}}{\delta}
 \end{align}
 and the Hessian matrix is defined as
 \begin{align}
   \label{eq:15}
-  \mathsf{H}f(x)=
+  \hess{}{x}=
   \begin{pmatrix}
     \parD{2}{11}{x}&  \parD{2}{12}{x}&  \mathellipsis &  \parD{2}{1K}{x}\\
     \parD{2}{21}{x}&  \parD{2}{22}{x}&  \mathellipsis &  \parD{2}{2K}{x}\\
@@ -391,202 +385,14 @@ and the Hessian matrix is defined as
     \end{pmatrix}
 \end{align}
 
-
-A second-order approximation to $f(x)$ is
+To estimate the $k$th column of $\hess{}{x}$, we again choose a
+sufficiently small $t$, and compute
 \begin{align}
-  \label{eq:16}
-  f(x+u)=f(x)+\left(\parD{}{}{x}\right)u+\frac{1}{2}u^\top \mathsf{H}f(x)u+o\left(\|u\|^2\right).
-\end{align}
-
-Differentiating this approximation,
-
-\begin{align}
-  \label{eq:16a}
-  \parD{}{}{x+u}=\parD{}{}{x}+\left(\parD{}{}{x}\right)u+\frac{1}{2}u^\top \mathsf{H}f(x)u+o\left(\|u\|^2\right).
+  \label{eq:1}
+  \hess{k}{x}&\approx\frac{\parD{}{}{x+\delta e_k}-\parD{}{}{x}}{t}
 \end{align}
 
 
-The second differential is the differential of the first differential.
-\begin{align}
-  \label{eq:17}
-  \mathsf{d}^2f(x;u)&=\mathsf{d}\left(\mathsf{d}f\left(x;u\right);u\right)\\
- &=\mathsf{d}\left(\parD{}{}{x}u\right);u\\
- &=\mathsf{D}\left(\parD{}{}{x}u\right)u\\
- &=\mathsf{D}\left(\sum_{j=1}^K\parD{}{j}{x}u_j\right)u\\
- &=\sum_{i,j=1}^Ku_iu_j\parD{2}{ij}{x}\\
- &=u'\left(\mathsf{H}f(x)\right)u
-\end{align}
-
-The ``Second Identification Theorem'' in \citet{MagnusNeudecker2007}
-states that, for $x,u\in\mathbb{R}^K$,
-\begin{align}
-  \label{eq:ID2}
-  f(x+u)=f(x)+\df{}{x}{u}+\frac{1}{2}\df{2}{x}{u}+o\left(\|u\|^2\right)
-\end{align}
-
-Taylor's Theorem (MN, theorem 12): for some $\theta\in\left[0,1\right]$,
-
-\begin{align}
-  \label{eq:Taylors}
-  f(x+u)=f(x)+\df{}{x}{u}+\frac{1}{2}\df{2}{x+\theta u}{u}
-\end{align}
-
-Rearranging some stuff,
-
-\begin{align}
-  \label{eq:18}
-  \parD{}{}{x}u&=
-\end{align}
-
-
-
-By differentiating Taylors Theorem,
-
-\begin{align}
-  \label{eq:19}
-  \df{}{x+u}{v}-\df{}{x}{v}&\approx\mathsf{d}\left(\df{}{x}{u};v\right)\\
-\end{align}
-
-Somehow, we want to get from here to how a finite difference of first
-derivatives is a valid approximation to second derivatives.
-
-
-Finite differencing (FD) is a numerical differentiation method that
-operationalizes a Taylor series approximation to a differentiable
-function.  Let $f(x)$ be the scalar-valued function to be
-differentiated, and let $\delta$ be some small, positive, scalar
-value.  For scalar $x$, the second order
-approximation to $f(x)$ is
-  \begin{align}
-    \label{eq:1}
-  f(x+\delta)  &=f(x) + f'(x)\delta + \frac{1}{2}f''(x)\delta^2 +\mathcal{O}(\delta^2) \qquad\text{ as
-                 }\delta\rightarrow 0
-  \end{align}
-Dropping the terms of second order and above,
-    \begin{align}
-    \label{eq:FD1}
-    f'(x)&\approx\frac{f(x+\delta)-f(x)}{\delta}
-  \end{align}
-
-  The dividing the difference between $f(x+\delta)$ and $f(x)$ by a
-  suitably small $\delta$ is a first-order numerical approximation to
-  the derivative.
-
-  Differentiating the Taylor series, and rearranging terms,
-
-    \begin{align}
-    \label{eq:1}
-  f''(x)  &\approx \frac{f'(x+\delta) - f'(x)}{\delta}
-  \end{align}
-
-The second derivative is approximated by a difference in the first derivatives.
-
-For multivariate $x$, the Taylor series is
-
-\begin{align}
-  \label{eq:8}
-  f(x+\iota\delta)=f(x) +
-  \delta\iota'D{x}+\frac{1}{2}\delta\iota'H{x}\delta\iota + \mathcal{O}(\delta^2)
-\end{align}
-
-
-  Define $D(x)$ as the gradient of $f(x)$ at $x$,
-  and define $H(x)$ as the Hessian matrix. Let $\iota$ be a vector of ones. The multivariate Taylor series is
-
-  \begin{align}
-    \label{eq:2}
-    f(x+\delta\iota)=f(x) + \delta\iota' D(x) + \frac{1}{2}\delta\iota'H(x) \delta\iota+\mathcal{O}(\delta^2)
-  \end{align}
-
-The gradient can be computed by adding $\delta$ successively to each
-element of $x$, so the partial derivative with respect to $x_k$ is
-
-      \begin{align}
-    \label{eq:FD1K}
-    f_k'(x)&\approx\frac{f(x+\delta e_k)-f(x)}{\delta}\\
-        D(x)&=\left(f_1'(x), f_2'(x),\mathellipsis f_K'(x)\right)
-  \end{align}
-
-
-
-  a describes methods of approximating
-  derivates The use of finite differences for approximating derivatives
-  numerically starts with a Taylor series approximation to a
-  scalar-valued function.  Because the highest-order derivative we
-  will consider in this paper is the second, we will truncate our
-  Taylor series there.
-
-
-
-  \subsubsection{First order}
-
-
-  After rearranging terms, we can see that we can approximate $f(x)$
-  by choosing and arbitrarily small $h>0$.
-
-
-For a multivariate $x$, with length $K$, estimating $f'(x)$ involves
-computing $f(x)$ once, and then Equation \ref{eq:FD1} $K$ times by
-perturbing each of the elements of $x$ separately.
-
-Error and complexity analysis here
-
-\subsubsection{Second order}
-
-  By differentiating the Taylor series, we see that we can approximate a
-second derivative by computing a finite difference of the first
-derivative.
-
-\begin{align}
-  \label{eq:3}
-  f'(x+\delta)&=f'(x) + f''(x)\delta + O(\delta^2)\\
- f''(x)&\approx\frac{f'(x+\delta)-f'(x)}{\delta}
-\end{align}
-
-Suppose we can compute partial derivatives $f'_k(x)$ exactly for all
-$k=1\mathellipsis K$, and let $e_k$ be the $k$th coordinate vector. We can then approximate each column of the
-Hessian via finite differencing of the gradients.
-\begin{align}
-  \label{eq:4}
-  H_k&\approx\frac{f'(x + \delta e_k)-f'(x)}{\delta}
-\end{align}
-Using forward differencing, estimating the entire Hessian requires $K+1$ evaluations of
-the gradient, or the equivalent of $K^2+1$ function evaluations.  This
-is another reason why estimating a Hessian can be expensive for
-large problems.
-
-
-Error and complexity analysis here
-
-
-\subsection{Exploiting sparsity}
-
-We can reduce the number of gradient evaluations if the Hessian is sparse.
-
-
-If we know that some of the cross-partial derivatives are
-zero, we \emph{might} be able to estimate the Hessian with fewer gradient evaluations.
-Suppose $K=2$.  The Hessian matrix is
-
-\begin{align}
-  \label{eq:5}
-  H=
-  \begin{pmatrix}
-    f'_1(x_1+\delta,x_2) -f'_1(x_1,x_2)& f'_1(x_1, x_2+\delta) -f'_1(x_1,x_2)\\
-    f'_2(x_1+\delta, x_2) -f'_2(x_1,x_2) & f'_2(x_1, x_2+\delta) -f'_2(x_1,x_2)
-    \end{pmatrix}            /\delta
-\end{align}
-Of course, the off-diagonal elements are equal.  If the cross-partial derivatives are zero, then
-\begin{align}
-  \label{eq:6}
-   f'_1(x_1, x_2+\delta) -f'_1(x_1,x_2)&=0\\
-  f'_2(x_1+\delta, x_2) -f'_2(x_1,x_2)&=0\\
-\text{and, therefore,}\nonumber\\
-     f'_1(x_1+\delta, x_2+\delta) -f'_1(x_1+\delta,x_2)&=0\\
-  f'_2(x_1+\delta, x_2+\delta) -f'_2(x_1,x_2+\delta)&=0\\
-\end{align}
-
-By substitution,
 \begin{align}
   \label{eq:6}
   H=
@@ -595,43 +401,74 @@ By substitution,
    0& f'_2(x_1+\delta, x_2+\delta) -f'_2(x_1,x_2)
     \end{pmatrix}            /\delta
 \end{align}
-A single evaluation of the gradient $f'(x_1+\delta, x_2+\delta)$, and a single
-evaluation of the gradient at $f'(x_1, x_2)$, provide enough
-information to extract the non-zero elements of the Hessian.  Reducing
+
+For $K=2$, our estimate of a general $\hess{}{x}$ would be
+\begin{align}
+  \label{eq:FDhess2}
+  \hess{}{x}\delta&=
+  \begin{pmatrix}
+    \parD{}{1}{x_1+\delta, x_2}-\parD{}{1}{x_1,x_2}& \parD{}{1}{x_1,x_2+\delta}-\parD{}{1}{x_1,x_2}\\
+        \parD{}{2}{x_1+\delta, x_2}-\parD{}{2}{x_1,x_2}&  \parD{}{2}{x_1,x_2+\delta}-\parD{}{2}{x_1,x_2}
+    \end{pmatrix}
+\end{align}
+
+This estimate requires three evaluations of the first derivative vector:
+$\parD{}{}{x_1,x_2}$, $\parD{}{}{x_1+\delta,x_2}$, and
+$\parD{}{}{x_1,x_2+\delta}$.  Now suppose that the Hessian is sparse, and that the off-diagonal
+elements of it are zero.  Not only are
+\begin{align}
+  \label{eq:3}
+  \parD{}{1}{x_1,x_2+\delta}-\parD{}{1}{x_1,x_2}&=0\\
+    \parD{}{2}{x_1+\delta,x_2}-\parD{}{2}{x_1,x_2}&=0
+\end{align},
+but also,
+\begin{align}
+  \label{eq:3a}
+  \parD{}{1}{x_1+\delta,x_2+\delta}-\parD{}{1}{x_1+\delta,x_2}&=0\\
+    \parD{}{2}{x_1+\delta,x_2+\delta}-\parD{}{2}{x_1,x_2+\delta}&=0
+\end{align}
+Therefore,
+\begin{align}
+  \label{eq:FDhess2sp}
+  \hess{}{x}\delta&=
+  \begin{pmatrix}
+    \parD{}{1}{x_1+\delta, x_2+\delta}-\parD{}{1}{x_1,x_2}&0\\
+        0&  \parD{}{2}{x_1+\delta,x_2+\delta}-\parD{}{2}{x_1,x_2}
+    \end{pmatrix}
+\end{align}
+
+This estimate requires only two evaluations of the derivative:
+$\parD{}{}{x_1,x_2}$ and $\parD{}{}{x_1+\delta,x_2+\delta}$. Reducing
 the number of gradient evaluations from 3 to 2 depends on knowing that
 the cross-partial derivatives are zero.
 
 Now let's consider a general case, starting with a ``direct'' method
 first proposed in \citet{CurtisPowellReid1974} for Jacobian matrices, and described in \citet{PowellToint1979}. To begin, partition the variables
-into $G$ mutually exclusive groups, or ``colors,'' so $g_k$ indexes
-the color of variable $k$. Let $D$ and $Y$ be $K\times G$
-matrices, where $D_{kg}=\delta$ if variable $k$ belongs to group $g$, and zero
-otherwise, and let $D_g$ be the $g$th column of $D$.  Each column in $Y$ is defined as
+into $M$ mutually exclusive groups, or ``colors.'' so $m_k$ indexes
+the color of variable $k$. Let $\Mat{G}$ and $\Mat{Y}$ be $K\times M$
+matrices, where $\Mat{G}_{km}=\delta$ if variable $k$ belongs to group $m$, and zero
+otherwise, and let $G_m$ be the $m$th column of $G$.  Each column in $Y$ is defined as
 \begin{align}
   \label{eq:Yg}
-  Y_g&=f'(x+D_g)-f'(x)
+  Y_m&=\parD{}{}{x+G_m}-\parD{}{}{x}
 \end{align}
 
-If $G=K$ and $g_k=k$, then $D$ is a diagonal matrix with $\delta$ in each
-diagonal element.  The matrix equation $HD=Y$ represents the Taylor
+If $M=K$ and $m_k=k$, then $G$ is a diagonal matrix with $\delta$ in each
+diagonal element.  The matrix equation $\hess{}{x}G=Y$ represents the Taylor
 series approximation
-$H_{ik}\delta\approx y_k$, and we can solve for all elements of $H$
-just by computing $Y$. But if $G<K$,
-there must be at least one column of $D$ with $\delta$ in at least two
-elements. Column $Y_g$ is computed by perturbing two variables at
-once, and a particular $Y_{ig}$ would be equal to $\delta$ times a
-\emph{sum} of multiple elements in row $H_i$.  Without further restrictions on values in
-$H$, $HD=Y$ is an underdetermined system of linear equations, and we
-would not be able to compute $H$ by computing a $Y$ with
-fewer than $K$ columns.
+$\hess{ik}{x}\delta\approx y_{ik}$, and we can solve for all elements of $\hess{}{x}$
+just by computing $Y$. But if $M<K$,
+there must be at least one column $G_m$ with $\delta$ in at least two
+rows. Column $Y_m$ would have been computed by perturbing two variables at
+once, and we would not have been able to solve for any $\hess{ik}{x}$
+without further constraints.
 
-The necessary restrictions on $H$ come from the sparsity pattern.  We
-know which $h_{ik}=0$, so we can add those equations to $HD=Y$.  For
+The necessary restrictions come from the sparsity pattern. For
 example, consider a function with the following Hessian.
 
 \begin{align}
   \label{eq:7}
- H= \begin{pmatrix}
+ \hess{}{x}= \begin{pmatrix}
     h_{11}&0&h_{31}&0&0\\
     0&h_{22}&0&h_{42}&0\\
     h_{31}&0&h_{33}&0&h_{53}\\
@@ -639,26 +476,27 @@ example, consider a function with the following Hessian.
     0&0&h_{53}&0&h_{55}
   \end{pmatrix}
 \end{align}
-Note the subscripts on the elements take the symmetry of $H$ into account.
+Note the subscripts on the elements take the symmetry of the Hessian
+into account.
 
-Suppose $G=2$, and define the colors through the following $D$ matrix.
+Suppose $M=2$, and define the colors through the following $\Mat{G}$ matrix.
 
 \begin{align}
   \label{eq:7}
- D= \delta\begin{pmatrix}
-   1&0\\
-   1&0\\
-   0&1\\
-   0&1\\
-   1&0
+ \Mat{G}= \begin{pmatrix}
+   \delta&0\\
+   \delta&0\\
+   0&\delta\\
+   0&\delta\\
+   \delta&0
   \end{pmatrix}
 \end{align}
 Variables 1 and 2 have color 1, and variables 3, 4 and 5 have color
 2.  For the moment, we will postpone the discussion of how to
-choose $G$ and how to color the variables.
+choose $M$ and how to color the variables.
 
-Next, compute the columns of $Y$ using Equation \ref{eq:Yg}.  We now
-have the following system of linear equations from $HD=Y$.
+Next, compute the columns of $\Mat{Y}$ using Equation \ref{eq:Yg}.  We now
+have the following system of linear equations from $\hess{}{x}\Mat{G}=\Mat{Y}$.
 \begin{align}
   \label{eq:11}
   \begin{aligned}[c]
@@ -689,23 +527,132 @@ $h_{53}=y_{52}$.  We can then solve for
 $h_{31}=y_{31}-h_{53}=y_{31}-y_{52}$. Thus, we have determined a
 $5\times 5$ Hessian matrix with only three gradient evaluations, in
 contrast with the six that would have been needed had $H$ been treated
-as dense.
+as dense.  Solving  $\Mat{L}\Mat{G}=\Mat{Y}$ is known as either an ``indirect,'' or
+``triangular substitution'' method.  \pkg{sparseHessianFD} implements
+only substitution methods, and we will consider only those
+methods in this paper.
 
-Solving $HD=Y$, using the full Hessian is known as a ``direct''
-method, because the elements of the Hessian can be determined directly
-from $Y$, as long as an appropriate coloring of the variables is
-used.  Solving $LD=Y$ is known as either an ``indirect,'' or
-``triangular substitution'' method, for obvious reasons.  The
-substitution method is often preferred over direct methods for
-symmetric matrices because we can partition the
-variables with a lower $G$, and estimate the Hessian with fewer
-evaluations of the gradient.
-Direct methods will not necessarily be able to exploit the fact that
-the Hessian is symmetric. This is particularly true for banded
-Hessians, which was described by \citet{ColemanMore1984}, and reveal
-in the preceding example.  Therefore, we will restrict our attention
-in the subsequent sections to triangular substitution methods.
-to
+
+\subsection{Partitioning the variables}
+
+\Citet{PowellToint1979} showed that the following rule for
+partitioning the variables is consistent with a triangular
+substitution method:  two variables cannot be in the same group if
+their respective columns have a non-zero element in the same row.
+Certainly the grouping in the last example meets that criterion, but
+it is not the only possible grouping.  In fact, a valid, yet trivial
+grouping would have been to define five groups, each
+with one variable.  An objective of sparse Hessian estimation is to
+minimize the number of required gradient
+evaluations.  And that means to minimize the number of groups.
+
+\Citet{ColemanMore1984} were the first to characterize the
+partitioning of the variables as a graph coloring problem.  If each
+variable is a vertex in an undirected graph, then the sparsity pattern
+is an adjacency matrix.  Each non-zero element in the
+lower triangle of the Hessian represents an edge between two vertices.
+
+For example, look at Figure \ref{fig:graph1}. Figure
+\ref{fig:graph1adj} presents a sparsity pattern in the form of an
+adjacency matrix, and Figure \ref{fig:graph1pic} represents the
+pattern as a graph.  To estimate the Hessian associated with the
+sparsity pattern, we can partition the variables using three colors.
+In the adjacency matrix, we can see that there are no columns of the
+same color with a non-zero element in the same row. In the graph, we
+see that the coloring is valid, in that there are no two connected
+vertices with the same color.
+
+\begin{figure}
+  \begin{subfigure}[b]{.5\textwidth}
+  \begin{tabular}{r|>{\columncolor{green!20}}c%
+    >{\columncolor{blue!20}}c%
+    >{\columncolor{red!20}}c%
+    >{\columncolor{blue!20}}c%
+    >{\columncolor{red!20}}c%
+    >{\columncolor{blue!20}}c%
+    >{\columncolor{red!20}}c}
+   & 1&2&3&4&5&6&7\\
+    \hline
+    1& 1&&&&&&\\
+    2&1&1&&&&&\\
+    3&1&1&1&&&&\\
+    4&1&0&0&1&&&\\
+    5&1&0&0&1&1&&\\
+    6&1&0&0&0&0&1&\\
+    7&1&0&0&0&0&1&1
+  \end{tabular}
+  \caption{}\label{fig:graph1adj}
+\end{subfigure}
+\begin{subfigure}[b]{.5\textwidth}\centering
+\begin{tikzpicture}
+\tikzstyle{every node}=[draw, shape=circle]
+\path node at (0.5, 0) [fill=blue!20] (v2) {2};
+\path node at  (1.5, 0) [fill=red!20] (v3) {3};
+\path node at  (2.5, 0) [fill=blue!20] (v4) {4};
+\path node at  (3.5, 0) [fill=red!20] (v5) {5};
+\path node at  (4.5, 0) [fill=blue!20] (v6) {6};
+\path node at  (5.5, 0) [fill=red!20] (v7) {7};
+\path node at  (3, 1.5)  [fill=green!20] (v1) {1};
+\draw
+(v2) -- (v1)
+(v3) -- (v1)
+(v2) -- (v3)
+(v4) -- (v1)
+(v5) -- (v1)
+(v4) -- (v5)
+(v6) -- (v1)
+(v7) -- (v1)
+(v6) -- (v7);
+\end{tikzpicture}
+\caption{}\label{fig:graph1pic}
+\end{subfigure}
+\caption{}\label{fig:graph1}
+\end{figure}
+
+However, not all valid colorings are consistent with a substitution
+method.  \Citet{ColemanCai1986} proved that a coloring is consistent
+if and only if the coloring is \emph{cyclic}:  any cycle in the graph
+must use at least three colors.  This is readily apparent in Figure
+\ref{fig:graph1pic}; there is no way to get from any vertex back to
+itself without passing through a red, a blue and a green vertex.
+
+For this particular sparsity pattern, a ``greedy'' coloring algorithm
+will work.  We start with variable 1, and color it green.  Since
+variable 1 is connected to every other variable, no other variable can
+be green, so we color variable 2 blue. Variable 3 can be neither green
+nor blue, so we color it red.  Coloring variables 4 and 6 blue, and
+variables 5 and 7 red, completes a cyclic coloring of the graph.
+
+\Citet{PowellToint1979}, \citet{ColemanMore1984} and
+\citet{ColemanCai1986} all note that the ordering of the variables
+matters when determining the a valid coloring.  Figure
+\ref{fig:graph1perm} presents the sparsity pattern from Figure
+\ref{fig:graph1adj}, but with the first and last variables switched.
+Because we cannot assign the same color to two columns with a non-zero
+in the same row, coloring the variables in sequence would lead to each
+variable having a unique color.  Such a coloring is indeed cyclic, and
+would be consistent with a substitution method under the
+\citet{ColemanCai1986} criterion.  But it is hardly the best cyclic
+coloring available.
+
+  \begin{figure}[b]
+  \begin{tabular}{r|ccccccc}
+   & 7&2&3&4&5&6&1\\
+    \hline
+    7& 1&&&&&&\\
+    2&0&1&&&&&\\
+    3&0&1&1&&&&\\
+    4&0&0&0&1&&&\\
+    5&0&0&0&1&1&&\\
+    6&1&0&0&0&0&1&\\
+    1&1&1&1&1&1&1&1
+  \end{tabular}
+  \caption{}\label{fig:graph1perm}
+\end{figure}
+
+
+We implement a ``smallest-last'' ordering.
+
 
  \subsection{Note:  Who proved what}
 
@@ -720,7 +667,7 @@ allows for a substitution method (mentioned by
 assigned to partitions affects the partition.
 
 \Citet{ColemanMore1984} characterize \cite{PowellToint1979} as a graph
-coloring problem.  Also justify using the smalest-last ordering on the lower
+coloring problem.  Also justify using the smallest-last ordering on the lower
 triangle to color the variables
 
 \Citet{ColemanCai1986}:  there are other substitutable partitions than
@@ -764,14 +711,7 @@ From \citet{ColemanCai1986}, general result of substitutable
 \subsection{Partitioning the variables}
 
 
-Both \citet{CurtisPowellReid1974} (for direct methods) and
-\citet{PowellToint1979} (for substitution methods) propose the
-following rule for partitioning the variables:  two variables cannot
-be in the same group if their respective columns of the Hessian
-(direct) or its lower triangle (substitution) have a
-non-zero element in the same row.  In the example above, variables 1
-and 3 cannot be in the same group because columns 1 and 3 both have
-non-zero elements in row 3.
+
 
 This rule tells us how to exclude certain groupings, but not how to
 find an optimal one, with the fewest possible number of groups.
