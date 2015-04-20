@@ -95,7 +95,7 @@ List color_graph(const IntegerVector& pntr, //row/col pointer
     for (auto i : uncolored) {
       for (auto rr : Wk) {
 	P[i].erase(rr);
-	if (LT) {
+	if (LT) { // Can degree calculation go outside loop on Wk?
 	  deg[i] = std::distance(P[i].begin(), P[i].upper_bound(i));
 	} else {
 	  deg[i] = P[i].size();

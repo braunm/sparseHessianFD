@@ -653,57 +653,43 @@ coloring available.
 
 We implement a ``smallest-last'' ordering.
 
-
- \subsection{Note:  Who proved what}
-
-Consistent partitioning of $L$:  No column in the same group has a
-non-zero element in the same row.
-
-\Citet{PowellToint1979} showed that a consistent partitioning of $L$
-allows for a substitution method (mentioned by
-\citet{ColemanMore1984}.  This is a substitutable partition.
-
-\Citet{PowellToint1979} show that the order in which variables are
-assigned to partitions affects the partition.
-
-\Citet{ColemanMore1984} characterize \cite{PowellToint1979} as a graph
-coloring problem.  Also justify using the smallest-last ordering on the lower
-triangle to color the variables
-
-\Citet{ColemanCai1986}:  there are other substitutable partitions than
-lower triangular.  Theorem 2.2.  A mapping induces a substitution
-method if and only if the mapping is a cyclic coloring.
-
-Cyclic coloring:  At least 3 colors in every cycle.
-
-From \citet{ColemanCai1986}, general result of substitutable
-(beyond \citet{PowellToint1979}.  Order nonzero elements
-  $1\mathellipsis M$. If, for nonzero element $(i_m, j_m)$,
-
-
-  \begin{enumerate}
-\item  columns  $j_m$ and another other $j_{m'}$ are in the same
-  group, and both $j_m$ and $j_{m'}$ have a nonzero in row $i_m$, then
-  $i_{m'}, j_{m'}$ must be ordered before $i_m, j_m$; \emph{or}
-\item  columns  $i_m$ and another other $i_{m'}$ are in the same
-  group, and both $i_m$ and $i_{m'}$ have a nonzero in row $j_m$, then
-  $j_{m'}, i_{m'}$ must be ordered before $j_m, i_m$
-  \end{enumerate}
-
-  What this means is that we can ignore column intersections that
-  occur in lower rows (what?).
-
-  The point is that lower triangular substitution qualifies, which
-  means that we just need a cyclic coloring of the graph.
-
-
-  Note:  My coloring algorithm is a smallest last ordering of the full
-  symmetric Hessian  This is \emph{slpt} in \citet{ColemanMore1984}.
-  What I should really do is a smallest-last on the lower triangle
-  (\emph{slsl} in citet{ColemanMore1984}.  So I need to change that.
-
-  In any event, it's still finding a cyclic coloring of the adjacency
-  graph.  Just using a different heuristic for the coloring.
+\begin{algorithm}
+  \caption{Algorithm to generate a substitution-consistent coloring of variables}
+  \label{alg:color1}
+  \begin{algorithmic}
+    \STATE{$P$ is a list of sets, where $P[i]$ is the set of
+      non-zero column indices in row $i$}
+    \STATE{Initialize $D$ with degrees on graph}
+  \STATE{$k\leftarrow 0$}
+  \STATE{$S\leftarrow\{1,/mathellipsis,K\}$}\COMMENT{indices of all variables}
+  \WHILE{$S$ is not empty}
+      \STATE{Copy $S$ to $A$}
+      \WHILE{$A$ is not empty}
+          \STATE{$r\leftarrow$ variable id with largest degree in
+            current graph}
+          \STATE{Insert $r$ in $W[k]$}
+          \STATE{Remove $r$ from $S$}
+          \FOR{$a$ in all members of $A$}
+              \STATE{$N\leftarrow P[r]\cap a$}
+              \IF{$N$ is not empty}
+                  \STATE{$D_j\leftarrow 0$}
+                  \STATE{Remove $A_j$ from $A$}
+                \ENDIF
+                \STATE{Move $j$ to next element of $A$}
+          \ENDFOR
+          \STATE{Remove all variables from $P[r]$}
+          \ENDWHILE
+          \STATE{$D\leftarrow 0$}
+          \FOR{$i$ in all members of $S$}
+              \FOR{$j$ in all members of $W[k]$}
+                  \STATE{Remove $j$ from $P[i]$}
+                  \STATE{$D\leftarrow$ degree of $P[i]$}
+              \ENDFOR
+          \ENDFOR
+          \STATE{$k\leftarrow k+1$}
+    \ENDWHILE
+    \end{algorithmic}
+\end{algorithm}
 
 
 
@@ -1092,5 +1078,59 @@ function.  For this example, call that object F.
     would be cases of objective functions that are poorly conditioned,
     with ridges, plateaus or other pathologies, or cases for which
     such tiny errors will incur large costs.
+
+
+ \subsection{Note:  Who proved what}
+
+Consistent partitioning of $L$:  No column in the same group has a
+non-zero element in the same row.
+
+\Citet{PowellToint1979} showed that a consistent partitioning of $L$
+allows for a substitution method (mentioned by
+\citet{ColemanMore1984}.  This is a substitutable partition.
+
+\Citet{PowellToint1979} show that the order in which variables are
+assigned to partitions affects the partition.
+
+\Citet{ColemanMore1984} characterize \cite{PowellToint1979} as a graph
+coloring problem.  Also justify using the smallest-last ordering on the lower
+triangle to color the variables
+
+\Citet{ColemanCai1986}:  there are other substitutable partitions than
+lower triangular.  Theorem 2.2.  A mapping induces a substitution
+method if and only if the mapping is a cyclic coloring.
+
+Cyclic coloring:  At least 3 colors in every cycle.
+
+From \citet{ColemanCai1986}, general result of substitutable
+(beyond \citet{PowellToint1979}.  Order nonzero elements
+  $1\mathellipsis M$. If, for nonzero element $(i_m, j_m)$,
+
+
+  \begin{enumerate}
+\item  columns  $j_m$ and another other $j_{m'}$ are in the same
+  group, and both $j_m$ and $j_{m'}$ have a nonzero in row $i_m$, then
+  $i_{m'}, j_{m'}$ must be ordered before $i_m, j_m$; \emph{or}
+\item  columns  $i_m$ and another other $i_{m'}$ are in the same
+  group, and both $i_m$ and $i_{m'}$ have a nonzero in row $j_m$, then
+  $j_{m'}, i_{m'}$ must be ordered before $j_m, i_m$
+  \end{enumerate}
+
+  What this means is that we can ignore column intersections that
+  occur in lower rows (what?).
+
+  The point is that lower triangular substitution qualifies, which
+  means that we just need a cyclic coloring of the graph.
+
+
+  Note:  My coloring algorithm is a smallest last ordering of the full
+  symmetric Hessian  This is \emph{slpt} in \citet{ColemanMore1984}.
+  What I should really do is a smallest-last on the lower triangle
+  (\emph{slsl} in citet{ColemanMore1984}.  So I need to change that.
+
+  In any event, it's still finding a cyclic coloring of the adjacency
+  graph.  Just using a different heuristic for the coloring.
+
+
 
 \end{document}
