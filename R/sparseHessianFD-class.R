@@ -78,7 +78,8 @@ sparseHessianFD <-
                         idx2 <- ptr2[[1]]
                         pntr2 <- ptr2[[2]]
 
-                        colors <<- color_graph(pntr2-index1, idx2-index1, nvars)
+                        colors <<- color_graph(pntr2-index1, idx2-index1, nvars, TRUE)
+                        print(colors)
                         colors_vec <<- rep(0L, nvars)
                         for (i in 1:length(colors)) {
                             colors_vec[colors[[i]]+1] <<- as.integer(i-1)

@@ -7,8 +7,8 @@ context("binary example")
 test_that("binary_example", {
 
     set.seed(123)
-    data(binary_large)
-    binary <- binary_large
+    data(binary_small)
+    binary <- binary_small
 
     N <- length(binary$Y)
     k <- NROW(binary$X)
@@ -70,7 +70,7 @@ test_that("binary_example", {
     print(th1)
     cat("\nBanded:\n")
     print(th2)
-browser()
+
     expect_equal(test.val1, true.val1)
     expect_equal(test.grad1, true.grad1)
     expect_equal(test.hess1, true.hess1, tolerance=5e-8)

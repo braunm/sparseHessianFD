@@ -7,15 +7,16 @@
 using namespace Rcpp;
 
 // color_graph
-List color_graph(const IntegerVector& pntr, const IntegerVector& idx, const int nvars);
-RcppExport SEXP sparseHessianFD_color_graph(SEXP pntrSEXP, SEXP idxSEXP, SEXP nvarsSEXP) {
+List color_graph(const IntegerVector& pntr, const IntegerVector& idx, const int nvars, const bool LT);
+RcppExport SEXP sparseHessianFD_color_graph(SEXP pntrSEXP, SEXP idxSEXP, SEXP nvarsSEXP, SEXP LTSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< const IntegerVector& >::type pntr(pntrSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type idx(idxSEXP);
     Rcpp::traits::input_parameter< const int >::type nvars(nvarsSEXP);
-    __result = Rcpp::wrap(color_graph(pntr, idx, nvars));
+    Rcpp::traits::input_parameter< const bool >::type LT(LTSEXP);
+    __result = Rcpp::wrap(color_graph(pntr, idx, nvars, LT));
     return __result;
 END_RCPP
 }

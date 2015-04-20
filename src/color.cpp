@@ -2,7 +2,7 @@
 #include <RcppEigen.h>
 #include <Eigen/Core>
 #include <common_R.hpp>
-#include <chrono>
+
 
 using Rcpp::List;
 using Rcpp::IntegerVector;
@@ -35,10 +35,18 @@ void print_vec(const Eigen::MatrixBase<T>& X) {
   Rcout << "\n";
 }
 
+
+//' @name color_graph
+//' @description Generate valid cyclic coloring of variables that is consistent with estimating sparse Hessian with a triangle substitution method.
+//' @param pntr,idx row pointers and column indices (CSC or CSR format; same since Hessian matrix is symmetric). Must use zero-based indexing.
+//' @param nvars Dimension of Hessian (number of variables)
+//' @param LT true (default) if ordering with degree in lower triangle, and false if using full Hessian.  Included only for testing, to see if it matters (I don't think it does).
+//' @return A list.  Each element of the list represents a color, and contains an integer vector with the indices of the variables with that color.  Indices are zero-based.
 //[[Rcpp::export]]
 List color_graph(const IntegerVector& pntr, //row/col pointer
 		 const IntegerVector& idx, // col/row index
-		 const int nvars) {
+		 const int nvars,
+		 const bool LT = true) {
   
   // All pointers and indices are ZERO-BASED
   // and for the FULL MATRICES (not just LT)
@@ -53,7 +61,11 @@ List color_graph(const IntegerVector& pntr, //row/col pointer
     uncolored.insert(m);
     P[m] = S(idx.begin()+pntr(m), idx.begin()+pntr(m+1)); // rows
     jrows[m] = P[m];
-    deg(m) = P[m].size();
+    if (LT) {
+      deg(m) = std::distance(P[m].begin(), P[m].upper_bound(m));
+    } else {
+      deg(m) = P[m].size();
+    }
   }
 
   int k = 0;
@@ -86,7 +98,11 @@ List color_graph(const IntegerVector& pntr, //row/col pointer
     for (auto i : uncolored) {
       for (auto rr : Wk) {
 	P[i].erase(rr);
-	deg[i] = P[i].size();      
+	if (LT) {
+	  deg(i) = std::distance(P[i].begin(), P[i].upper_bound(i));
+	} else {
+	  deg[i] = P[i].size();
+	}
       }
     }
     W.push_back(Wk);
