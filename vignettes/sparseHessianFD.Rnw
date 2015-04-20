@@ -15,13 +15,14 @@
 
 \usepackage{algorithm}
 \usepackage{algorithmic}
-\usepackage{tikz}
+%%\usepackage{tikz}
+
 \usepackage{colortbl}
 \usepackage{parskip}
 \usepackage{setspace}
 \linespread{1.1}
 
-
+\usepackage{xcolor}
 \usepackage[colorlinks=true, urlcolor=NavyBlue]{hyperref}
 
 %%make knitr environment line spacing separate from LaTeX
@@ -41,12 +42,7 @@
 \newcommand{\variable}[1]{\texttt{#1}}
 \newcommand{\method}[1]{\textsl{#1}}
 
- \newcommand{\Prior}{\pi(\theta)}
- \newcommand{\Post}{\pi(\theta|y)}
- \newcommand{\Gtheta}{g(\theta)}
- \newcommand{\Phitheta}{\Phi(\theta|y)}
- \newcommand{\Ly}{\mathcal{L}(y)}
- \newcommand{\Dy}{\mathcal{D}(\theta,y)}
+
  \newcommand{\df}[3]{\mathsf{d}^{#1}f(#2;#3)}
  \newcommand{\parD}[3]{\mathsf{D}^{#1}_{#2}f(#3)}
 \newcommand{\hess}[2]{\mathsf{H}_{#1}f(#2)}
@@ -75,54 +71,9 @@
 
  \addbibresource{~/OneDriveBusiness/References/Papers/braun_refs.bib}
 
- \setlength{\bibitemsep}{1em}
-\AtEveryCitekey{\ifciteseen{}{\defcounter{maxnames}{2}}}
-\DeclareFieldFormat[article,incollection,unpublished]{title}{#1} %No quotes for article titles
-\DeclareFieldFormat[thesis]{title}{\mkbibemph{#1}} % Theses like book
-                                % titles
-\DeclareFieldFormat{pages}{#1} %% no pp prefix before page numbers
-\renewbibmacro{in:}{%
-  \ifentrytype{article}{}{ % Don't print In: for journal articles
-  \printtext{\bibstring{in}\intitlepunct}} %% but use elsewhere
-}
-\renewbibmacro*{volume+number+eid}{%
-  \printfield{volume}%
-  \printfield{number}%
-  \setunit{\addcomma\addspace}%
-  \printfield{eid}}
-
-\DeclareFieldFormat[article]{volume}{\mkbibbold{#1}}
-\DeclareFieldFormat[article]{number}{\mkbibparens{#1}}
-\DeclareFieldFormat[article]{date}{#1}
-\AtEveryBibitem{\clearfield{day}}
-
-\renewbibmacro*{issue+date}{% print month only
-  \printtext{%
-    \printfield{issue}\addspace%
-    \newunit%
-%\printtext{\printfield{month}}%
-}
-  \newunit}
-
-\renewbibmacro*{publisher+location+date}{% no print year
-  \printlist{location}%
-  \iflistundef{publisher}
-    {\setunit*{\addcomma\space}}
-    {\setunit*{\addcolon\space}}%
-  \printlist{publisher}%
-  \setunit*{\addcomma\space}%
-%%\printdate
-  \newunit}
-
-\renewcommand*{\nameyeardelim}{~} %no comma in cite
-\renewcommand{\bibitemsep}{1ex}
-\def\bibfont{\small}
-
 \title{\pkg{sparseHessianFD}: An \proglang{R} Package for Estimating Sparse Hessian Matrices}
 \author{Michael Braun\\Cox School of Business\\Southern Methodist University}
-\date{April 12, 2015}
-%\usepackage[dvipsnames,svgnames,x11names,hyperref]{xcolor}
-
+\date{April 20, 2015}
 
 
 \begin{document}
@@ -188,10 +139,10 @@ efficient.  In fact, for the hierarchical models that we consider in
 this paper, the number of derivative evaluations is \emph{constant},
 even as additional heterogeneous units are added to the model.
 
-%% At the outset, we have to mention that there may be some applications for
-%% which \pkg{sparseHessianFD} is not an appropriate package to use. To
-%% extract the maximum benefit from using \pkg{sparseHessianFD}, we need
-%% to accept a few conditions or assumptions. $\alpha$.
+At the outset, we have to mention that there may be some applications for
+which \pkg{sparseHessianFD} is not an appropriate package to use. To
+extract the maximum benefit from using \pkg{sparseHessianFD}, we need
+to accept a few conditions or assumptions.
 
 \begin{enumerate}
 \item The objective function $f(x)$ should be twice differentiable, and can be
@@ -584,26 +535,26 @@ vertices with the same color.
   \caption{}\label{fig:graph1adj}
 \end{subfigure}
 \begin{subfigure}[b]{.5\textwidth}\centering
-\begin{tikzpicture}
-\tikzstyle{every node}=[draw, shape=circle]
-\path node at (0.5, 0) [fill=blue!20] (v2) {2};
-\path node at  (1.5, 0) [fill=red!20] (v3) {3};
-\path node at  (2.5, 0) [fill=blue!20] (v4) {4};
-\path node at  (3.5, 0) [fill=red!20] (v5) {5};
-\path node at  (4.5, 0) [fill=blue!20] (v6) {6};
-\path node at  (5.5, 0) [fill=red!20] (v7) {7};
-\path node at  (3, 1.5)  [fill=green!20] (v1) {1};
-\draw
-(v2) -- (v1)
-(v3) -- (v1)
-(v2) -- (v3)
-(v4) -- (v1)
-(v5) -- (v1)
-(v4) -- (v5)
-(v6) -- (v1)
-(v7) -- (v1)
-(v6) -- (v7);
-\end{tikzpicture}
+%% \begin{tikzpicture}
+%% \tikzstyle{every node}=[draw, shape=circle]
+%% \path node at (0.5, 0) [fill=blue!20] (v2) {2};
+%% \path node at  (1.5, 0) [fill=red!20] (v3) {3};
+%% \path node at  (2.5, 0) [fill=blue!20] (v4) {4};
+%% \path node at  (3.5, 0) [fill=red!20] (v5) {5};
+%% \path node at  (4.5, 0) [fill=blue!20] (v6) {6};
+%% \path node at  (5.5, 0) [fill=red!20] (v7) {7};
+%% \path node at  (3, 1.5)  [fill=green!20] (v1) {1};
+%% \draw
+%% (v2) -- (v1)
+%% (v3) -- (v1)
+%% (v2) -- (v3)
+%% (v4) -- (v1)
+%% (v5) -- (v1)
+%% (v4) -- (v5)
+%% (v6) -- (v1)
+%% (v7) -- (v1)
+%% (v6) -- (v7);
+%% \end{tikzpicture}
 \caption{}\label{fig:graph1pic}
 \end{subfigure}
 \caption{}\label{fig:graph1}
@@ -651,39 +602,82 @@ coloring available.
 \end{figure}
 
 
-We implement a ``smallest-last'' ordering.
+The \pkg{sparseHessianFD} package implements the ``smallest-last
+ordering,'' first described in \citet{PowellToint1979}.  Other
+coloring algorithms have been proposed since
+\citep{ColmanCai1986,GebremedhinTarafdar2007,GebremedhinManne2005},
+but this algorithm is conceptually simple and easy to implement using
+standard data structures.  We include a detailed presentation of the algorithm as Algorithm
+\ref{alg:color1}, but the basic idea is as follows.
+\begin{enumerate}
+\item For Color $i$, start with the graph of the sparsity structure
+  for the Hessian after removing the rows and columns of previously
+  colored variables.  All remaining vertices in the graph are
+  ``candidates'' for the current color.\label{item:startColor}
+\item Let variable $r$ be the candidate vertex with the highest
+  degree.  Assign $r$ to color $i$, and remove it from both the candidate
+  list and the graph of uncolored variables.\label{item:maxDegree}
+\item Remove from the candidate list all of $r$'s neighbors, and their
+  neighbors.
+\item If some candidates remain, return to Step \ref{item:maxDegree}
+  to assign more vertices to color $i$.
+\item If the candidate list is empty, move to the next color and
+  return to Step \ref{item:startColor}.
+\end{enumerate}
+
+For the sparsity patterns in Figures \ref{fig:graph1} and \ref{fig:graph1perm}, the algorithm
+would proceed as follows:
+\begin{enumerate}
+\item Variable 1 has the highest degree, so color that vertex green.
+  Since 1 is connected to all other variable, no other variable can be
+  colored green. Variable 1 is now removed from the graph of uncolored
+  vertices.
+\item Variables 2, 4 and 6 all have the same degree, so we color
+  vertex 2 blue.  It's only distance-1 or distance-2 neighbor is
+  vertex 3, so we remove it from the blue candidate set.  S
+\end{enumerate}
+
+
 
 \begin{algorithm}
   \caption{Algorithm to generate a substitution-consistent coloring of variables}
   \label{alg:color1}
   \begin{algorithmic}
-    \STATE{$P$ is a list of sets, where $P[i]$ is the set of
-      non-zero column indices in row $i$}
-    \STATE{Initialize $D$ with degrees on graph}
+    \REQUIRE{Rows and columns are labeled as consecutive integers $1,\mathellipsis,K$}
+    \REQUIRE{$P,Q$, are lists of $K$ sets (initially identical), where
+      each $P[i]$ or $Q[i]$ is the set of column indices of the non-zero values in row $i$}
+    \REQUIRE{$W$, a stack of sets}
+    \REQUIRE{$D$, a vector of size $K$}
+    \REQUIRE{$S$, $A$ and $N$ are ordered sets}
+\FOR{$i$ = 1 \TO $K$}
+    \STATE{$D[i]\leftarrow size(P[i])$}
+  \ENDFOR
+  \STATE{Copy $P\rightarrow Q$}
   \STATE{$k\leftarrow 0$}
-  \STATE{$S\leftarrow\{1,/mathellipsis,K\}$}\COMMENT{indices of all variables}
+  \STATE{Insert $\{1,\mathellipsis,K\}\rightarrow S$}\COMMENT{indices of all variables}
+    \STATE{Initialize set $W[k]$}
   \WHILE{$S$ is not empty}
-      \STATE{Copy $S$ to $A$}
+      \STATE{Copy $S\rightarrow A$}
       \WHILE{$A$ is not empty}
-          \STATE{$r\leftarrow$ variable id with largest degree in
-            current graph}
-          \STATE{Insert $r$ in $W[k]$}
+          \STATE{$r\leftarrow$ index of $\max(D)$.}
+          \STATE{Insert $r\rightarrow W[k]$}
           \STATE{Remove $r$ from $S$}
-          \FOR{$a$ in all members of $A$}
-              \STATE{$N\leftarrow P[r]\cap a$}
+          \FOR{each $j$ in $A$}
+          \STATE{Clear $N$}
+              \STATE{$N\leftarrow P[r]\cap Q[j]$}\COMMENT{Remaining
+                2-degree neighbors}
               \IF{$N$ is not empty}
-                  \STATE{$D_j\leftarrow 0$}
-                  \STATE{Remove $A_j$ from $A$}
+                  \STATE{$D[j]\leftarrow 0$}
+                  \STATE{Remove $j$ from $A$}
                 \ENDIF
-                \STATE{Move $j$ to next element of $A$}
           \ENDFOR
-          \STATE{Remove all variables from $P[r]$}
+          \STATE{Clear $P[r]$}
           \ENDWHILE
-          \STATE{$D\leftarrow 0$}
-          \FOR{$i$ in all members of $S$}
-              \FOR{$j$ in all members of $W[k]$}
+          \STATE{$D[1,\mathellipsis,K]\leftarrow 0$}
+          \FOR{each $i$ in $S$}
+              \FOR{each $j$ in $W[k]$}
                   \STATE{Remove $j$ from $P[i]$}
-                  \STATE{$D\leftarrow$ degree of $P[i]$}
+                  \STATE{$D[i]\leftarrow size(P[i])$}
               \ENDFOR
           \ENDFOR
           \STATE{$k\leftarrow k+1$}
@@ -742,25 +736,25 @@ is an adjacency matrix in an undirected graph.
   \end{tabular}
 \end{subfigure}
 \begin{subfigure}[b]{.5\textwidth}\centering
-\begin{tikzpicture}
-\tikzstyle{every node}=[draw, shape=circle]
-\path node at (0.5,1.5) [fill=red!20] (v1) {1};
-\path node at  (1.5,1.5) [fill=blue!20] (v2) {2};
-\path node at  (2.5,1.5) [fill=red!20] (v3) {3};
-\path node at  (3.5,1.5) [fill=blue!20] (v4) {4};
-\path node at  (4.5,1.5) [fill=red!20] (v5) {5};
-\path node at  (5.5,1.5) [fill=blue!20] (v6) {6};
-\path node at  (3,0)  [fill=green!20] (v7) {7};
-\draw (v1) -- (v2)
-(v1) -- (v7)
-(v2) -- (v7)
-(v3) -- (v4)
-(v3) -- (v7)
-(v4) -- (v7)
-(v5) -- (v6)
-(v5) -- (v7)
-(v6) -- (v7);
-\end{tikzpicture}
+%% \begin{tikzpicture}
+%% \tikzstyle{every node}=[draw, shape=circle]
+%% \path node at (0.5,1.5) [fill=red!20] (v1) {1};
+%% \path node at  (1.5,1.5) [fill=blue!20] (v2) {2};
+%% \path node at  (2.5,1.5) [fill=red!20] (v3) {3};
+%% \path node at  (3.5,1.5) [fill=blue!20] (v4) {4};
+%% \path node at  (4.5,1.5) [fill=red!20] (v5) {5};
+%% \path node at  (5.5,1.5) [fill=blue!20] (v6) {6};
+%% \path node at  (3,0)  [fill=green!20] (v7) {7};
+%% \draw (v1) -- (v2)
+%% (v1) -- (v7)
+%% (v2) -- (v7)
+%% (v3) -- (v4)
+%% (v3) -- (v7)
+%% (v4) -- (v7)
+%% (v5) -- (v6)
+%% (v5) -- (v7)
+%% (v6) -- (v7);
+%% \end{tikzpicture}
 \end{subfigure}
 \end{figure}
 
