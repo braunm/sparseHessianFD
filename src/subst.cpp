@@ -6,8 +6,8 @@
 
 
 
-//' @name subst
-//' @description Run triangular subsitution algorithm
+//' @title Estimate sparse Hessian
+//' @description Estimate Hessian using triangular subsitution algorithm
 //' @param Y Matrix of finite differences
 //' @param colors Vector of length nvars that identifies color of each variable
 //' @param W A list.  Each element represents a color, and contains an integer vector with the indices of the variables with that color.  Indexing is zero-based.

@@ -3,9 +3,23 @@
 \docType{data}
 \name{binary-data}
 \alias{binary-data}
+\alias{binary_large}
+\alias{binary_large-data}
+\alias{binary_small}
+\alias{binary_small-data}
+\alias{binary_super-data}
 \title{Sample simulated data for binary choice model in vignette}
 \description{
 Simulated data.  See vignette.  Generated from
 data-raw/binary.R
+
+Simulated data, with $N=20$ and $k=2$.  See vignette.
+Generated from data-raw/binary.R
+
+Simulated data, with $N=800$ and $k=3$.  See vignette.
+Generated from data-raw/binary.R
+
+Simulated data, with $N=1200$ and $k=3$.  See vignette.
+Generated from data-raw/binary.R
 }
 

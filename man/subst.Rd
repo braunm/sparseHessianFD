@@ -2,6 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{subst}
 \alias{subst}
+\title{Estimate sparse Hessian}
 \usage{
 subst(Y, colors, W, jCol, ipntr, delta, nvars, nnz)
 }
@@ -30,6 +31,6 @@ subst(Y, colors, W, jCol, ipntr, delta, nvars, nnz)
 A sparse Hessian of class dgCMatrix.
 }
 \description{
-Run triangular subsitution algorithm
+Estimate Hessian using triangular subsitution algorithm
 }
 

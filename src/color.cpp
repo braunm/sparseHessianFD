@@ -33,8 +33,7 @@ void print_vec(const Eigen::MatrixBase<T>& X) {
 }
 */
 
-
-//' @name color_graph
+//' @title Color graph of sparse Hessian
 //' @description Generate valid cyclic coloring of variables that is consistent with estimating sparse Hessian with a triangle substitution method.
 //' @param pntr,idx row pointers and column indices (CSC or CSR format; same since Hessian matrix is symmetric). Must use zero-based indexing.
 //' @param nvars Dimension of Hessian (number of variables)

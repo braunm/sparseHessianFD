@@ -2,6 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{color_graph}
 \alias{color_graph}
+\title{Color graph of sparse Hessian}
 \usage{
 color_graph(pntr, idx, nvars, LT = TRUE)
 }
