@@ -49,21 +49,21 @@ test_that("indexing", {
     pat1S <- Matrix.to.Coord(true.hess1)
     pat2S <- Matrix.to.Coord(true.hess2)
 
-    obj1L <- new("sparseHessianFD", P, f1$fn, f1$gr, pat1L$rows, pat1L$cols,
+    obj1L <- sparseHessianFD(P, f1$fn, f1$gr, pat1L$rows, pat1L$cols,
                 index1=TRUE)
-    obj2L <- new("sparseHessianFD", P, f2$fn, f2$gr, pat2L$rows, pat2L$cols,
+    obj2L <- sparseHessianFD(P, f2$fn, f2$gr, pat2L$rows, pat2L$cols,
                 index1=TRUE)
-    obj3L <- new("sparseHessianFD", P, f1$fn, f1$gr, pat1L$rows-1, pat1L$cols-1,
+    obj3L <- sparseHessianFD(P, f1$fn, f1$gr, pat1L$rows-1, pat1L$cols-1,
                 index1=FALSE)
-    obj4L <- new("sparseHessianFD", P, f2$fn, f2$gr, pat2L$rows-1, pat2L$cols-1,
+    obj4L <- sparseHessianFD(P, f2$fn, f2$gr, pat2L$rows-1, pat2L$cols-1,
                  index1=FALSE)
-    ## obj1S <- new("sparseHessianFD", P, f1$fn, f1$gr, pat1S$rows, pat1S$cols,
+    ## obj1S <- sparseHessianFD(P, f1$fn, f1$gr, pat1S$rows, pat1S$cols,
     ##              index1=TRUE)
-    ## obj2S <- new("sparseHessianFD", P, f2$fn, f2$gr, pat2S$rows, pat2S$cols,
+    ## obj2S <- sparseHessianFD(P, f2$fn, f2$gr, pat2S$rows, pat2S$cols,
     ##              index1=TRUE)
-    ## obj3S <- new("sparseHessianFD", P, f1$fn, f1$gr, pat1S$rows-1, pat1S$cols-1,
+    ## obj3S <- sparseHessianFD(P, f1$fn, f1$gr, pat1S$rows-1, pat1S$cols-1,
     ##              index1=FALSE)
-    ## obj4S <- new("sparseHessianFD", P, f2$fn, f2$gr, pat2S$rows-1, pat2S$cols-1,
+    ## obj4S <- sparseHessianFD(P, f2$fn, f2$gr, pat2S$rows-1, pat2S$cols-1,
     ##              index1=FALSE)
 
     H1L <- obj1L$hessian(P)

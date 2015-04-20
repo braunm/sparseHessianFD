@@ -1,5 +1,4 @@
 #include <Rcpp.h>
-#include <common_R.hpp>
 
 
 using Rcpp::List;

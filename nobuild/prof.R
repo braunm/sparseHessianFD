@@ -1,8 +1,8 @@
 rm(list=ls())
 gc()
 set.seed(123)
-data(binary_small)
-binary <- binary_small
+data(binary_large)
+binary <- binary_large
 
 N <- length(binary$Y)
 k <- NROW(binary$X)
@@ -45,8 +45,8 @@ true.hess2 <- drop0(f2$hessian(P))
 pat1 <- Matrix.to.Coord(tril(true.hess1))
 pat2 <- Matrix.to.Coord(tril(true.hess2))
 
-ts1 <- system.time(obj1 <- new("sparseHessianFD", P, f1$fn, f1$gr, pat1$rows, pat1$cols))
-ts2 <- system.time(obj2 <- new("sparseHessianFD", P, f2$fn, f2$gr, pat2$rows, pat2$cols))
+ts1 <- system.time(obj1 <- sparseHessianFD(P, f1$fn, f1$gr, pat1$rows, pat1$cols))
+ts2 <- system.time(obj2 <- sparseHessianFD(P, f2$fn, f2$gr, pat2$rows, pat2$cols))
 
 test.val1 <- obj1$fn(P)
 test.grad1 <- obj1$gr(P)

@@ -8,6 +8,10 @@
 \description{
 A reference class for computing sparse Hessians
 }
+\details{
+Do not access any of the fields directly.  Use the
+initializer instead.
+}
 \section{Fields}{
 
 \describe{
