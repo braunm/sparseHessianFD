@@ -17,6 +17,7 @@
 ##' @field idx,pntr Column indices and row pointers for non-zero elements in lower triangle of the Hessian.  Row-oriented compressed storage.
 ##' @field colors A list representation of the partitioning of the columns of the Hessian.  This is used as part of the estimation algorithm.  Specifically, each list element is a "color," and each element in the corresponding vector is a column with that color.  See references.
 ##' @field colors_vec A vector representation of the partitioning of the columns.  There are nvars elements, one for each column of the Hessian.  The value corresponds to the "color" for that column.
+##' @details Do not access any of the fields directly.  Use the initializer instead.
 ##' @export sparseHessianFD
 sparseHessianFD <-
     setRefClass("sparseHessianFD",
@@ -78,8 +79,8 @@ sparseHessianFD <-
                         idx2 <- ptr2[[1]]
                         pntr2 <- ptr2[[2]]
 
-                        colors <<- color_graph(pntr2-index1, idx2-index1, nvars, TRUE)
-                        print(colors)
+                        colors <<- color_graph(pntr2-index1, idx2-index1, nvars, FALSE)
+
                         colors_vec <<- rep(0L, nvars)
                         for (i in 1:length(colors)) {
                             colors_vec[colors[[i]]+1] <<- as.integer(i-1)

@@ -4,6 +4,18 @@
 #include <Eigen/Sparse>
 
 
+
+
+//' @name subst
+//' @description Run triangular subsitution algorithm
+//' @param Y Matrix of finite differences
+//' @param colors Vector of length nvars that identifies color of each variable
+//' @param W A list.  Each element represents a color, and contains an integer vector with the indices of the variables with that color.  Indexing is zero-based.
+//' @param jCol,ipntr Column indices and row pointers for non-zero elements of lower triangle of Hessian.
+//' @param delta Perturbation factor used to compute finite differences.
+//' @param nvars Dimension of Hessian (number of variables)
+//' @param nnz Number of non-zero elements in the lower triangle of the Hessian.
+//' @return A sparse Hessian of class dgCMatrix.
 //[[Rcpp::export]]
 Rcpp::S4 subst(const Rcpp::NumericMatrix& Y,
 	       const Rcpp::IntegerVector& colors,
