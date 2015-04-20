@@ -1,13 +1,10 @@
 #include <Rcpp.h>
-#include <RcppEigen.h>
-#include <Eigen/Core>
 #include <common_R.hpp>
 
 
 using Rcpp::List;
 using Rcpp::IntegerVector;
 using Rcpp::Rcout;
-using Eigen::VectorXi;
 
 
 typedef std::set<int> S;
@@ -23,6 +20,7 @@ void print_container(const T& X) {
   Rcout << "\n";
 }
 
+/*
 template<typename T>
 void print_vec(const Eigen::MatrixBase<T>& X) {
   int z = 0;
@@ -34,6 +32,7 @@ void print_vec(const Eigen::MatrixBase<T>& X) {
   }
   Rcout << "\n";
 }
+*/
 
 
 //' @name color_graph
@@ -53,8 +52,8 @@ List color_graph(const IntegerVector& pntr, //row/col pointer
 
   std::vector<std::set<int> > W; // colorings
   S uncolored;
-  VectorXi deg(nvars);
-
+  std::vector<int> deg(nvars);
+  
   std::vector<std::set<int> > P(nvars), jrows(nvars);
 
   for (int m=0; m < nvars; m++) {
@@ -62,9 +61,9 @@ List color_graph(const IntegerVector& pntr, //row/col pointer
     P[m] = S(idx.begin()+pntr(m), idx.begin()+pntr(m+1)); // rows
     jrows[m] = P[m];
     if (LT) {
-      deg(m) = std::distance(P[m].begin(), P[m].upper_bound(m));
+      deg[m] = std::distance(P[m].begin(), P[m].upper_bound(m));
     } else {
-      deg(m) = P[m].size();
+      deg[m] = P[m].size();
     }
   }
 
@@ -75,7 +74,7 @@ List color_graph(const IntegerVector& pntr, //row/col pointer
     S A = S(uncolored); // all uncolored are candidates
 
     while (!A.empty()) { // while there are still candidates
-      deg.maxCoeff(&r); // chose r,  candidate with highest degree
+      r = std::distance(deg.begin(), max_element(deg.begin(), deg.end()));
       Wk.insert(r); // put r in color k
       uncolored.erase(r); // remove r from uncolored      
       for (auto j = A.begin(); j != A.end(); ) {
@@ -84,7 +83,7 @@ List color_graph(const IntegerVector& pntr, //row/col pointer
 			 jrows[*j].begin(), jrows[*j].end(),
 			 std::inserter(in_nei, in_nei.begin()));	
 	if (!in_nei.empty()) {
-	  deg(*j) = 0;
+	  deg[*j] = 0;
 	  j = A.erase(j);
 	} else {
 	  ++j;
@@ -94,12 +93,12 @@ List color_graph(const IntegerVector& pntr, //row/col pointer
     } // until no more candidates
     
     // remove r as neighbor for everyone else, and recompute degrees
-    deg.setZero();
+    fill(deg.begin(), deg.end(), 0);
     for (auto i : uncolored) {
       for (auto rr : Wk) {
 	P[i].erase(rr);
 	if (LT) {
-	  deg(i) = std::distance(P[i].begin(), P[i].upper_bound(i));
+	  deg[i] = std::distance(P[i].begin(), P[i].upper_bound(i));
 	} else {
 	  deg[i] = P[i].size();
 	}
