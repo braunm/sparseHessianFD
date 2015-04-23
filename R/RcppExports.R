@@ -5,9 +5,9 @@
 #' @description Generate valid cyclic coloring of variables that is consistent with estimating sparse Hessian with a triangle substitution method.
 #' @param pntr,idx row pointers and column indices (CSC or CSR format; same since Hessian matrix is symmetric). Must use zero-based indexing.
 #' @param nvars Dimension of Hessian (number of variables)
-#' @param LT true (default) if ordering with degree in lower triangle, and false if using full Hessian.  Included only for testing, to see if it matters (I don't think it does).
+#' @param LT true if ordering with degree in lower triangle, and false (default) if using full Hessian.  Included only for testing, to see if it matters (I don't think it does).
 #' @return A list.  Each element of the list represents a color, and contains an integer vector with the indices of the variables with that color.  Indices are zero-based.
-color_graph <- function(pntr, idx, nvars, LT = TRUE) {
+color_graph <- function(pntr, idx, nvars, LT = FALSE) {
     .Call('sparseHessianFD_color_graph', PACKAGE = 'sparseHessianFD', pntr, idx, nvars, LT)
 }
 
