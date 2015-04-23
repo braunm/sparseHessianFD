@@ -54,6 +54,7 @@
  \newcommand{\df}[3]{\mathsf{d}^{#1}f(#2;#3)}
  \newcommand{\parD}[3]{\mathsf{D}^{#1}_{#2}f(#3)}
 \newcommand{\hess}[2]{\mathsf{H}_{#1}f(#2)}
+\newcommand{\hessLT}[2]{\mathsf{L}_{#1}f(#2)}
 \newcommand{\Mat}[1]{#1}
 
 \usepackage[style=authoryear,%
@@ -277,10 +278,10 @@ In this case, the Hessian has a "block-arrow" structure.  For example,
 if $N=\Sexpr{N}$ and $k=\Sexpr{k}$, then there are `\Sexpr{nv1}` total variables, and the Hessian will have the following pattern.
 
 <<>>=
-M <- as(kronecker(diag(N),matrix(1,k,k)),"lMatrix")
-M <- rBind(M, Matrix(TRUE,k,N*k))
-M <- cBind(M, Matrix(TRUE, k*(N+1), k))
-print(M)
+Mat <- as(kronecker(diag(N),matrix(1,k,k)),"lMatrix")
+Mat <- rBind(Mat, Matrix(TRUE,k,N*k))
+Mat <- cBind(Mat, Matrix(TRUE, k*(N+1), k))
+print(Mat)
 @
 
 Another possibility is to group coefficients for each covariate
@@ -293,10 +294,10 @@ together.
 Now the Hessian has an "off-diagonal" sparsity pattern.
 
 <<>>=
-M <- as(kronecker(matrix(1,k,k), diag(N)),"lMatrix")
-M <- rBind(M, Matrix(TRUE,k,N*k))
-M <- cBind(M, Matrix(TRUE, k*(N+1), k))
-print(M)
+Mat <- as(kronecker(matrix(1,k,k), diag(N)),"lMatrix")
+Mat <- rBind(Mat, Matrix(TRUE,k,N*k))
+Mat <- cBind(Mat, Matrix(TRUE, k*(N+1), k))
+print(Mat)
 @
 
 In both cases, the number of non-zeros is the same.   There are \Sexpr{nels1} elements in this symmetric matrix, but only \Sexpr{nnz1} are
@@ -380,10 +381,10 @@ The following code constructs a block diagonal matrix, and extracts
 the sparsity pattern from its lower triangle.
 
 <<exPattern>>=
-M <- as(kronecker(Diagonal(3), Matrix(T,2,2)),"nMatrix")
-M
-tril(M)
-mc <- Matrix.to.Coord(tril(M))
+Mat <- as(kronecker(Diagonal(3), Matrix(T,2,2)),"nMatrix")
+Mat
+tril(Mat)
+mc <- Matrix.to.Coord(tril(Mat))
 mc
 @
 The list elements \funcarg{mc\$row} and \funcarg{mc\$col} can be
@@ -395,8 +396,8 @@ intended matrix, use the \func{Coord.to.Pattern.Matrix} function,
 which is just a wrapper to \pkg{Matrix}'s \func{sparseMatrix} constructor.
 
 <<>>=
-M2 <- Coord.to.Pattern.Matrix(mc$rows, mc$cols, dims=dim(M))
-M2
+pattern <- Coord.to.Pattern.Matrix(mc$rows, mc$cols, dims=dim(Mat))
+pattern
 @
 
 
@@ -447,6 +448,7 @@ priors as lists.  The \func{data()} call adds the appropriate data
 list to the environment, but we need to construct the prior list ourselves.
 
 <<>>=
+library(sparseHessianFD)
 set.seed(123)
 data(binary_small)
 binary <- binary_small
@@ -457,21 +459,22 @@ nvars <- as.integer(N*k + k)
 P <- rnorm(nvars) ## random starting values
 priors <- list(inv.Sigma = rWishart(1,k+5,diag(k))[,,1],
                inv.Omega = diag(k))
+nvars
 @
 
 <<echo=FALSE>>=
 options(scipen=-999)
 @
 
-This dataset represents the simulated choices for $N= \Sexpr{N}$ customers
+KnThis dataset represents the simulated choices for $N= \Sexpr{N}$ customers
 over $T= \Sexpr{T}$ purchase opportunties, where the probability of purchase
 is influenced by $k= \Sexpr{k}$ covariates.
 
 The following code chunk evaluates the ``true'' value, gradient and
 Hessian.  The \funcarg{order.row} argument tells the function whether
 the variables are ordered by household (\variable{TRUE}) or by covariate
-(\variable{FALSE}). If `order.row=TRUE`, then the Hessian
-will have an off-diagonal pattern.  If `order.row=FALSE`, then the
+(\variable{FALSE}). If \funcarg{order.row} is \variable{TRUE}, then the Hessian
+will have an off-diagonal pattern.  If \funcarg{order.row} is \variable{FALSE}, then the
 Hessian will have a block-arrow pattern.
 
 <<>>=
@@ -505,20 +508,14 @@ obj <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
 @
 
 Now we can evaluate the function value, gradient and Hessian through
-`obj`.
+`obj`, and compare to the true values.
 
 <<>>=
 f <- obj$fn(P) #$
-gr <- obj$gr(P) #$
-hs <- obj$hessian(P) #$
-@
-
-Do we get the same results that we would get after calling \func{binary.f},
-`binary.grad` and `binary.hess` directly?  Let's see.
-
-<<>>=
 all.equal(f, true.f)
+gr <- obj$gr(P) #$
 all.equal(gr, true.grad)
+hs <- obj$hessian(P) #$
 all.equal(hs, true.hess)
 @
 
@@ -546,23 +543,17 @@ print(fd.time)
 @
 
 
-    \section{Underlying theory and algorithms}\label{sec:theory}
+    \section{Theory and Implementation}\label{sec:theory}
+
+    This section explains why and how the package works, and can be
+    skipped by end users with little interest in such things.
 
 
   \subsection{Numerical differentiation}\label{sec:numdiff}
 
 
-  In this section, we review the theoretical basis for approximating
-  derivatives using finite differences.  To facilitate this
-  discussion, we use the notation of \citet{MagnusNeudecker2007}, and
-  their notion of the differential, but we will not be as formal in
-  our proofs.
-
-  \subsubsection{Definitions of derivatives}
-
   Let $f(x)$ be a scalar-valued function, and let $x$ and $u$ be
-  $M$-dimensional vectors.  Let $u$ be a sufficiently small positive
-  real value.  If $k=1$, then the definition of the first \emph{derivative} of $f(x)$ is
+  $M$-dimensional vectors.  For $M=1$, then the definition of the first \emph{derivative} of $f(x)$ is
   \begin{align}
     \label{eq:defDeriv1}
     f'(x)=\lim\limits_{u\to 0}\frac{f(x+u)-f(x)}{u}
@@ -574,23 +565,26 @@ which is equivalent to
   f(x+u)=f(x)+uf'(x)+o(u)
 \end{align}
 
-The \emph{partial} derivative of $f(x)$ with respect to $x_j$ (the $j$th
-component of $x$) is defined as
+\footnote{A function $g(x)\in o(x)$ if $\lim\limits_{x\to 0}\dfrac{g(x)}{x}=0$.}
+
+For $M>1$, define the \emph{partial} derivative of $f(x)$ with respect to $x_j$ (the $j$th
+component of $x$) as
 \begin{align}
   \label{eq:defParD}
 \parD{}{j}{x}=\lim\limits_{\delta\to 0}\frac{f(x+\delta e_j)-f(x)}{\delta}
 \end{align}
-with $\parD{}{}{x}=\left(\parD{}{1}{x},\mathellipsis,\parD{}{M}{x}\right)$ as
-the vector of all partial derivatives.  Thus, we can compute a linear
+Thus, we can compute a linear
 approximation to $\parD{}{j}{x}$ by computing
 
 \begin{align}
   \label{eq:25}
   \parD{}{j}{x}\approx\frac{f(x+\delta e_j)-f(x)}{\delta}
 \end{align}
-for a sufficiently small $t$.
+for a sufficiently small $\delta$.
 
-The \emph{gradient} is defined as $\nabla f(x)=\left(\parD{}{}{x}\right)^\top$.
+
+The vector $\parD{}{}{x}=\left(\parD{}{1}{x},\mathellipsis,\parD{}{M}{x}\right)$ is
+the vector of all partial derivatives.  The \emph{gradient} is defined as $\nabla f(x)=\left(\parD{}{}{x}\right)^\top$.
 
 The second-order partial derivative is defined as
 \begin{align}
@@ -610,36 +604,29 @@ and the Hessian matrix is defined as
 \end{align}
 
 To estimate the $k$th column of $\hess{}{x}$, we again choose a
-sufficiently small $t$, and compute
+sufficiently small $\delta$, and compute
 \begin{align}
   \label{eq:1}
-  \hess{k}{x}&\approx\frac{\parD{}{}{x+\delta e_k}-\parD{}{}{x}}{t}
+  \hess{k}{x}&\approx\frac{\parD{}{}{x+\delta e_k}-\parD{}{}{x}}{\delta}
 \end{align}
 
-
-\begin{align}
-  \label{eq:6}
-  H=
-  \begin{pmatrix}
-    f'_1(x_1+\delta,x_2+h) -f'_1(x_1,x_2)& 0\\
-   0& f'_2(x_1+\delta, x_2+\delta) -f'_2(x_1,x_2)
-    \end{pmatrix}            /\delta
-\end{align}
 
 For $M=2$, our estimate of a general $\hess{}{x}$ would be
 \begin{align}
   \label{eq:FDhess2}
-  \hess{}{x}\delta&=
+  \hess{}{x}&=
   \begin{pmatrix}
     \parD{}{1}{x_1+\delta, x_2}-\parD{}{1}{x_1,x_2}& \parD{}{1}{x_1,x_2+\delta}-\parD{}{1}{x_1,x_2}\\
         \parD{}{2}{x_1+\delta, x_2}-\parD{}{2}{x_1,x_2}&  \parD{}{2}{x_1,x_2+\delta}-\parD{}{2}{x_1,x_2}
-    \end{pmatrix}
+    \end{pmatrix}/\delta
 \end{align}
 
-This estimate requires three evaluations of the first derivative vector:
+This estimate requires three evaluations of the gradient to get
 $\parD{}{}{x_1,x_2}$, $\parD{}{}{x_1+\delta,x_2}$, and
-$\parD{}{}{x_1,x_2+\delta}$.  Now suppose that the Hessian is sparse, and that the off-diagonal
-elements of it are zero.  Not only are
+$\parD{}{}{x_1,x_2+\delta}$.
+
+Now suppose that the Hessian is sparse, and that the off-diagonal
+elements are zero.  Not only are
 \begin{align}
   \label{eq:3}
   \parD{}{1}{x_1,x_2+\delta}-\parD{}{1}{x_1,x_2}&=0\\
@@ -661,25 +648,26 @@ Therefore,
     \end{pmatrix}
 \end{align}
 
-This estimate requires only two evaluations of the derivative:
-$\parD{}{}{x_1,x_2}$ and $\parD{}{}{x_1+\delta,x_2+\delta}$. Reducing
+This estimate requires only
+$\parD{}{}{x_1,x_2}$ and $\parD{}{}{x_1+\delta,x_2+\delta}$, which we
+get from only two evaluations of the gradient.  Reducing
 the number of gradient evaluations from 3 to 2 depends on knowing that
 the cross-partial derivatives are zero.
 
-Now let's consider a general case, starting with a ``direct'' method
-first proposed in \citet{CurtisPowellReid1974} for Jacobian matrices, and described in \citet{PowellToint1979}. To begin, partition the variables
-into $C$ mutually exclusive groups, or ``colors.'' so $c_k$ indexes
+Now let's consider a general case, starting with a described in \citet{PowellToint1979}. To begin, partition the variables
+into $C$ mutually exclusive groups, or ``colors.'' so $c_m$ indexes
 the color of variable $m$. Let $\Mat{G}$ and $\Mat{Y}$ be $M\times C$
-matrices, where $\Mat{G}_{kc}=\delta$ if variable $m$ belongs to group $c$, and zero
-otherwise, and let $G_c$ be the $c$th column of $G$.  Each column in $Y$ is defined as
+matrices, where $\Mat{G}_{mc}=\delta$ if variable $m$ belongs to group $c$, and zero
+otherwise, and let $G_c$ be the $c$th column of $G$.
+
+Next, define column in $Y$ is defined as
 \begin{align}
   \label{eq:Yg}
   Y_c&=\parD{}{}{x+G_c}-\parD{}{}{x}
 \end{align}
 
 If $C=K$ and $c_m=m$, then $G$ is a diagonal matrix with $\delta$ in each
-diagonal element.  The matrix equation $\hess{}{x}G=Y$ represents the Taylor
-series approximation
+diagonal element.  The matrix equation $\hess{}{x}G=Y$ represents the linear approximation
 $\hess{im}{x}\delta\approx y_{im}$, and we can solve for all elements of $\hess{}{x}$
 just by computing $Y$. But if $C<M$,
 there must be at least one column $G_c$ with $\delta$ in at least two
@@ -687,8 +675,9 @@ rows. Column $Y_c$ would have been computed by perturbing two variables at
 once, and we would not have been able to solve for any $\hess{im}{x}$
 without further constraints.
 
-The necessary restrictions come from the sparsity pattern. For
-example, consider a function with the following Hessian.
+The necessary restrictions come from the sparsity pattern and symmetry
+pattern of the Hessian. Consider and example with the following values and
+sparsity pattern.
 
 \begin{align}
   \label{eq:7}
@@ -700,10 +689,8 @@ example, consider a function with the following Hessian.
     0&0&h_{53}&0&h_{55}
   \end{pmatrix}
 \end{align}
-Note the subscripts on the elements take the symmetry of the Hessian
-into account.
 
-Suppose $M=2$, and define the colors through the following $\Mat{G}$ matrix.
+Suppose $C=2$, and define the colors of the five variables through the following $\Mat{G}$ matrix.
 
 \begin{align}
   \label{eq:7}
@@ -717,7 +704,7 @@ Suppose $M=2$, and define the colors through the following $\Mat{G}$ matrix.
 \end{align}
 Variables 1 and 2 have color 1, and variables 3, 4 and 5 have color
 2.  For the moment, we will postpone the discussion of how to
-choose $C$ and how to color the variables.
+choose $C$ and how to color the variables, until Section \ref{sec:coloring}.
 
 Next, compute the columns of $\Mat{Y}$ using Equation \ref{eq:Yg}.  We now
 have the following system of linear equations from $\hess{}{x}\Mat{G}=\Mat{Y}$.
@@ -740,31 +727,35 @@ have the following system of linear equations from $\hess{}{x}\Mat{G}=\Mat{Y}$.
   \end{aligned}
 \end{align}
 
-Note that this system is overdetermined; \citet{CurtisPowellReid1974} did
-not assume that their Jacobian is symmetric.  Both $h_{31}=y_{12}$ and $h_{53}=y_{52}$
+Note that this system is overdetermined.  Both $h_{31}=y_{12}$ and $h_{53}=y_{52}$
 can be determined directly, but $h_{31}+h_{53}=y_{31}$, and $h_{42}$
 could be either $y_{41}$ or $y_{22}$.  \Citet{PowellToint1979} prove
-that it is sufficient to solve $LD=Y$ via a substitution method, where $L$ is the lower
+that it is sufficient to solve $\hessLT{}{x}G=Y$ via a substitution method, where $L$ is the lower
 triangular part of $H$.  This has the effect of removing the equations
 $h_{42}=y_{22}$ and $h_{31}=y_{12}$ from the system, but retaining
 $h_{53}=y_{52}$.  We can then solve for
 $h_{31}=y_{31}-h_{53}=y_{31}-y_{52}$. Thus, we have determined a
 $5\times 5$ Hessian matrix with only three gradient evaluations, in
-contrast with the six that would have been needed had $H$ been treated
-as dense.  Solving  $\Mat{L}\Mat{G}=\Mat{Y}$ is known as either an ``indirect,'' or
-``triangular substitution'' method.  \pkg{sparseHessianFD} implements
-only substitution methods, and we will consider only those
-methods in this paper.
+contrast with the six that would have been needed had $\hess{}{x}$ been treated
+as dense.
+
+The $\Mat{Y}$ matrix is, in essence, a compressed representation of
+$\hess{}{x}$.  The values in $\Mat{Y}$ are finite differences after
+one \emph{or more} variables are perturbed.  Hence, we need two
+different algorithms to estimate a sparse Hessian.  The first is to
+determine which variables can be perturbed together when computing
+$\Mat{Y}$, and the second is to extract the values of $\hess{}{x}$
+from $\Mat{Y}$.  We discuss these algorithms next.
 
 
-\subsection{Partitioning the variables}\label{sec:coloring}
+\subsection{Coloring the variables}\label{sec:coloring}
 
 \Citet{PowellToint1979} showed that the following rule for
 partitioning the variables is consistent with a triangular
 substitution method:  two variables cannot be in the same group if
-their respective columns have a non-zero element in the same row.
-Certainly the grouping in the last example meets that criterion, but
-it is not the only possible grouping.  In fact, a valid, yet trivial
+their respective columns have a non-zero element in the same row in
+the lower triangle.  Certainly the grouping in the last example meets that criterion, but
+it is not the only possible grouping.  A valid, yet trivial
 grouping would have been to define five groups, each
 with one variable.  An objective of sparse Hessian estimation is to
 minimize the number of required gradient
@@ -774,7 +765,10 @@ evaluations.  And that means to minimize the number of groups.
 partitioning of the variables as a graph coloring problem.  If each
 variable is a vertex in an undirected graph, then the sparsity pattern
 is an adjacency matrix.  Each non-zero element in the
-lower triangle of the Hessian represents an edge between two vertices.
+lower triangle of the Hessian represents an edge between two
+vertices. \Citet{ColemanCai1986} proved that a coloring is consistent
+if and only if the coloring is \emph{cyclic}:  any cycle in the graph
+must use at least three colors.
 
 For example, look at Figure \ref{fig:graph1}. Figure
 \ref{fig:graph1adj} presents a sparsity pattern in the form of an
@@ -783,8 +777,7 @@ pattern as a graph.  To estimate the Hessian associated with the
 sparsity pattern, we can partition the variables using three colors.
 In the adjacency matrix, we can see that there are no columns of the
 same color with a non-zero element in the same row. In the graph, we
-see that the coloring is valid, in that there are no two connected
-vertices with the same color.
+see that the coloring is cyclic.
 
 \begin{figure}
   \begin{subfigure}[b]{.5\textwidth}
@@ -835,12 +828,29 @@ vertices with the same color.
 \caption{}\label{fig:graph1}
 \end{figure}
 
-However, not all valid colorings are consistent with a substitution
-method.  \Citet{ColemanCai1986} proved that a coloring is consistent
-if and only if the coloring is \emph{cyclic}:  any cycle in the graph
-must use at least three colors.  This is readily apparent in Figure
-\ref{fig:graph1pic}; there is no way to get from any vertex back to
-itself without passing through a red, a blue and a green vertex.
+
+A reasonable question to ask next would be if there is an algorithm
+that can color the variables with a minimal number of colors.  It
+turns out that the cyclic coloring problem is NP-hard
+\citep{ColemanMore1984,ColemanCai1986}, so we have to rely on
+heuristics.  There are quite a few options from which to choose
+\citep{PowellToint1979,ColemanCai1986,GebremedhinTarafdar2007}, all of
+which vary into their ability to minimize the number of colors, but
+also in their run time and ease of implementation.  And since there is
+no solution to the \emph{optimal} coloring problem, we are happy with
+coloring algorithms that are ``pretty good.''
+
+For \pkg{sparseHessianFD}, that means the original
+\citet{PowellToint1979} method. (Explain why here).
+
+
+
+\subsubsection{Algorithm and Permutations}
+
+
+
+
+
 
 For this particular sparsity pattern, a ``greedy'' coloring algorithm
 will work.  We start with variable 1, and color it green.  Since
