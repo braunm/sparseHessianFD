@@ -654,8 +654,8 @@ get from only two evaluations of the gradient.  Reducing
 the number of gradient evaluations from 3 to 2 depends on knowing that
 the cross-partial derivatives are zero.
 
-Now let's consider a general case, starting with a described in \citet{PowellToint1979}. To begin, partition the variables
-into $C$ mutually exclusive groups, or ``colors.'' so $c_m$ indexes
+Now let's consider a more general case. To begin, partition the variables
+into $C$ mutually exclusive groups,' so $c_m$ indexes
 the color of variable $m$. Let $\Mat{G}$ and $\Mat{Y}$ be $M\times C$
 matrices, where $\Mat{G}_{mc}=\delta$ if variable $m$ belongs to group $c$, and zero
 otherwise, and let $G_c$ be the $c$th column of $G$.
@@ -663,7 +663,7 @@ otherwise, and let $G_c$ be the $c$th column of $G$.
 Next, define column in $Y$ is defined as
 \begin{align}
   \label{eq:Yg}
-  Y_c&=\parD{}{}{x+G_c}-\parD{}{}{x}
+  Y_c^\top&=\parD{}{}{x+G_c}-\parD{}{}{x}
 \end{align}
 
 If $C=K$ and $c_m=m$, then $G$ is a diagonal matrix with $\delta$ in each
@@ -676,7 +676,7 @@ once, and we would not have been able to solve for any $\hess{im}{x}$
 without further constraints.
 
 The necessary restrictions come from the sparsity pattern and symmetry
-pattern of the Hessian. Consider and example with the following values and
+pattern of the Hessian. Consider an example with the following values and
 sparsity pattern.
 
 \begin{align}
@@ -702,9 +702,9 @@ Suppose $C=2$, and define the colors of the five variables through the following
    \delta&0
   \end{pmatrix}
 \end{align}
-Variables 1 and 2 have color 1, and variables 3, 4 and 5 have color
-2.  For the moment, we will postpone the discussion of how to
-choose $C$ and how to color the variables, until Section \ref{sec:coloring}.
+Variables 1 and 2 are in group 1, and variables 3, 4 and 5 are in
+group 2.  For the moment, we will postpone the discussion of how to
+choose $C$ and how to partition the variables, until Section \ref{sec:coloring}.
 
 Next, compute the columns of $\Mat{Y}$ using Equation \ref{eq:Yg}.  We now
 have the following system of linear equations from $\hess{}{x}\Mat{G}=\Mat{Y}$.
@@ -730,8 +730,8 @@ have the following system of linear equations from $\hess{}{x}\Mat{G}=\Mat{Y}$.
 Note that this system is overdetermined.  Both $h_{31}=y_{12}$ and $h_{53}=y_{52}$
 can be determined directly, but $h_{31}+h_{53}=y_{31}$, and $h_{42}$
 could be either $y_{41}$ or $y_{22}$.  \Citet{PowellToint1979} prove
-that it is sufficient to solve $\hessLT{}{x}G=Y$ via a substitution method, where $L$ is the lower
-triangular part of $H$.  This has the effect of removing the equations
+that it is sufficient to solve $\hessLT{}{x}G=Y$ via a substitution method, where $\hessLT{}{x}$ is the lower
+triangular part of $\hess{}{x}$.  This has the effect of removing the equations
 $h_{42}=y_{22}$ and $h_{31}=y_{12}$ from the system, but retaining
 $h_{53}=y_{52}$.  We can then solve for
 $h_{31}=y_{31}-h_{53}=y_{31}-y_{52}$. Thus, we have determined a
@@ -748,100 +748,162 @@ $\Mat{Y}$, and the second is to extract the values of $\hess{}{x}$
 from $\Mat{Y}$.  We discuss these algorithms next.
 
 
-\subsection{Coloring the variables}\label{sec:coloring}
+\subsection{Partitioning the variables}\label{sec:coloring}
 
-\Citet{PowellToint1979} showed that the following rule for
-partitioning the variables is consistent with a triangular
-substitution method:  two variables cannot be in the same group if
-their respective columns have a non-zero element in the same row in
-the lower triangle.  Certainly the grouping in the last example meets that criterion, but
-it is not the only possible grouping.  A valid, yet trivial
-grouping would have been to define five groups, each
-with one variable.  An objective of sparse Hessian estimation is to
-minimize the number of required gradient
-evaluations.  And that means to minimize the number of groups.
 
-\Citet{ColemanMore1984} were the first to characterize the
-partitioning of the variables as a graph coloring problem.  If each
-variable is a vertex in an undirected graph, then the sparsity pattern
-is an adjacency matrix.  Each non-zero element in the
-lower triangle of the Hessian represents an edge between two
-vertices. \Citet{ColemanCai1986} proved that a coloring is consistent
-if and only if the coloring is \emph{cyclic}:  any cycle in the graph
-must use at least three colors.
+\Citet{PowellToint1979} write that a partitioning is consistent with a
+substitution method for estimating a sparse Hessian if and only if no columns
+of the of lower triangle of the Hessian that are
+in the same group have a non-zero element in the same
+row. It turns out that finding valid, efficient partitions can be
+characterized as a vertex coloring problem from graph theory \citep{ColemanMore1984}.  In this
+sense, each variable is a vertex in an undirected graph, and an edge connects two
+vertices $i$ and $j$ if $\hess{ij}{x}\neq 0$.  The lower triangular
+sparsity pattern of the Hessian is the adjacency matrix of the graph.
 
-For example, look at Figure \ref{fig:graph1}. Figure
-\ref{fig:graph1adj} presents a sparsity pattern in the form of an
-adjacency matrix, and Figure \ref{fig:graph1pic} represents the
-pattern as a graph.  To estimate the Hessian associated with the
-sparsity pattern, we can partition the variables using three colors.
-In the adjacency matrix, we can see that there are no columns of the
-same color with a non-zero element in the same row. In the graph, we
-see that the coloring is cyclic.
+Before continuing, we need to define some additional terms related to
+graph theory.  The ``intersection set'' of two columns of
+$\hessLT{}{x}$ consists of the row indices of non-zero elements that
+are common to both columns.  In the ``intersection graph,'' two
+variables are connected if their intersection set is non-empty.  Thus,
+two columns are connected in the intersection graph if they have any
+non-zero element in a common row.
+
+The intersection graph of $\hessLT{}{x}$ is \emph{not} invariant to
+permutation of the rows and columns of $\hess{}{x}$.  Let $\pi$
+represent such a partition, and let $\hessLT{\pi}{x}$ be the lower
+triangle of $\pi\hess{}{x}{\pi^\top}$.
+
+A ``proper'' coloring of a graph is one in which two
+vertices with a common edge do not have the same color. \Citet{ColemanMore1984} define a ``triangular coloring'' of a graph is
+a proper coloring with the additional condition that common
+neighbors of a vertex do not have the same color.  A triangular
+coloring is a special case of an ``acyclic coloring,'' in which any cycle in the graph
+uses at least three colors \citep{GebremedhinTarafdar2007}. \Citet{ColemanCai1986} prove that a partitioning is consistent with a
+substitution method if and only if it is an acyclic coloring of the
+graph of the sparsity pattern of the Hessian.   \Citet[Theorem 6.1]{ColemanMore1984} show that a coloring is
+triangular if and only if it is also a coloring of the intersection
+graph of $\hessLT{\pi}{x}$ for some permutation $\pi$.  Therefore,
+finding an optimal partitioning of the variables involves finding an
+optimal combination of a permutation $\pi$, and coloring algorithm
+for the intersection graph of $\hessLT{\pi}{x}$.
+
+Check out the example in Figure \ref{fig:graph1}.  Figure
+\ref{fig:graph1adj} is the sparsity pattern of the lower triangle of a
+Hessian, and Figure \ref{fig:graph1pic} is an illustration of the
+graph.  The coloring for the graph itself is proper, but not
+necessarily consistent for a substitution method. For that, we need a
+coloring of the intersection graph.  We can deduce the
+intersection graph from Figure \ref{fig:graph1adj} by noting that
+every column (and thus, every pair of columns) has a non-zero element
+in row 7.  Thus, the intersection graph is Figure \ref{fig:graph1int},
+which requires seven colors for a proper coloring.  Estimating a
+sparse Hessian with this partitioning scheme would be no more
+efficient than if treating the Hessian as if it were dense.
 
 \begin{figure}
-  \begin{subfigure}[b]{.5\textwidth}
-  \begin{tabular}{r|>{\columncolor{green!20}}c%
-    >{\columncolor{blue!20}}c%
-    >{\columncolor{red!20}}c%
-    >{\columncolor{blue!20}}c%
-    >{\columncolor{red!20}}c%
-    >{\columncolor{blue!20}}c%
-    >{\columncolor{red!20}}c}
+  \begin{subfigure}[b]{.33\textwidth}\centering
+  \begin{tabular}{r|ccccccc}
    & 1&2&3&4&5&6&7\\
     \hline
     1& 1&&&&&&\\
     2&1&1&&&&&\\
-    3&1&1&1&&&&\\
-    4&1&0&0&1&&&\\
-    5&1&0&0&1&1&&\\
-    6&1&0&0&0&0&1&\\
-    7&1&0&0&0&0&1&1
+    3&0&0&1&&&&\\
+    4&0&0&1&1&&&\\
+    5&0&0&0&0&1&&\\
+    6&1&0&0&0&1&1&\\
+    7&1&1&1&1&1&1&1
   \end{tabular}
   \caption{}\label{fig:graph1adj}
 \end{subfigure}
-\begin{subfigure}[b]{.5\textwidth}\centering
+\begin{subfigure}[b]{.33\textwidth}\centering
 \iftoggle{tikz}{
 \begin{tikzpicture}
 \tikzstyle{every node}=[draw, shape=circle]
-\path node at (0.5, 0) [fill=blue!20] (v2) {2};
-\path node at  (1.5, 0) [fill=red!20] (v3) {3};
-\path node at  (2.5, 0) [fill=blue!20] (v4) {4};
-\path node at  (3.5, 0) [fill=red!20] (v5) {5};
-\path node at  (4.5, 0) [fill=blue!20] (v6) {6};
-\path node at  (5.5, 0) [fill=red!20] (v7) {7};
-\path node at  (3, 1.5)  [fill=green!20] (v1) {1};
+\path node at (0.5, 0) [fill=blue!20] (v1) {1};
+\path node at  (1.5, 0) [fill=red!20] (v2) {2};
+\path node at  (2.5, 0) [fill=blue!20] (v3) {3};
+\path node at  (3.5, 0) [fill=red!20] (v4) {4};
+\path node at  (4.5, 0) [fill=blue!20] (v5) {5};
+\path node at  (5.5, 0) [fill=red!20] (v6) {6};
+\path node at  (3, 1.5)  [fill=green!20] (v7) {7};
 \draw
-(v2) -- (v1)
-(v3) -- (v1)
-(v2) -- (v3)
-(v4) -- (v1)
-(v5) -- (v1)
-(v4) -- (v5)
-(v6) -- (v1)
-(v7) -- (v1)
-(v6) -- (v7);
+(v1) -- (v7)
+(v2) -- (v7)
+(v3) -- (v7)
+(v4) -- (v7)
+(v5) -- (v7)
+(v6) -- (v7)
+(v1) -- (v2)
+(v3) -- (v4)
+(v5) -- (v6);
 \end{tikzpicture}
 }{} %% end toggle
 \caption{}\label{fig:graph1pic}
 \end{subfigure}
+\begin{subfigure}[b]{.33\textwidth}\centering
+\iftoggle{tikz}{
+\begin{tikzpicture}
+\tikzstyle{every node}=[draw, shape=circle]
+\path node at (0, 3) [fill=blue!20] (v1) {1};
+\path node at  (0, .75) [fill=red!20] (v2) {2};
+\path node at  (2, 3) [fill=green!20] (v3) {3};
+\path node at  (2, .75) [fill=purple!20] (v4) {4};
+\path node at  (4, 3) [fill=cyan!20] (v5) {5};
+\path node at  (4, 0) [fill=white!20] (v6) {6};
+\path node at  (3, 1.5)  [fill=yellow!20] (v7) {7};
+\draw
+(v1) -- (v7)
+(v2) -- (v7)
+(v3) -- (v7)
+(v4) -- (v7)
+(v5) -- (v7)
+(v6) -- (v7)
+(v1) -- (v6)
+(v2) -- (v6)
+(v3) -- (v6)
+(v4) -- (v6)
+(v5) -- (v6)
+(v1) -- (v5)
+(v2) -- (v5)
+(v3) -- (v5)
+(v4) -- (v5)
+(v1) -- (v4)
+(v2) -- (v4)
+(v3) -- (v4)
+(v1) -- (v3)
+(v2) -- (v3)
+(v1) -- (v2);
+\end{tikzpicture}
+}{} %% end toggle
+\caption{}\label{fig:graph1int}
+\end{subfigure}
 \caption{}\label{fig:graph1}
 \end{figure}
 
+Now suppose that we were to rearrange $\hess{}{x}$ so the last row and
+and column were moved to the front.  The graph of the
+Hessian is unchanged, but the lower triangular adjacency matrix and
+the corresponding intersection graph, are different (Figure
+\ref{fig:graph2}).  In Figure \ref{fig:graph2adj}, all columns share at least one non-zero row with
+the column for variable 7, but variable groups $\{2,4,6\}$ and
+$\{1,3,5\}$ have empty intersection sets.  The intersection graph in
+Figure \ref{fig:graph2pic} has many fewer edges, and can be colored
+with only three colors.
 
-A reasonable question to ask next would be if there is an algorithm
-that can color the variables with a minimal number of colors.  It
-turns out that the cyclic coloring problem is NP-hard
-\citep{ColemanMore1984,ColemanCai1986}, so we have to rely on
-heuristics.  There are quite a few options from which to choose
-\citep{PowellToint1979,ColemanCai1986,GebremedhinTarafdar2007}, all of
-which vary into their ability to minimize the number of colors, but
-also in their run time and ease of implementation.  And since there is
-no solution to the \emph{optimal} coloring problem, we are happy with
-coloring algorithms that are ``pretty good.''
 
-For \pkg{sparseHessianFD}, that means the original
-\citet{PowellToint1979} method. (Explain why here).
+The \pkg{sparseHessianFD} package groups variables by permuting the
+rows and columns of the Hessian and coloring the intersection graph of
+the lower triangle of the permuted matrix.
+
+
+
+
+
+\subsection{Implementing the substitution method}
+
+Once the colors are established, they no longer need to be recomputed.
+
 
 
 
@@ -870,22 +932,6 @@ variable having a unique color.  Such a coloring is indeed cyclic, and
 would be consistent with a substitution method under the
 \citet{ColemanCai1986} criterion.  But it is hardly the best cyclic
 coloring available.
-
-  \begin{figure}[b]
-  \begin{tabular}{r|ccccccc}
-   & 7&2&3&4&5&6&1\\
-    \hline
-    7& 1&&&&&&\\
-    2&0&1&&&&&\\
-    3&0&1&1&&&&\\
-    4&0&0&0&1&&&\\
-    5&0&0&0&1&1&&\\
-    6&1&0&0&0&0&1&\\
-    1&1&1&1&1&1&1&1
-  \end{tabular}
-  \caption{}\label{fig:graph1perm}
-\end{figure}
-
 
 The \pkg{sparseHessianFD} package implements the ``smallest-last
 ordering,'' first described in \citet{PowellToint1979}.  Other
@@ -1074,6 +1120,20 @@ Define acyclic.
 
  \subsection{Note:  Who proved what}
 
+
+ *** \Citet{ColemanMore1984} The ``no nonzero in same row'' rule for
+the permuted lower triangular matrix is equivalent to the
+\emph{intersection graph}.  Theorem 6.1 shows that a proper coloring of the
+intersection graph of $L_\pi$ is also a triangular coloring of the
+full symmetric graph.
+
+Theorem 6.2 justifies the sequential smallest-last ordering.
+
+This is what our algorithm does.
+
+
+
+
 Consistent partitioning of $L$:  No column in the same group has a
 non-zero element in the same row.
 
@@ -1087,6 +1147,8 @@ assigned to partitions affects the partition.
 \Citet{ColemanMore1984} characterize \cite{PowellToint1979} as a graph
 coloring problem.  Also justify using the smallest-last ordering on the lower
 triangle to color the variables
+
+
 
 \Citet{ColemanCai1986}:  there are other substitutable partitions than
 lower triangular.  Theorem 2.2.  A mapping induces a substitution
