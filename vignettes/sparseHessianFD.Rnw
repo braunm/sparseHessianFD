@@ -24,7 +24,7 @@
 
 \usepackage{etoolbox}
 \newtoggle{tikz}
-\togglefalse{tikz}
+\toggletrue{tikz}
 
 \iftoggle{tikz}{
 \usepackage{tikz}
@@ -814,19 +814,19 @@ efficient than if treating the Hessian as if it were dense.
     6&1&0&0&0&1&1&\\
     7&1&1&1&1&1&1&1
   \end{tabular}
-  \caption{}\label{fig:graph1adj}
+  \caption{Adjacency matrix}\label{fig:graph1adj}
 \end{subfigure}
 \begin{subfigure}[b]{.33\textwidth}\centering
 \iftoggle{tikz}{
 \begin{tikzpicture}
 \tikzstyle{every node}=[draw, shape=circle]
-\path node at (0.5, 0) [fill=blue!20] (v1) {1};
-\path node at  (1.5, 0) [fill=red!20] (v2) {2};
-\path node at  (2.5, 0) [fill=blue!20] (v3) {3};
-\path node at  (3.5, 0) [fill=red!20] (v4) {4};
-\path node at  (4.5, 0) [fill=blue!20] (v5) {5};
-\path node at  (5.5, 0) [fill=red!20] (v6) {6};
-\path node at  (3, 1.5)  [fill=green!20] (v7) {7};
+\node at (0,0) [fill=green!20] (v7) {7};
+\node at (0:1) [fill=blue!20] (v1) {1};
+\node at (60:1) [fill=red!20] (v2) {2};
+\node at (120:1) [fill=blue!20] (v3) {3};
+\node at (180:1) [fill=red!20] (v4) {4};
+\node at (240:1) [fill=blue!20] (v5) {5};
+\node at (300:1) [fill=red!20] (v6) {6};
 \draw
 (v1) -- (v7)
 (v2) -- (v7)
@@ -839,19 +839,19 @@ efficient than if treating the Hessian as if it were dense.
 (v5) -- (v6);
 \end{tikzpicture}
 }{} %% end toggle
-\caption{}\label{fig:graph1pic}
+\caption{Sparsity graph}\label{fig:graph1pic}
 \end{subfigure}
 \begin{subfigure}[b]{.33\textwidth}\centering
 \iftoggle{tikz}{
 \begin{tikzpicture}
 \tikzstyle{every node}=[draw, shape=circle]
-\path node at (0, 3) [fill=blue!20] (v1) {1};
-\path node at  (0, .75) [fill=red!20] (v2) {2};
-\path node at  (2, 3) [fill=green!20] (v3) {3};
-\path node at  (2, .75) [fill=purple!20] (v4) {4};
-\path node at  (4, 3) [fill=cyan!20] (v5) {5};
-\path node at  (4, 0) [fill=white!20] (v6) {6};
-\path node at  (3, 1.5)  [fill=yellow!20] (v7) {7};
+\node at (0,0) [fill=green!20] (v7) {7};
+\node at (0:1) [fill=blue!20] (v1) {1};
+\node at (60:1) [fill=red!20] (v2) {2};
+\node at (120:1) [fill=yellow!20] (v3) {3};
+\node at (180:1) [fill=purple!20] (v4) {4};
+\node at (240:1) [fill=brown!20] (v5) {5};
+\node at (300:1) [fill=white!20] (v6) {6};
 \draw
 (v1) -- (v7)
 (v2) -- (v7)
@@ -876,9 +876,9 @@ efficient than if treating the Hessian as if it were dense.
 (v1) -- (v2);
 \end{tikzpicture}
 }{} %% end toggle
-\caption{}\label{fig:graph1int}
+\caption{Intersection graph}\label{fig:graph1int}
 \end{subfigure}
-\caption{}\label{fig:graph1}
+\caption{Unpermuted matrix}\label{fig:graph1}
 \end{figure}
 
 Now suppose that we were to rearrange $\hess{}{x}$ so the last row and
@@ -890,6 +890,76 @@ the column for variable 7, but variable groups $\{2,4,6\}$ and
 $\{1,3,5\}$ have empty intersection sets.  The intersection graph in
 Figure \ref{fig:graph2pic} has many fewer edges, and can be colored
 with only three colors.
+
+\begin{figure}
+  \begin{subfigure}[b]{.33\textwidth}\centering
+  \begin{tabular}{r|ccccccc}
+   & 7&1&2&3&4&5&6\\
+    \hline
+    7& 1&&&&&&\\
+    1&1&1&&&&&\\
+    2&1&1&1&&&&\\
+    3&1&0&0&1&&&\\
+    4&1&0&0&1&1&&\\
+    5&1&0&0&0&0&1&\\
+    6&1&0&0&0&0&1&1
+  \end{tabular}
+  \caption{Adjacency matrix}\label{fig:graph2adj}
+\end{subfigure}
+\begin{subfigure}[b]{.33\textwidth}\centering
+\iftoggle{tikz}{
+\begin{tikzpicture}
+\tikzstyle{every node}=[draw, shape=circle]
+\node at (0,0) [fill=green!20] (v7) {7};
+\node at (0:1) [fill=blue!20] (v1) {1};
+\node at (60:1) [fill=red!20] (v2) {2};
+\node at (120:1) [fill=blue!20] (v3) {3};
+\node at (180:1) [fill=red!20] (v4) {4};
+\node at (240:1) [fill=blue!20] (v5) {5};
+\node at (300:1) [fill=red!20] (v6) {6};
+\draw
+(v1) -- (v7)
+(v2) -- (v7)
+(v3) -- (v7)
+(v4) -- (v7)
+(v5) -- (v7)
+(v6) -- (v7)
+(v1) -- (v2)
+(v3) -- (v4)
+(v5) -- (v6);
+\end{tikzpicture}
+}{} %% end toggle
+\caption{Sparsity graph}\label{fig:graph2pic}
+\end{subfigure}
+\begin{subfigure}[b]{.33\textwidth}\centering
+\iftoggle{tikz}{
+\begin{tikzpicture}
+\tikzstyle{every node}=[draw, shape=circle]
+\node at (0,0) [fill=green!20] (v7) {7};
+\node at (0:1) [fill=blue!20] (v1) {1};
+\node at (60:1) [fill=red!20] (v2) {2};
+\node at (120:1) [fill=blue!20] (v3) {3};
+\node at (180:1) [fill=red!20] (v4) {4};
+\node at (240:1) [fill=blue!20] (v5) {5};
+\node at (300:1) [fill=red!20] (v6) {6};
+\draw
+(v1) -- (v7)
+(v2) -- (v7)
+(v3) -- (v7)
+(v4) -- (v7)
+(v5) -- (v7)
+(v6) -- (v7)
+(v1) -- (v2)
+(v3) -- (v4)
+(v5) -- (v6);
+\end{tikzpicture}
+}{} %% end toggle
+\caption{Intersection graph}\label{fig:graph2int}
+\end{subfigure}
+\caption{Permuted matrix}\label{fig:graph2}
+\end{figure}
+
+
 
 
 The \pkg{sparseHessianFD} package groups variables by permuting the
