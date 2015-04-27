@@ -68,7 +68,11 @@ test_that("indexing", {
     ## obj4S <- sparseHessianFD(P, f2$fn, f2$gr, pat2S$rows-1, pat2S$cols-1,
     ##              index1=FALSE)
 
+    print(true.hess1[c(9,10,1:8),c(9,10,1:8)])
     H1L <- obj1L$hessian(P)
+
+
+
     H2L <- obj2L$hessian(P)
     H3L <- obj3L$hessian(P)
     H4L <- obj4L$hessian(P)

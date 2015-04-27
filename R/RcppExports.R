@@ -25,3 +25,17 @@ subst <- function(Y, colors, W, jCol, ipntr, delta, nvars, nnz) {
     .Call('sparseHessianFD_subst', PACKAGE = 'sparseHessianFD', Y, colors, W, jCol, ipntr, delta, nvars, nnz)
 }
 
+#' @title Estimate sparse Hessian
+#' @description Estimate Hessian using triangular subsitution algorithm
+#' @param Y Matrix of finite differences
+#' @param colors Vector of length nvars that identifies color of each variable
+#' @param W A list.  Each element represents a color, and contains an integer vector with the indices of the variables with that color.  Indexing is zero-based.
+#' @param jCol,ipntr Column indices and row pointers for non-zero elements of lower triangle of Hessian.
+#' @param delta Perturbation factor used to compute finite differences.
+#' @param nvars Dimension of Hessian (number of variables)
+#' @param nnz Number of non-zero elements in the lower triangle of the Hessian.
+#' @return A sparse Hessian of class dgCMatrix.
+subst2 <- function(Y, colors, W, jCol, ipntr, delta, nvars, nnz) {
+    .Call('sparseHessianFD_subst2', PACKAGE = 'sparseHessianFD', Y, colors, W, jCol, ipntr, delta, nvars, nnz)
+}
+

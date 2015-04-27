@@ -66,8 +66,8 @@ sparseHessianFD <-
 
 
                         tmp <- sparseMatrix(i=iRow, j=jCol, index1=index1, symmetric=TRUE)
-                        perm <<- 1:nvars
-    ##                   perm <<- order(Matrix::rowSums(tmp), decreasing=TRUE)
+    ##                    perm <<- 1:nvars
+                       perm <<- order(Matrix::rowSums(tmp), decreasing=TRUE)
                         invperm <<- invPerm(perm)
 
 
@@ -105,7 +105,6 @@ sparseHessianFD <-
                         }
 
                         D <<- sapply(colors, coord2vec)[invperm,]
-
                         ready <<- TRUE
 
                     },
@@ -168,11 +167,12 @@ sparseHessianFD <-
                             grad.x <- gr1(x)
                             Y2 <- apply(D, 2, fd, x = x, grad.x = grad.x)
                             Y <- Y2[perm,]
-                            res <- subst(Y, colors_vec, colors, idx-index1, pntr-index1, eps, nvars, nnz)
+                            res <- subst2(Y, colors_vec, colors, idx-index1, pntr-index1, eps, nvars, nnz)
                         } else {
                             stop("sparseHessianFD object not initialized")
                             res <- NULL
                         }
+
                         return(res[invperm,invperm])
                     },
 
