@@ -74,28 +74,28 @@ sparseHessianFD <-
                         M <- tmp[perm,perm]
 
                         ptr <- Matrix.to.Pointers(tril(M), order="row", index1=index1)
-                        ptr2 <- Matrix.to.Pointers(M, order="symmetric", index1=index1)
+                 ##       ptr2 <- Matrix.to.Pointers(M, order="symmetric", index1=index1)
 
                         idx <<- ptr[[1]]
                         pntr <<- ptr[[2]]
 
-                        idx2 <- ptr2[[1]]
-                        pntr2 <- ptr2[[2]]
+                   ##     idx2 <- ptr2[[1]]
+                   ##     pntr2 <- ptr2[[2]]
 
 
-                        ## colors_vec <<- as.integer(get_groups(M) - 1)
-                        ## ncolors <- max(colors_vec)+1
-                        ## colors <<- vector("list", length=ncolors)
-                        ## for (i in 1:ncolors) {
-                        ##     colors[[i]] <<- which(colors_vec==(i-1))-1
-                        ## }
-
-                        colors <<- color_graph(pntr2-index1, idx2-index1, nvars, FALSE)
-
-                        colors_vec <<- rep(0L, nvars)
-                        for (i in 1:length(colors)) {
-                            colors_vec[colors[[i]]+1] <<- as.integer(i-1)
+                        colors_vec <<- as.integer(get_groups(M) - 1)
+                        ncolors <- max(colors_vec)+1
+                        colors <<- vector("list", length=ncolors)
+                        for (i in 1:ncolors) {
+                            colors[[i]] <<- which(colors_vec==(i-1))-1
                         }
+
+                        ## colors <<- color_graph(pntr2-index1, idx2-index1, nvars, FALSE)
+
+                        ## colors_vec <<- rep(0L, nvars)
+                        ## for (i in 1:length(colors)) {
+                        ##     colors_vec[colors[[i]]+1] <<- as.integer(i-1)
+                        ## }
 
 
                         coord2vec <- function(j) {
@@ -167,7 +167,8 @@ sparseHessianFD <-
                             grad.x <- gr1(x)
                             Y2 <- apply(D, 2, fd, x = x, grad.x = grad.x)
                             Y <- Y2[perm,]
-                            res <- subst2(Y, colors_vec, colors, idx-index1, pntr-index1, eps, nvars, nnz)
+                            res <- subst2(Y, colors_vec, colors,
+                                          idx-index1, pntr-index1, eps, nvars, nnz)
                         } else {
                             stop("sparseHessianFD object not initialized")
                             res <- NULL

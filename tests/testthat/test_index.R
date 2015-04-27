@@ -70,9 +70,6 @@ test_that("indexing", {
 
     print(true.hess1[c(9,10,1:8),c(9,10,1:8)])
     H1L <- obj1L$hessian(P)
-
-
-
     H2L <- obj2L$hessian(P)
     H3L <- obj3L$hessian(P)
     H4L <- obj4L$hessian(P)
@@ -81,7 +78,7 @@ test_that("indexing", {
     ## H3S <- obj3S$hessian(P)
     ## H4S <- obj4S$hessian(P)
 
-
+browser()
     expect_equal(H1L, true.hess1, tolerance=5e-8)
     expect_equal(H2L, true.hess2, tolerance=5e-8)
     expect_equal(H1L, H3L)
