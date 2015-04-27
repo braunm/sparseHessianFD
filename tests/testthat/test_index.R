@@ -7,8 +7,8 @@ context("indexing")
 test_that("indexing", {
 
     set.seed(1234)
-    data(binary)
-    binary <- binary
+    data(binary_small)
+    binary <- binary_small
 
     N <- length(binary$Y)
     k <- NROW(binary$X)
@@ -49,6 +49,8 @@ test_that("indexing", {
     pat1S <- Matrix.to.Coord(true.hess1)
     pat2S <- Matrix.to.Coord(true.hess2)
 
+
+
     obj1L <- sparseHessianFD(P, f1$fn, f1$gr, pat1L$rows, pat1L$cols,
                 index1=TRUE)
     obj2L <- sparseHessianFD(P, f2$fn, f2$gr, pat2L$rows, pat2L$cols,
@@ -75,6 +77,7 @@ test_that("indexing", {
     ## H3S <- obj3S$hessian(P)
     ## H4S <- obj4S$hessian(P)
 
+    browser()
     expect_equal(H1L, true.hess1, tolerance=5e-8)
     expect_equal(H2L, true.hess2, tolerance=5e-8)
     expect_equal(H1L, H3L)
@@ -84,7 +87,5 @@ test_that("indexing", {
     ## expect_equal(H1S, H3S)
     ## expect_equal(H2S, H4S)
 })
-
-
 
 

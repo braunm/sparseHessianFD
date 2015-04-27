@@ -17,6 +17,7 @@
 ##' @field idx,pntr Column indices and row pointers for non-zero elements in lower triangle of the Hessian.  Row-oriented compressed storage.
 ##' @field colors A list representation of the partitioning of the columns of the Hessian.  This is used as part of the estimation algorithm.  Specifically, each list element is a "color," and each element in the corresponding vector is a column with that color.  See references.
 ##' @field colors_vec A vector representation of the partitioning of the columns.  There are nvars elements, one for each column of the Hessian.  The value corresponds to the "color" for that column.
+##'@field perm,invperm Permutation vector and its inverse
 ##' @details Do not access any of the fields directly.  Use the initializer instead.
 ##' @export sparseHessianFD
 sparseHessianFD <-
@@ -35,7 +36,9 @@ sparseHessianFD <-
                     idx = "integer",
                     pntr = "integer",
                     colors = "list",
-                    colors_vec = "integer"),
+                    colors_vec = "integer",
+                    perm = "integer",
+                    invperm = "integer"),
                 methods = list(
                     initialize = function(x.init, fn, gr, rows, cols, direct=NULL,
                                           eps=sqrt(.Machine$double.eps),
@@ -61,30 +64,50 @@ sparseHessianFD <-
                             warning("Some elements are in upper triangle, and will be ignored.")
                         }
 
-                        ptr <- Coord.to.Pointers(iRow, jCol, c(nvars, nvars),
-                                                 triangle=TRUE,
-                                                 lower=TRUE,
-                                                 order="row",
-                                                 index1=index1)
+
+                        tmp <- sparseMatrix(i=iRow, j=jCol, index1=index1)
+##                        perm <<- 1:nvars
+                       perm <<- order(Matrix::rowSums(tmp), decreasing=TRUE)
+                        invperm <<- invPerm(perm)
+
+
+                        M <- tmp[perm,perm]
+                        M2 <- symmpart(M)
+                        ptr <- Matrix.to.Pointers(M, order="row", index1=index1)
+                        ptr2 <- Matrix.to.Pointers(M2, order="symmetric", index1=index1)
+
+                        ## ptr <- Coord.to.Pointers(iRow, jCol, c(nvars, nvars),
+                        ##                          triangle=TRUE,
+                        ##                          lower=TRUE,
+                        ##                          order="row",
+                        ##                          index1=index1)
 
                         idx <<- ptr[[1]]
                         pntr <<- ptr[[2]]
 
-                        ptr2 <- Coord.to.Pointers(iRow, jCol, c(nvars, nvars),
-                                                 triangle=TRUE,
-                                                 lower=TRUE,
-                                                 order="symmetric",
-                                                 index1=index1)
+                        ## ptr2 <- Coord.to.Pointers(iRow, jCol, c(nvars, nvars),
+                        ##                          triangle=TRUE,
+                        ##                          lower=TRUE,
+                        ##                          order="symmetric",
+                        ##                          index1=index1)
 
                         idx2 <- ptr2[[1]]
                         pntr2 <- ptr2[[2]]
 
-                        colors <<- color_graph(pntr2-index1, idx2-index1, nvars, FALSE)
 
-                        colors_vec <<- rep(0L, nvars)
-                        for (i in 1:length(colors)) {
-                            colors_vec[colors[[i]]+1] <<- as.integer(i-1)
+                        colors_vec <<- as.integer(get_groups(M2))
+
+                        colors <<- vector("list", length=max(colors_vec))
+                        for (i in 1:max(colors_vec)) {
+                            colors[[i]] <<- which(colors_vec==i)
                         }
+
+                     ##   colors <<- color_graph(pntr2-index1, idx2-index1, nvars, FALSE)
+
+                        ## colors_vec <<- rep(0L, nvars)
+                        ## for (i in 1:length(colors)) {
+                        ##     colors_vec[colors[[i]]+1] <<- as.integer(i-1)
+                        ## }
 
 
                         coord2vec <- function(j) {
@@ -94,7 +117,7 @@ sparseHessianFD <-
                         }
 
 
-                        D <<- sapply(colors, coord2vec)
+                        D <<- sapply(colors, coord2vec)[invperm,]
                         ready <<- TRUE
 
                     },
@@ -156,13 +179,13 @@ sparseHessianFD <-
                         if (ready) {
                             grad.x <- gr1(x)
                             Y <- apply(D, 2, fd, x = x, grad.x = grad.x)
+                            browser()
                             res <- subst(Y, colors_vec, colors, idx-index1, pntr-index1, eps, nvars, nnz)
-                            return(res)
                         } else {
                             stop("sparseHessianFD object not initialized")
                             res <- NULL
                         }
-                        return(res)
+                        return(res[invperm, invperm])
                     },
 
                     fn = function(x) {
