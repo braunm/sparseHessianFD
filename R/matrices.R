@@ -84,7 +84,8 @@ Matrix.to.Pointers <- function(M, order="symmetric",
     res <- vector("list",length=2)
     if (order == "symmetric") {
         stopifnot(Matrix::isSymmetric(M))
-        M <- as(M,"dgCMatrix")
+        ##     M <- as(M,"dgCMatrix")
+        M <- as(M,"ngCMatrix")
         names(res) <- c("idx","pntr")
         res$idx <- as.integer(M@i) + as.integer(index1)
         res$pntr <- as.integer(M@p) + as.integer(index1)

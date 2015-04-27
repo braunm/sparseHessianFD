@@ -2,9 +2,9 @@
 #' @param M full pattern matrix
 get_groups <- function(M) {
 
-    X <- as(M, "nMatrix")
-    P <- order(Matrix::rowSums(X), decreasing=TRUE)
-    L <- tril(X[P,P])
+  #  X <- as(M, "nMatrix")
+  #  P <- order(Matrix::rowSums(X), decreasing=TRUE)
+    L <- tril(M)
     tmp <- L %&% L ## intersection graph from Boolean matrix product
 
 
@@ -18,9 +18,9 @@ get_groups <- function(M) {
     for (i in 1:nvars) {
         ## color = smallest integer not forbidden for i
         if (is.null(forb[[i]])) {
-            colors[i] <- 0
+            colors[i] <- 1
         } else {
-            colors[i] <- min(seq(0:(max(forb[[i]])+1))[-forb[[i]]])
+            colors[i] <- min(seq(1:(max(forb[[i]])+1))[-forb[[i]]])
         }
         for (j in which(G[i,])) forb[[j]] <- c(forb[[j]], colors[i])
     }

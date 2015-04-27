@@ -77,7 +77,7 @@ test_that("indexing", {
     ## H3S <- obj3S$hessian(P)
     ## H4S <- obj4S$hessian(P)
 
-    browser()
+
     expect_equal(H1L, true.hess1, tolerance=5e-8)
     expect_equal(H2L, true.hess2, tolerance=5e-8)
     expect_equal(H1L, H3L)
