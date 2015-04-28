@@ -35,27 +35,28 @@ Rcpp::S4 subst2(const Rcpp::NumericMatrix& Y,
   Rcpp::Rcout << "\n";
 
  
-  Eigen::MatrixXd B(ngrp, nvars);
-  B.setZero();
+  // Eigen::MatrixXd B(ngrp, nvars);
+  // B.setZero();
 
-  // Eigen::MatrixXd H(nvars, nvars);
-  // H.setZero();
+  Eigen::MatrixXd H(nvars, nvars);
+  H.setZero();
   
   for (int i=nvars-1; i>=0; --i) {
-    //    Rcpp::Rcout << "\ni = " << i << "\n";
+    //   Rcpp::Rcout << "\ni = " << i << "\n";
     int colI = colors(i);
     for (auto j=jCol.begin()+ipntr(i); j != jCol.begin()+ipntr(i+1); j++) {	
       int colJ = colors(*j);
-      double z = Y(i, colJ) * inv_delta; 
-      // for (auto k=W[colJ].begin(); k!=W[colJ].end(); ++k) {
-      // 	z += H(*k, i);
-      // }
-      z += B(colJ, i);
-      //    Rcpp::Rcout << "\tj = " << *j << "\tz = " << z << "\n"; 
+      double yij = Y(i, colJ) * inv_delta;
+      double z = yij;
+      for (auto k=W[colJ].begin(); k!=W[colJ].end(); ++k) {
+      	z -= H(*k, i);
+      }
+      //   z += B(colJ, i);
+      //     Rcpp::Rcout << "\tj = " << *j << "\tz = " << z << "\tyij = " << yij << "\n"; 
       //     B(colJ, *j) += z;
       Trips.emplace_back(i, *j, z);
-      //    H(i, *j) = z;
-      B(colI, *j) += z;
+      H(i, *j) = z;
+      //B(colI, *j) += z;
       if (i != *j) {
 	Trips.emplace_back(*j, i, z);
       }
@@ -65,6 +66,8 @@ Rcpp::S4 subst2(const Rcpp::NumericMatrix& Y,
   Eigen::SparseMatrix<double> M(nvars, nvars);
   M.setFromTriplets(Trips.begin(), Trips.end());
   M.makeCompressed();
+ 
+  
   return(Rcpp::wrap(M)); 
 }
 

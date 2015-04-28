@@ -20,6 +20,19 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// get_colors
+List get_colors(const IntegerVector& pntr, const IntegerVector& idx, const int nvars);
+RcppExport SEXP sparseHessianFD_get_colors(SEXP pntrSEXP, SEXP idxSEXP, SEXP nvarsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const IntegerVector& >::type pntr(pntrSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type idx(idxSEXP);
+    Rcpp::traits::input_parameter< const int >::type nvars(nvarsSEXP);
+    __result = Rcpp::wrap(get_colors(pntr, idx, nvars));
+    return __result;
+END_RCPP
+}
 // subst
 Rcpp::S4 subst(const Rcpp::NumericMatrix& Y, const Rcpp::IntegerVector& colors, const Rcpp::ListOf<Rcpp::IntegerVector>& W, const Rcpp::IntegerVector& jCol, const Rcpp::IntegerVector& ipntr, const double& delta, const int& nvars, const int& nnz);
 RcppExport SEXP sparseHessianFD_subst(SEXP YSEXP, SEXP colorsSEXP, SEXP WSEXP, SEXP jColSEXP, SEXP ipntrSEXP, SEXP deltaSEXP, SEXP nvarsSEXP, SEXP nnzSEXP) {

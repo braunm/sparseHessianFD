@@ -1,8 +1,8 @@
 rm(list=ls())
 gc()
 set.seed(123)
-data(binary_large)
-binary <- binary_large
+data(binary)
+binary <- binary
 
 N <- length(binary$Y)
 k <- NROW(binary$X)

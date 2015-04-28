@@ -58,15 +58,14 @@ sparseHessianFD <-
                                    eps = eps,
                                    index1 = index1,
                                    nvars = length(x.init),
-                                   nnz = length(iRow),
                                    ready = FALSE)
                         if (any(cols > rows)) {
                             warning("Some elements are in upper triangle, and will be ignored.")
                         }
-
+                        nnz <<- length(iRow)
 
                         tmp <- sparseMatrix(i=iRow, j=jCol, index1=index1, symmetric=TRUE)
-    ##                    perm <<- 1:nvars
+      ##                perm <<- 1:nvars
                        perm <<- order(Matrix::rowSums(tmp), decreasing=TRUE)
                         invperm <<- invPerm(perm)
 
@@ -74,28 +73,31 @@ sparseHessianFD <-
                         M <- tmp[perm,perm]
 
                         ptr <- Matrix.to.Pointers(tril(M), order="row", index1=index1)
-                 ##       ptr2 <- Matrix.to.Pointers(M, order="symmetric", index1=index1)
+
 
                         idx <<- ptr[[1]]
                         pntr <<- ptr[[2]]
 
-                   ##     idx2 <- ptr2[[1]]
-                   ##     pntr2 <- ptr2[[2]]
 
-
-                        colors_vec <<- as.integer(get_groups(M) - 1)
-                        ncolors <- max(colors_vec)+1
-                        colors <<- vector("list", length=ncolors)
-                        for (i in 1:ncolors) {
-                            colors[[i]] <<- which(colors_vec==(i-1))-1
-                        }
-
-                        ## colors <<- color_graph(pntr2-index1, idx2-index1, nvars, FALSE)
-
-                        ## colors_vec <<- rep(0L, nvars)
-                        ## for (i in 1:length(colors)) {
-                        ##     colors_vec[colors[[i]]+1] <<- as.integer(i-1)
+                        ## colors_vec <<- as.integer(get_groups(M) - 1)
+                        ## ncolors <- max(colors_vec)+1
+                        ## colors <<- vector("list", length=ncolors)
+                        ## for (i in 1:ncolors) {
+                        ##     colors[[i]] <<- which(colors_vec==(i-1))-1
                         ## }
+
+
+                        ptr2 <- Matrix.to.Pointers(M, order="symmetric", index1=index1)
+                        idx2 <- ptr2[[1]]
+                        pntr2 <- ptr2[[2]]
+
+
+                        colors <<- get_colors(pntr2-index1, idx2-index1, nvars)
+
+                        colors_vec <<- rep(0L, nvars)
+                        for (i in 1:length(colors)) {
+                            colors_vec[colors[[i]]+1] <<- as.integer(i-1)
+                        }
 
 
                         coord2vec <- function(j) {
@@ -173,8 +175,9 @@ sparseHessianFD <-
                             stop("sparseHessianFD object not initialized")
                             res <- NULL
                         }
+                        res2 <- res[invperm,invperm]
 
-                        return(res[invperm,invperm])
+                        return(res2)
                     },
 
                     fn = function(x) {

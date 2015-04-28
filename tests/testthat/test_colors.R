@@ -47,8 +47,6 @@ test_that("colors", {
     true.grad2 <- f2$gr(P)
     true.hess2 <- drop0(f2$hessian(P))
 
-
-
     g1 <- get_groups(true.hess1)
     g2 <- get_groups(true.hess2)
 
