@@ -46,10 +46,6 @@ test_that("indexing", {
     ## Get hessian structure
     pat1L <- Matrix.to.Coord(tril(true.hess1))
     pat2L <- Matrix.to.Coord(tril(true.hess2))
-    pat1S <- Matrix.to.Coord(true.hess1)
-    pat2S <- Matrix.to.Coord(true.hess2)
-
-
 
     obj1L <- sparseHessianFD(P, f1$fn, f1$gr, pat1L$rows, pat1L$cols,
                 index1=TRUE)
@@ -59,36 +55,18 @@ test_that("indexing", {
                 index1=FALSE)
     obj4L <- sparseHessianFD(P, f2$fn, f2$gr, pat2L$rows-1, pat2L$cols-1,
                  index1=FALSE)
-    ## obj1S <- sparseHessianFD(P, f1$fn, f1$gr, pat1S$rows, pat1S$cols,
-    ##              index1=TRUE)
-    ## obj2S <- sparseHessianFD(P, f2$fn, f2$gr, pat2S$rows, pat2S$cols,
-    ##              index1=TRUE)
-    ## obj3S <- sparseHessianFD(P, f1$fn, f1$gr, pat1S$rows-1, pat1S$cols-1,
-    ##              index1=FALSE)
-    ## obj4S <- sparseHessianFD(P, f2$fn, f2$gr, pat2S$rows-1, pat2S$cols-1,
-    ##              index1=FALSE)
 
-    ##   print(true.hess1[c(9,10,1:8),c(9,10,1:8)])
- ##   print("true.hess1")
- ##   print(true.hess1)
+
     H1L <- obj1L$hessian(P)
     H2L <- obj2L$hessian(P)
     H3L <- obj3L$hessian(P)
     H4L <- obj4L$hessian(P)
-    ## H1S <- obj1S$hessian(P)
-    ## H2S <- obj2S$hessian(P)
-    ## H3S <- obj3S$hessian(P)
-    ## H4S <- obj4S$hessian(P)
-
 
     expect_equal(H1L, true.hess1, tolerance=5e-8)
     expect_equal(H2L, true.hess2, tolerance=5e-8)
     expect_equal(H1L, H3L)
     expect_equal(H2L, H4L)
-    ## expect_equal(H1S, true.hess1, tolerance=5e-8)
-    ## expect_equal(H2S, true.hess2, tolerance=5e-8)
-    ## expect_equal(H1S, H3S)
-    ## expect_equal(H2S, H4S)
+
 })
 
 

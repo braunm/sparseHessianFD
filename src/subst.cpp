@@ -25,32 +25,46 @@ Rcpp::S4 subst(const Rcpp::NumericMatrix& Y,
 	       const double& delta,
 	       const int& nvars,
 	       const int& nnz) {
-  
-  const int ngrp = W.size();
 
   typedef Eigen::Triplet<double> T;
   std::vector<T> Trips;
   Trips.reserve(nnz*2);
-  std::vector<double> B(nvars);
   const double inv_delta = 1/delta;
+  Rcpp::Rcout << "\n";
+
+ 
+  Eigen::MatrixXd B(W.size(), nvars);
+  B.setZero();
+
+  // Eigen::MatrixXd H(nvars, nvars);
+  // H.setZero();
   
-  for (int g=0; g<ngrp; g++) {
-    std::fill(B.begin(), B.end(), 0.0);
-    for (int k = W[g].size()-1; k >= 0; --k){
-      int i = W[g](k); 
-      for (auto j=jCol.begin()+ipntr(i); j != jCol.begin()+ipntr(i+1); j++) {	
-	double z = Y(*j, colors(i)) * inv_delta;
-	z -= B[*j];
-	B[*j] += z;	
-	Trips.emplace_back(i, *j, z);
-	if (i != *j) Trips.emplace_back(*j, i, z);	
+  for (int i=nvars-1; i>=0; --i) {
+    //   Rcpp::Rcout << "\ni = " << i << "\n";
+    for (auto j=jCol.begin()+ipntr(i); j != jCol.begin()+ipntr(i+1); j++) {	
+      int colJ = colors(*j);
+      double yij = Y(i, colJ) * inv_delta;
+      double z = yij;
+      for (auto k=W[colJ].begin(); k!=W[colJ].end(); ++k) {
+      	z -= H(*k, i);
       }
-    }// move up a row
-  } // next group and reset accumulator
-  
+      //   z += B(colJ, i);
+      //     Rcpp::Rcout << "\tj = " << *j << "\tz = " << z << "\tyij = " << yij << "\n"; 
+      //     B(colJ, *j) += z;
+      Trips.emplace_back(i, *j, z);
+      H(i, *j) = z;
+      //B(colI, *j) += z;
+      if (i != *j) {
+	Trips.emplace_back(*j, i, z);
+      }
+    }
+  }
+
   Eigen::SparseMatrix<double> M(nvars, nvars);
   M.setFromTriplets(Trips.begin(), Trips.end());
   M.makeCompressed();
+ 
+  
   return(Rcpp::wrap(M)); 
 }
 

@@ -38,6 +38,8 @@ initializer instead.
 \item{\code{colors}}{A list representation of the partitioning of the columns of the Hessian.  This is used as part of the estimation algorithm.  Specifically, each list element is a "color," and each element in the corresponding vector is a column with that color.  See references.}
 
 \item{\code{colors_vec}}{A vector representation of the partitioning of the columns.  There are nvars elements, one for each column of the Hessian.  The value corresponds to the "color" for that column.}
+
+\item{\code{perm,invperm}}{Permutation vector and its inverse}
 }}
 \section{Methods}{
 

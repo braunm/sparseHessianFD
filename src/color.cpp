@@ -50,14 +50,12 @@ Rcpp::IntegerVector get_colors(const IntegerVector& pntr, //row/col pointer
 
   for (int m=0; m < nvars; m++) {
     P[m] = S(idx.begin()+pntr(m), idx.begin()+pntr(m+1)); // rows
-    //    print_container(P[m]);
   }
 
   
   int max_color = 0;
   used.insert(0);
-  for (int i=0; i<nvars; i++) {
-    //   Rcout << "i = " << i << "\n";
+  for (int i=0; i<nvars; i++) { 
     if (forb[i].empty()) {
       colors[i] = 0;
     } else {
@@ -65,12 +63,6 @@ Rcpp::IntegerVector get_colors(const IntegerVector& pntr, //row/col pointer
       set_difference(used.begin(), used.end(),
 		     forb[i].begin(), forb[i].end(),
 		     std::inserter(valid,valid.begin()));
-      // Rcpp::Rcout << "Used colors:\t";
-      // print_container(used);
-      // Rcpp::Rcout << "Forbidden colors:\t";
-      // print_container(forb[i]);
-      // Rcpp::Rcout << "Valid colors:\t";
-      // print_container(valid);
       if (valid.empty()) { // add new color
 	max_color++;
 	used.insert(max_color);
@@ -79,7 +71,7 @@ Rcpp::IntegerVector get_colors(const IntegerVector& pntr, //row/col pointer
 	colors[i] = *valid.begin();
       }
     }
-    //  Rcout << "\tcolor = " << colors[i] << "\n";
+
     for (auto j : P[i]) {
       forb[j].insert(colors[i]);
     }     
