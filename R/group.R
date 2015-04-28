@@ -25,3 +25,19 @@ get_groups <- function(M) {
 
 
 
+#' @param M full pattern matrix
+get_groups2 <- function(M, index1) {
+
+    nvars <- NROW(M)
+    L <- tril(as(M,"nMatrix"))
+    G <- Matrix::crossprod(L)
+    ptr <- Matrix.to.Pointers(G, order="symmetric", index1=index1)
+    idx <<- ptr[[1]]
+    pntr <<- ptr[[2]]
+
+    colors_vec <- get_colors(pntr-index1, idx-index1, nvars)
+    return(colors_vec)
+}
+
+
+

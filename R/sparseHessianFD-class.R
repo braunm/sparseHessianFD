@@ -87,17 +87,30 @@ sparseHessianFD <-
                         ## }
 
 
-                        ptr2 <- Matrix.to.Pointers(M, order="symmetric", index1=index1)
-                        idx2 <- ptr2[[1]]
-                        pntr2 <- ptr2[[2]]
 
 
-                        colors <<- get_colors(pntr2-index1, idx2-index1, nvars)
-
-                        colors_vec <<- rep(0L, nvars)
-                        for (i in 1:length(colors)) {
-                            colors_vec[colors[[i]]+1] <<- as.integer(i-1)
+                        colors_vec <<- get_groups2(M, index1)
+                        ncolors <- max(colors_vec)+1
+                        colors <<- vector("list", length=ncolors)
+                        for (i in 1:ncolors) {
+                            colors[[i]] <<- which(colors_vec==(i-1))-1
                         }
+
+
+
+                        ## ptr2 <- Matrix.to.Pointers(M, order="symmetric", index1=index1)
+                        ## idx2 <- ptr2[[1]]
+                        ## pntr2 <- ptr2[[2]]
+
+
+                        ## colors <<- color_graph(pntr2-index1, idx2-index1, nvars)
+
+                        ## colors_vec <<- rep(0L, nvars)
+                        ## for (i in 1:length(colors)) {
+                        ##     colors_vec[colors[[i]]+1] <<- as.integer(i-1)
+                        ## }
+
+
 
 
                         coord2vec <- function(j) {

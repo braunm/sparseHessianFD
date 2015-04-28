@@ -1,5 +1,8 @@
 rm(list=ls())
 gc()
+
+library(testthat)
+
 set.seed(123)
 data(binary)
 binary <- binary

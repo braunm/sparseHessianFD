@@ -21,7 +21,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // get_colors
-List get_colors(const IntegerVector& pntr, const IntegerVector& idx, const int nvars);
+Rcpp::IntegerVector get_colors(const IntegerVector& pntr, const IntegerVector& idx, const int nvars);
 RcppExport SEXP sparseHessianFD_get_colors(SEXP pntrSEXP, SEXP idxSEXP, SEXP nvarsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;

@@ -14,9 +14,18 @@ void print_container(const T& X) {
   for (auto i : X) {
     Rcout << i << "   ";
     z++;
-    if (fmod(z,7) == 0) Rcout << "\n";
+    if (fmod(z,10) == 0) Rcout << "\n";
   }
   Rcout << "\n";
+}
+
+static void chkIntFn(void *dummy) {
+  R_CheckUserInterrupt();
+}
+
+void checkInterrupt() {
+   if( ! R_ToplevelExec(chkIntFn, NULL) )
+     Rcpp::stop( "user interuption" );
 }
 
 /*
@@ -33,63 +42,63 @@ void print_vec(const Eigen::MatrixBase<T>& X) {
 }
 */
 
-//' @title Vertex coloring of intersection graph
-//' @description Generate valid cyclic coloring of variables that is consistent with estimating sparse Hessian with a triangle substitution method.
-//' @param pntr,idx row pointers and column indices (CSC or CSR format; same since Hessian matrix is symmetric) of the intersection Must use zero-based indexing.
-//' @param nvars Dimension of Hessian (number of variables)
-//' @param LT true if ordering with degree in lower triangle, and false (default) if using full Hessian.  Included only for testing, to see if it matters (I don't think it does).
+//' @title Vertex coloring of sparse symmetric matrix
+//' @description Generate proper coloring of a sparse symmetric matrix.
+//' @param pntr,idx row pointers and column indices (CSC or CSR format; same since  matrix is symmetric). Must use zero-based indexing.
+//' @param nvars Dimension of matrix (number of variables)
 //' @return A list.  Each element of the list represents a color, and contains an integer vector with the indices of the variables with that color.  Indices are zero-based.
 //[[Rcpp::export]]
-List get_colors(const IntegerVector& pntr, //row/col pointer
-		const IntegerVector& idx, // col/row index
-		const int nvars) {
+Rcpp::IntegerVector get_colors(const IntegerVector& pntr, //row/col pointer
+			 const IntegerVector& idx, // col/row index
+			 const int nvars) {
   
   // All pointers and indices are ZERO-BASED
   // and for the FULL MATRICES (not just LT)
-
-  std::vector<std::set<int> > W; // colorings
-  S uncolored;
   
-  std::vector<std::set<int> > P(nvars), jrows(nvars);
+  std::vector<std::set<int> > P(nvars);
+  std::vector<std::set<int> > forb(nvars);
+  Rcpp::IntegerVector colors(nvars);
+  std::set<int> used;
+  std::set<int> valid;
 
   for (int m=0; m < nvars; m++) {
-    uncolored.insert(m);
     P[m] = S(idx.begin()+pntr(m), idx.begin()+pntr(m+1)); // rows
-    jrows[m] = P[m];
+    //    print_container(P[m]);
   }
 
-  int k = 0;
-  while (!uncolored.empty()) {
   
-    S Wk;
-    S A = S(uncolored); // all uncolored are candidates
-
-    while (!A.empty()) { // while there are still candidates
-      auto r = A.begin();
-      Wk.insert(*r); // put r in color k
-      uncolored.erase(*r); // remove r from uncolored      
-      for (auto j : P[*r]) {
-	A.erase(j);
-      }
-      P[*r].clear();      
-    } // until no more candidates
-    
-    // remove r as neighbor for everyone else 
-    for (auto i : uncolored) {
-      for (auto rr : Wk) {
-	P[i].erase(rr);
+  int max_color = 0;
+  used.insert(0);
+  for (int i=0; i<nvars; i++) {
+    //   Rcout << "i = " << i << "\n";
+    if (forb[i].empty()) {
+      colors[i] = 0;
+    } else {
+      valid.clear();
+      set_difference(used.begin(), used.end(),
+		     forb[i].begin(), forb[i].end(),
+		     std::inserter(valid,valid.begin()));
+      // Rcpp::Rcout << "Used colors:\t";
+      // print_container(used);
+      // Rcpp::Rcout << "Forbidden colors:\t";
+      // print_container(forb[i]);
+      // Rcpp::Rcout << "Valid colors:\t";
+      // print_container(valid);
+      if (valid.empty()) { // add new color
+	max_color++;
+	used.insert(max_color);
+	colors[i] = max_color;
+      } else {
+	colors[i] = *valid.begin();
       }
     }
-    W.push_back(Wk);
-    k++; // advance to next color
-  } // end loop on uncolored
-  
-  List res(k);
-  for (int j=0; j<k; j++) {
-    res[j] = W[j]; // returning ZERO-BASED INDEXES
+    //  Rcout << "\tcolor = " << colors[i] << "\n";
+    for (auto j : P[i]) {
+      forb[j].insert(colors[i]);
+    }     
   }
-  
-  return(Rcpp::wrap(res));  
+
+  return(Rcpp::wrap(colors));
 }
 
 
