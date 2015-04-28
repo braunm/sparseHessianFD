@@ -33,11 +33,9 @@ initializer instead.
 
 \item{\code{ready}}{TRUE if object has been initialized, and Hessian has been partitioned.}
 
-\item{\code{idx,pntr}}{Column indices and row pointers for non-zero elements in lower triangle of the Hessian.  Row-oriented compressed storage.}
+\item{\code{idx,pntr}}{Column indices and row pointers for non-zero elements in lower triangle of the permuted Hessian.  Row-oriented compressed storage.}
 
-\item{\code{colors}}{A list representation of the partitioning of the columns of the Hessian.  This is used as part of the estimation algorithm.  Specifically, each list element is a "color," and each element in the corresponding vector is a column with that color.  See references.}
-
-\item{\code{colors_vec}}{A vector representation of the partitioning of the columns.  There are nvars elements, one for each column of the Hessian.  The value corresponds to the "color" for that column.}
+\item{\code{colors}}{A vector representation of the partitioning of the columns.  There are nvars elements, one for each column of the Hessian.  The value corresponds to the "color" for that column.}
 
 \item{\code{perm,invperm}}{Permutation vector and its inverse}
 }}
@@ -49,6 +47,18 @@ initializer instead.
 \item{\code{fngr(x)}}{Return list of function value and gradient, evaluated at x}
 
 \item{\code{fngrhs(x)}}{Return list of function value, gradient, and Hessian, evaluated at x}
+
+\item{\code{get_invperm()}}{Return integer vector of inverse of permutation used for computing Hessian}
+
+\item{\code{get_nnz()}}{Return number of non-zero elements in lower triangle of Hessian}
+
+\item{\code{get_nvars()}}{Return dimension (number of rows or columns) of Hessian}
+
+\item{\code{get_pattern()}}{Return pattern matrix of lower triangle of Hessian}
+
+\item{\code{get_perm()}}{Return integer vector of permutation used for computing Hessian}
+
+\item{\code{get_perm_pattern()}}{Return pattern matrix of lower triangle of *permuted* Hessian}
 
 \item{\code{gr(x)}}{Return gradient, evaluated at x:  gr(x,...)}
 

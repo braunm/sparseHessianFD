@@ -1,5 +1,5 @@
 #' @name binary-data
-#' @aliases binary_small binary_large
+#' @aliases binary_small binary_large binary_super
 #' @title Sample simulated data for binary choice model in vignette
 #' @description Simulated data.  See vignette.  Generated from data-raw/binary.R
 #' @docType data

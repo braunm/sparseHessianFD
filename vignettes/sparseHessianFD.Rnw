@@ -31,7 +31,7 @@
 }{}
 
 \usepackage{xcolor}
-\usepackage[colorlinks=true, urlcolor=NavyBlue]{hyperref}
+\usepackage{hyperref}
 
 %%make knitr environment line spacing separate from LaTeX
 \renewenvironment{knitrout}{\begin{singlespace}}{\end{singlespace}}
@@ -78,21 +78,21 @@
                         firstinits=false
 			]{biblatex}
 
- \addbibresource{~/OneDriveBusiness/References/Papers/braun_refs.bib}
-
+ %%\addbibresource{~/OneDriveBusiness/References/Papers/braun_refs.bib}
+\addbibresource{./braun_refs.bib}
 \title{\pkg{sparseHessianFD}: An \proglang{R} Package for Estimating Sparse Hessian Matrices}
 \author{Michael Braun\\Cox School of Business\\Southern Methodist University}
 \date{April 23, 2015}
-
 
 \begin{document}
 
 \maketitle
 
 <<setup1, echo=FALSE, cache=FALSE>>=
-library(devtools)
 library(methods, quietly = TRUE)
 library(numDeriv, quietly = TRUE)
+library(Matrix, quietly = TRUE)
+library(sparseHessianFD, quietly=TRUE)
 knitr::opts_chunk[["set"]](collapse = FALSE, eval=TRUE, echo=TRUE,
                           message=FALSE, tidy=FALSE, cache = TRUE)
 @
@@ -190,12 +190,10 @@ Some users may find the requirement to provide the gradient
 burdensome.  We take the position that deriving a vector of first
 derivatives, and writing \proglang{R} functions to compute them, is a
 lot easier than doing the same for a matrix of second derivatives.
-Also, we have found in practice that even when we have derived and
+Even when we have derived and
 coded the
-Hessian matrix symbolically, sometimes it can still be faster to estimate the Hessian
-using \pkg{sparseHessianFD} than running coding it directly (maybe
-because of our weak coding skills, or the computation time to compute
-intermediate values).   These are the
+Hessian matrix symbolically, in practice it may still be faster to estimate the Hessian
+using \pkg{sparseHessianFD} than coding it directly.   These are the
 situations in which \pkg{sparseHessianFD} adds the most value.  If AD software is available to compute the gradient, then
 it is probably available for sparse Hessians as well, and
 \pkg{sparseHessianFD} would not be needed.
@@ -240,11 +238,7 @@ The log posterior density, ignoring any normalization constants, is
 \end{align}
 We will return to this example throughout the article.
 
-
-
-
 <<setup2, echo=FALSE>>=
-load_all()
 N <- 6
 k <- 2
 nv1 <- (N+1)*k
@@ -278,7 +272,7 @@ In this case, the Hessian has a "block-arrow" structure.  For example,
 if $N=\Sexpr{N}$ and $k=\Sexpr{k}$, then there are `\Sexpr{nv1}` total variables, and the Hessian will have the following pattern.
 
 <<>>=
-Mat <- as(kronecker(diag(N),matrix(1,k,k)),"lMatrix")
+Mat <- as(Matrix::kronecker(Matrix::Diagonal(N),Matrix(1,k,k)),"nMatrix")
 Mat <- rBind(Mat, Matrix(TRUE,k,N*k))
 Mat <- cBind(Mat, Matrix(TRUE, k*(N+1), k))
 print(Mat)
@@ -294,7 +288,7 @@ together.
 Now the Hessian has an "off-diagonal" sparsity pattern.
 
 <<>>=
-Mat <- as(kronecker(matrix(1,k,k), diag(N)),"lMatrix")
+Mat <- as(Matrix::kronecker(Matrix(1,k,k), Matrix::Diagonal(N)),"nMatrix")
 Mat <- rBind(Mat, Matrix(TRUE,k,N*k))
 Mat <- cBind(Mat, Matrix(TRUE, k*(N+1), k))
 print(Mat)
@@ -758,28 +752,31 @@ in the same group have a non-zero element in the same
 row. It turns out that finding valid, efficient partitions can be
 characterized as a vertex coloring problem from graph theory \citep{ColemanMore1984}.  In this
 sense, each variable is a vertex in an undirected graph, and an edge connects two
-vertices $i$ and $j$ if $\hess{ij}{x}\neq 0$.  The lower triangular
+vertices $i$ and $j$ if $\hess{ij}{x}\neq 0$.  The
 sparsity pattern of the Hessian is the adjacency matrix of the graph.
 
 Before continuing, we need to define some additional terms related to
-graph theory.  The ``intersection set'' of two columns of
-$\hessLT{}{x}$ consists of the row indices of non-zero elements that
-are common to both columns.  In the ``intersection graph,'' two
-variables are connected if their intersection set is non-empty.  Thus,
-two columns are connected in the intersection graph if they have any
-non-zero element in a common row.
-
-The intersection graph of $\hessLT{}{x}$ is \emph{not} invariant to
-permutation of the rows and columns of $\hess{}{x}$.  Let $\pi$
-represent such a partition, and let $\hessLT{\pi}{x}$ be the lower
-triangle of $\pi\hess{}{x}{\pi^\top}$.
-
-A ``proper'' coloring of a graph is one in which two
-vertices with a common edge do not have the same color. \Citet{ColemanMore1984} define a ``triangular coloring'' of a graph is
+graph theory. A ``proper'' coloring of a graph is one in which two
+vertices with a common edge do not have the same
+color. \Citet{ColemanMore1984} define a ``triangular coloring'' of a graph is
 a proper coloring with the additional condition that common
 neighbors of a vertex do not have the same color.  A triangular
 coloring is a special case of an ``acyclic coloring,'' in which any cycle in the graph
-uses at least three colors \citep{GebremedhinTarafdar2007}. \Citet{ColemanCai1986} prove that a partitioning is consistent with a
+uses at least three colors \citep{GebremedhinTarafdar2007}.
+
+In our context, ``intersection set'' of two columns of
+$\hessLT{}{x}$ consists of the row indices of non-zero elements that
+are common to both columns.  In the ``intersection graph,'' two
+vertices are connected if their intersection set is non-empty.  Thus,
+the vertices of two columns are connected in the intersection graph if they have any
+non-zero element in a common row.
+
+The intersection graph of $\hessLT{}{x}$ is not invariant to
+permutation of the rows and columns of $\hess{}{x}$.  Let $\pi$
+represent such a permutation, and let $\hessLT{\pi}{x}$ be the lower
+triangle of $\pi\hess{}{x}{\pi^\top}$.
+
+\Citet{ColemanCai1986} prove that a partitioning is consistent with a
 substitution method if and only if it is an acyclic coloring of the
 graph of the sparsity pattern of the Hessian.   \Citet[Theorem 6.1]{ColemanMore1984} show that a coloring is
 triangular if and only if it is also a coloring of the intersection
@@ -882,7 +879,7 @@ efficient than if treating the Hessian as if it were dense.
 \end{figure}
 
 Now suppose that we were to rearrange $\hess{}{x}$ so the last row and
-and column were moved to the front.  The graph of the
+and column were moved to the front.  The sparsity graph of the
 Hessian is unchanged, but the lower triangular adjacency matrix and
 the corresponding intersection graph, are different (Figure
 \ref{fig:graph2}).  In Figure \ref{fig:graph2adj}, all columns share at least one non-zero row with
@@ -959,132 +956,120 @@ with only three colors.
 \caption{Permuted matrix}\label{fig:graph2}
 \end{figure}
 
+\subsection{Algorithm and Permutations}
+
+The \pkg{sparseHessianFD} implements algorithms for the following tasks:
+
+\begin{enumerate}
+\item Permuting rows and columns of the matrix to reduce the number of
+  colors;
+\item Finding a cyclic coloring that is consistent with the
+  substitution method;
+\item Computing the compressed matrix of finite differences of
+  gradients; and
+\item Solving triangular linear system to estimate the non-zero
+  elements of the Hessian.
+\end{enumerate}
+
+None of these algorithms are meant to be optimal, or even the ``best
+available.''  However, they are meant to be easy to implement and
+maintain with standard libraries.
+
+\subsubsection{Permuting Hessian}
+
+Finding an appropriate permutation of the Hessian is similar to, but
+exactly the same as, finding a fill-reducing permutation for a
+Cholesky decomposition.  Instead of reducing the total number of zeros
+in the lower triangle, we want to reduce the number of columns with
+common non-zero rows.  A reasonable heuristic is to permute the matrix
+such that the number of non-zero elements in each row is decreasing.
+This is the ``smallest-last'' ordering discussed in
+\citet{ColemanMore1984}.  The reason for this order is simple.
+Suppose non-zeros within a row are randomly distributed across
+columns.  If the row is near the top of the matrix, there is a higher
+probability that the non-zero element is in the upper triangle, not in
+the lower.  We can put sparser rows near the bottom, since the cells
+that are in the lower triangle are less likely to be non-zero.
+
+\subsubsection{Cyclic coloring}
 
 
+As discussed above, we can get a triangular coloring of the sparsity
+graph with a proper coloring of the intersection graph of the
+columns.  Let $\hessLT{\pi}{\cdot}$ be the lower triangle of the
+sparsity pattern of the Hessian, with rows and columns permuted by
+$\pi$.  The adjacency matrix of the intersection graph $\Gamma$ is the Boolean
+crossproduct, $\Gamma = L^\top L$.
 
-The \pkg{sparseHessianFD} package groups variables by permuting the
-rows and columns of the Hessian and coloring the intersection graph of
-the lower triangle of the permuted matrix.
 
+This is a ``greedy'' coloring algorithm on the permuted matrix.
 
-
-
+\begin{algorithm}
+  \begin{algorithmic}
+    \FOR{$i=1$ \TO $M$}
+        \STATE{$P[i]\leftarrow$ set of column indices of non-zero
+      elements in row $i$}
+       \STATE{Initialize $F[i]$ as set of  ``forbidden'' colors for vertex $i$.}
+        \STATE{$C[i]\leftarrow 0$.}
+    \ENDFOR
+    \STATE{$k\leftarrow 0$}
+    \STATE{Insert $0$ in $U$}
+    \FOR{$i=1$ \TO $M$}
+       \IF{$F[i]$ is empty}
+           \STATE{$C[i]\leftarrow 0$}
+        \ELSE
+           \STATE{$V\leftarrow U\cap F[i]$}
+           \IF{$V$ is empty}
+              \STATE{$k\leftarrow k+1$}
+              \STATE{Insert $k$ into $U$}
+              \STATE{$C[i]\leftarrow k$}
+        \ELSE
+             \STATE{$C[i]\leftarrow\min(V)$}
+       \ENDIF
+    \ENDIF
+    \ENDFOR
+    \FOR{$j$ in $P[i]$}
+    \STATE{Insert $C[i]$ into $F[j]$}
+    \ENDFOR
+    \RETURN{$C$}
+    \end{algorithmic}
+    \caption{Consistent partitioning of variables for a triangular
+      substitution method}\label{alg:coloring}
+    \end{algorithm}
 
 \subsection{Implementing the substitution method}
 
-Once the colors are established, they no longer need to be recomputed.
+Now we can fill in the matrix.  Let $C_m$ be the assigned color to
+variable $m$.  From \citet[Equation 6.1]{ColemanMore1984},
+\begin{align}
+  \label{eq:2}
+  \hess{ij}{x}&=Y_{i,C_j}/\delta - \sum_{l>i,l\in C_j}\hess{li}{x}
+\end{align}
 
-
-
-
-\subsubsection{Algorithm and Permutations}
-
-
-
-
-
-
-For this particular sparsity pattern, a ``greedy'' coloring algorithm
-will work.  We start with variable 1, and color it green.  Since
-variable 1 is connected to every other variable, no other variable can
-be green, so we color variable 2 blue. Variable 3 can be neither green
-nor blue, so we color it red.  Coloring variables 4 and 6 blue, and
-variables 5 and 7 red, completes a cyclic coloring of the graph.
-
-\Citet{PowellToint1979}, \citet{ColemanMore1984} and
-\citet{ColemanCai1986} all note that the ordering of the variables
-matters when determining the a valid coloring.  Figure
-\ref{fig:graph1perm} presents the sparsity pattern from Figure
-\ref{fig:graph1adj}, but with the first and last variables switched.
-Because we cannot assign the same color to two columns with a non-zero
-in the same row, coloring the variables in sequence would lead to each
-variable having a unique color.  Such a coloring is indeed cyclic, and
-would be consistent with a substitution method under the
-\citet{ColemanCai1986} criterion.  But it is hardly the best cyclic
-coloring available.
-
-The \pkg{sparseHessianFD} package implements the ``smallest-last
-ordering,'' first described in \citet{PowellToint1979}.  Other
-coloring algorithms have been proposed since
-\citep{ColemanCai1986,GebremedhinTarafdar2007,GebremedhinManne2005},
-but this algorithm is conceptually simple and easy to implement using
-standard data structures.  We include a detailed presentation of the algorithm as Algorithm
-\ref{alg:color1}, but the basic idea is as follows.
-\begin{enumerate}
-\item For Color $i$, start with the graph of the sparsity structure
-  for the Hessian after removing the rows and columns of previously
-  colored variables.  All remaining vertices in the graph are
-  ``candidates'' for the current color.\label{item:startColor}
-\item Let variable $r$ be the candidate vertex with the highest
-  degree.  Assign $r$ to color $i$, and remove it from both the candidate
-  list and the graph of uncolored variables.\label{item:maxDegree}
-\item Remove from the candidate list all of $r$'s neighbors, and their
-  neighbors.
-\item If some candidates remain, return to Step \ref{item:maxDegree}
-  to assign more vertices to color $i$.
-\item If the candidate list is empty, move to the next color and
-  return to Step \ref{item:startColor}.
-\end{enumerate}
-
-For the sparsity patterns in Figures \ref{fig:graph1} and \ref{fig:graph1perm}, the algorithm
-would proceed as follows:
-\begin{enumerate}
-\item Variable 1 has the highest degree, so color that vertex green.
-  Since 1 is connected to all other variable, no other variable can be
-  colored green. Variable 1 is now removed from the graph of uncolored
-  vertices.
-\item Variables 2, 4 and 6 all have the same degree, so we color
-  vertex 2 blue.  It's only distance-1 or distance-2 neighbor is
-  vertex 3, so we remove it from the blue candidate set.  S
-\end{enumerate}
-
-
-
+We implement this substitution method using Algorithm \ref{alg:subst}.
 \begin{algorithm}
-  \caption{Algorithm to generate a substitution-consistent coloring of variables}
-  \label{alg:color1}
   \begin{algorithmic}
-    \REQUIRE{Rows and columns are labeled as consecutive integers $1,\mathellipsis,M$}
-    \REQUIRE{$P,Q$, are lists of $M$ sets (initially identical), where
-      each $P[i]$ or $Q[i]$ is the set of column indices of the non-zero values in row $i$}
-    \REQUIRE{$W$, a stack of sets}
-    \REQUIRE{$D$, a vector of size $M$}
-    \REQUIRE{$S$, $A$ and $N$ are ordered sets}
-\FOR{$i$ = 1 \TO $M$}
-    \STATE{$D[i]\leftarrow size(P[i])$}
-  \ENDFOR
-  \STATE{Copy $P\rightarrow Q$}
-  \STATE{$c\leftarrow 0$}
-  \STATE{Insert $\{1,\mathellipsis,M\}\rightarrow S$}\COMMENT{indices of all variables}
-    \STATE{Initialize set $W[c]$}
-  \WHILE{$S$ is not empty}
-      \STATE{Copy $S\rightarrow A$}
-      \WHILE{$A$ is not empty}
-          \STATE{$r\leftarrow$ index of $\max(D)$.}
-          \STATE{Insert $r\rightarrow W[c]$}
-          \STATE{Remove $r$ from $S$}
-          \FOR{each $j$ in $A$}
-          \STATE{Clear $N$}
-              \STATE{$N\leftarrow P[r]\cap Q[j]$}\COMMENT{Remaining
-                2-degree neighbors}
-              \IF{$N$ is not empty}
-                  \STATE{$D[j]\leftarrow 0$}
-                  \STATE{Remove $j$ from $A$}
-                \ENDIF
-          \ENDFOR
-          \STATE{Clear $P[r]$}
-          \ENDWHILE
-          \STATE{$D[1,\mathellipsis,K]\leftarrow 0$}
-          \FOR{each $i$ in $S$}
-              \FOR{each $j$ in $W[c]$}
-                  \STATE{Remove $j$ from $P[i]$}
-                  \STATE{$D[i]\leftarrow size(P[i])$}
-              \ENDFOR
-          \ENDFOR
-          \STATE{$c\leftarrow c+1$}
-    \ENDWHILE
-    \end{algorithmic}
+    \STATE{Initialize Hessian $H$.}
+    \STATE{Initialize $B\leftarrow$ a $k\times M$ matrix of zeros}
+    \FOR{$i$ = $M$ \TO $1$}
+      \STATE{$P_i\leftarrow$ set of column indices of non-zero
+      elements in row $i$}
+    \FOR{All $j$ in $P_i$}
+    \STATE{$z\leftarrow Y[i,C[j]]/\delta - B[C[j], i]$}
+    \STATE{$B[C[i], j]\leftarrow B[C[i], j] + z$}
+    \STATE{$H[i,j]\leftarrow z$}
+    \STATE{$H[j,i]\leftarrow H[i,j]$}
+    \ENDFOR
+    \ENDFOR
+  \end{algorithmic}
+  \caption{Triangular substitution method}\label{alg:subst}
 \end{algorithm}
+
+
+
+
+
+
 
 
 
@@ -1092,99 +1077,6 @@ would proceed as follows:
 \subsection{Partitioning the variables}
 
 
-
-
-This rule tells us how to exclude certain groupings, but not how to
-find an optimal one, with the fewest possible number of groups.
-\Citet{ColemanMore1984} were the first to recognize that the
-partitioning task is actually a graph coloring problem.  The sparsity pattern of $L$
-is an adjacency matrix in an undirected graph.
-
-\begin{figure}
-  \begin{tabular}{r|c|c|c|c|c|c|c}
-   & 1&2&3&4&5&6&7\\
-    \hline
-    1& 1&&&&&&\\
-    2&1&1&&&&&\\
-    3&0&0&1&&&&\\
-    4&0&0&1&1&&&\\
-    5&0&0&0&0&1&&\\
-    6&0&0&0&0&1&1&\\
-    7&1&1&1&1&1&1&1
-  \end{tabular}
-\end{figure}
-
-
-
-\begin{figure}
-  \begin{subfigure}[b]{.5\textwidth}
-  \begin{tabular}{r|>{\columncolor{red!20}}c%
-    >{\columncolor{blue!20}}c%
-    >{\columncolor{red!20}}c%
-    >{\columncolor{blue!20}}c%
-    >{\columncolor{red!20}}c%
-    >{\columncolor{blue!20}}c%
-    >{\columncolor{green!20}}c}
-   & 1&2&3&4&5&6&7\\
-    \hline
-    1& 1&&&&&&\\
-    2&1&1&&&&&\\
-    3&0&0&1&&&&\\
-    4&0&0&1&1&&&\\
-    5&0&0&0&0&1&&\\
-    6&0&0&0&0&1&1&\\
-    7&1&1&1&1&1&1&1
-  \end{tabular}
-\end{subfigure}
-\iftoggle{tikz}{
-\begin{subfigure}[b]{.5\textwidth}\centering
-  \begin{tikzpicture}
-\tikzstyle{every node}=[draw, shape=circle]
-\path node at (0.5,1.5) [fill=red!20] (v1) {1};
-\path node at  (1.5,1.5) [fill=blue!20] (v2) {2};
-\path node at  (2.5,1.5) [fill=red!20] (v3) {3};
-\path node at  (3.5,1.5) [fill=blue!20] (v4) {4};
-\path node at  (4.5,1.5) [fill=red!20] (v5) {5};
-\path node at  (5.5,1.5) [fill=blue!20] (v6) {6};
-\path node at  (3,0)  [fill=green!20] (v7) {7};
-\draw (v1) -- (v2)
-(v1) -- (v7)
-(v2) -- (v7)
-(v3) -- (v4)
-(v3) -- (v7)
-(v4) -- (v7)
-(v5) -- (v6)
-(v5) -- (v7)
-(v6) -- (v7);
-\end{tikzpicture}
-\end{subfigure}
-}{}
-\end{figure}
-
-
-
-If $h_{i,j}\neq 0$ ,
-then variables $i$ and $j$ are ``neighbors'' in the graph, and they
-cannot have the same color.  Now, let's introduce a new variable $k$,
-where $j$ and $k$ are neighbors, but $i$ and $k$ are not.  The colors
-of $i$ and $k$ still have to be different, because they have a common
-neighbor in $j$.
-
-For a partition to be compatible with estimating a Hessian via
-substitution, it is sufficient, but not necessary, that no variable
-have the same color as any other variable with which it shares a
-common neighbor.  That is, no variable within two ``steps'' on the
-undirected graph may have the same color.  But in the example above,
-variables 1 and 5 have the same color, even though 1 is connected to
-3, and 3 is connected to 5.  \Citet{ColemanCai1986} prove that the
-rule that no same-colored columns may have non-zero elements in the
-same row is equivalent to an ``acyclic'' graph coloring scheme, and
-that coloring the variables in this way is also sufficient for
-estimating a sparse Hessian.  Thus, as \citet{GebremedhinTarafdar2009}
-point out, minimizing the number of partitions is equivalent to
-minimizing the number of colors in an acyclic graph.
-
-Define acyclic.
 
 
 
@@ -1255,6 +1147,6 @@ From \citet{ColemanCai1986}, general result of substitutable
   In any event, it's still finding a cyclic coloring of the adjacency
   graph.  Just using a different heuristic for the coloring.
 
-
+\printbibliography
 
 \end{document}

@@ -7,6 +7,7 @@
 \alias{binary_large-data}
 \alias{binary_small}
 \alias{binary_small-data}
+\alias{binary_super}
 \alias{binary_super-data}
 \title{Sample simulated data for binary choice model in vignette}
 \description{
