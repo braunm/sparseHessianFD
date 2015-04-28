@@ -148,7 +148,7 @@ sparseHessianFD <-
                             grad.x <- gr1(x)
                             Y2 <- apply(D, 2, fd, x = x, grad.x = grad.x)
                             Y <- Y2[perm,]
-                            res <- subst(Y, colors_vec, colors,
+                            res <- subst(Y, colors_vec,
                                          idx-index1, pntr-index1, eps, nvars, nnz)
                         } else {
                             stop("sparseHessianFD object not initialized")
@@ -192,7 +192,19 @@ sparseHessianFD <-
                             res <- NULL
                         }
                         return(res)
-                    })
+                    },
+
+                    get_nnz= function() return(nnz),
+                    get_nvars = function() return(nvars),
+                    get_perm = function() return(perm),
+                    get_invperm = function() return(invperm),
+                    get_pattern = function() {
+                        sparseMatrix(i=iRow, j=jCol, index1=index1, symmetric=FALSE)
+                    },
+                    get_perm_pattern = function() {
+                        sparseMatrix(j=idx, p=pntr-index1, index1=index1, symmetric=FALSE)
+                    }
+                    )
                 )
 
 

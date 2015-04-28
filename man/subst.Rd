@@ -4,17 +4,13 @@
 \alias{subst}
 \title{Estimate sparse Hessian}
 \usage{
-subst(Y, colors, W, jCol, ipntr, delta, nvars, nnz)
+subst(Y, colors, jCol, ipntr, delta, nvars, nnz)
 }
 \arguments{
   \item{Y}{Matrix of finite differences}
 
   \item{colors}{Vector of length nvars that identifies
   color of each variable}
-
-  \item{W}{A list.  Each element represents a color, and
-  contains an integer vector with the indices of the
-  variables with that color.  Indexing is zero-based.}
 
   \item{jCol,ipntr}{Column indices and row pointers for
   non-zero elements of lower triangle of Hessian.}
