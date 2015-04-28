@@ -4,8 +4,8 @@ gc()
 library(testthat)
 
 set.seed(123)
-data(binary_small)
-binary <- binary_small
+data(binary_large)
+binary <- binary_large
 
 N <- length(binary$Y)
 k <- NROW(binary$X)

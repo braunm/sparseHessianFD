@@ -14,9 +14,8 @@
 ##' @field nvars Number of variables (length of x)
 ##' @field nnz Number of non-zero elements in the lower triangle of the Hessian.
 ##' @field ready TRUE if object has been initialized, and Hessian has been partitioned.
-##' @field idx,pntr Column indices and row pointers for non-zero elements in lower triangle of the Hessian.  Row-oriented compressed storage.
-##' @field colors A list representation of the partitioning of the columns of the Hessian.  This is used as part of the estimation algorithm.  Specifically, each list element is a "color," and each element in the corresponding vector is a column with that color.  See references.
-##' @field colors_vec A vector representation of the partitioning of the columns.  There are nvars elements, one for each column of the Hessian.  The value corresponds to the "color" for that column.
+##' @field idx,pntr Column indices and row pointers for non-zero elements in lower triangle of the permuted Hessian.  Row-oriented compressed storage.
+##' @field colors A vector representation of the partitioning of the columns.  There are nvars elements, one for each column of the Hessian.  The value corresponds to the "color" for that column.
 ##'@field perm,invperm Permutation vector and its inverse
 ##' @details Do not access any of the fields directly.  Use the initializer instead.
 ##' @export sparseHessianFD
@@ -35,8 +34,7 @@ sparseHessianFD <-
                     ready = "logical",
                     idx = "integer",
                     pntr = "integer",
-                    colors = "list",
-                    colors_vec = "integer",
+                    colors = "integer",
                     perm = "integer",
                     invperm = "integer"),
                 methods = list(
@@ -73,39 +71,19 @@ sparseHessianFD <-
                         idx <<- ptr[[1]]
                         pntr <<- ptr[[2]]
 
-                        colors_vec <<- coloring(L)
-                        ncolors <- max(colors_vec)+1
-                        colors <<- vector("list", length=ncolors)
-                        for (i in 1:ncolors) {
-                            colors[[i]] <<- which(colors_vec==(i-1))-1
-                        }
+                        colors <<- coloring(L)
+                        ncolors <- max(colors)+1
 
-                        coord2vec <- function(j) {
-                            z <- rep(0,nvars)
-                            z[j+1] <- eps
-                            return(z)
-                        }
+                        D <<- matrix(0, nvars, ncolors)
+                        D[cbind(perm, colors+1)] <<- eps
 
-                        D <<- sapply(colors, coord2vec)[invperm,]
                         ready <<- TRUE
                     },
 
                     partition = function() {
                         "Return the partitioning used to compute finite differences"
-                        if (ready) {
-                            res <- colors
-                            if (index1) {
-                                for (i in 1:length(res)) {
-                                    res[[i]] <- colors[[i]]+1
-                                }
-                            } else {
-                                res <- colors
-                            }
-                        } else {
-                            stop("Invalid/incomplete partition")
-                            res <- NULL
-                        }
-                        return(res)
+                        stopifnot(ready)
+                        colors
                     },
 
                     validate = function(fn, gr, rows, cols, x,
@@ -144,19 +122,13 @@ sparseHessianFD <-
                     hessian = function(x) {
                         "Return sparse Hessian, evaluated at x, as a dgCMatrix object."
                         usingMethods(fd)
-                        if (ready) {
-                            grad.x <- gr1(x)
-                            Y2 <- apply(D, 2, fd, x = x, grad.x = grad.x)
-                            Y <- Y2[perm,]
-                            res <- subst(Y, colors_vec,
-                                         idx-index1, pntr-index1, eps, nvars, nnz)
-                        } else {
-                            stop("sparseHessianFD object not initialized")
-                            res <- NULL
-                        }
-                        res2 <- res[invperm,invperm]
-
-                        return(res2)
+                        stopifnot(ready)
+                        grad.x <- gr1(x)
+                        Y2 <- apply(D, 2, fd, x = x, grad.x = grad.x)
+                        Y <- Y2[perm,]
+                        res <- subst(Y, colors,
+                                     idx-index1, pntr-index1, eps, nvars, nnz)
+                        return(res[invperm,invperm])
                     },
 
                     fn = function(x) {
@@ -183,25 +155,39 @@ sparseHessianFD <-
 
                     pointers = function(out.index1=index1) {
                         "Return list with indices (idx) and pointers (pntr) for sparsity pattern of the compressed sparse Hessian.  Since the Hessian is symmetric, the indices and pointers for row-oriented and column-oriented storage patterns are the same."
-                        if (ready){
-                            res <- list(idx = idx + out.index1 - index1,
-                                        pntr = pntr + out.index1 - index1
-                                        )
-                        } else {
-                            stop("sparseHessianFD object not initialized")
-                            res <- NULL
-                        }
-                        return(res)
+                        stopifnot(ready)
+                        list(idx = idx + out.index1 - index1,
+                             pntr = pntr + out.index1 - index1)
                     },
 
-                    get_nnz= function() return(nnz),
-                    get_nvars = function() return(nvars),
-                    get_perm = function() return(perm),
-                    get_invperm = function() return(invperm),
+                    get_nnz= function() {
+                        "Return number of non-zero elements in lower triangle of Hessian"
+                        stopifnot(ready)
+                        nnz
+                    },
+                    get_nvars = function() {
+                        "Return dimension (number of rows or columns) of Hessian"
+                        stopifnot(ready)
+                        nvars
+                    },
+                    get_perm = function() {
+                        "Return integer vector of permutation used for computing Hessian"
+                        stopifnot(ready)
+                        perm
+                    },
+                    get_invperm = function() {
+                        "Return integer vector of inverse of permutation used for computing Hessian"
+                        stopifnot(ready)
+                        invperm
+                    },
                     get_pattern = function() {
+                        "Return pattern matrix of lower triangle of Hessian"
+                        stopifnot(ready)
                         sparseMatrix(i=iRow, j=jCol, index1=index1, symmetric=FALSE)
                     },
                     get_perm_pattern = function() {
+                        "Return pattern matrix of lower triangle of *permuted* Hessian"
+                        stopifnot(ready)
                         sparseMatrix(j=idx, p=pntr-index1, index1=index1, symmetric=FALSE)
                     }
                     )
