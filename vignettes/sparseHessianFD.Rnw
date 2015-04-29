@@ -536,6 +536,60 @@ fd.time <- system.time(H2 <- hessian(obj$fn, P)) #$
 print(fd.time)
 @
 
+To better understand just how scalable \pkg{sparseHessianFD} is, we
+recorded run times for different steps of the computation of the
+Hessian for the binary example. In the plots in Figure XX,
+each panel is a different step in the computation.
+
+\begin{enumerate}
+\item[Coloring] Time to find a consistent partitioning of the
+  variables
+\item[Setup] Total setup time (including coloring time)
+\item[f] Time to estimate the objective function
+\item[gr] Time to estimate the gradient
+\item[Hessian] Time to compute the Hessian
+    \item[Hessian/gf Ratio of the Hessian time to the
+    function time
+  \item[Hessian/gr] Ratio of the Hessian time to the
+    gradient time
+\end{enumerate}
+
+The x-axes represent $N$ (the number of hierarchical units in the binary choice example)
+and each curve is $k$ (both the number of parameters within each unit,
+and the number of population parameters) units.  The y-axes are mean
+times across 200 replications,
+in milliseconds, as recorded by the routines in the
+\pkg{microbenchmark} package.
+
+The first thing to note is that the times to compute the function, and the
+gradient grow linearly with the number of
+heterogeneous units. We expect that, since larger data sets involve
+more arithmetic operations.  If the Hessian were dense, we would
+expect Hessian computation time to grow quadratically with $N$.
+
+For our example, the Hessian is sparse, the time increases linearly in
+$N$, which is certainly better than quadratically.  But where does the
+time come from?  First, we see that most of the time is in the setup
+(validation, colors, etc.).  But the actual computation is still
+linear in $N$.  However, if we were to plot the Hessian computation
+time ratios, with respect to time to compute the function and
+gradient, we see that the Hessian computation time is about constant
+with respect to $N$.  Thus, for a given $k$, the time to compute the
+Hessian is a fixed multiple of the time to compute the gradient,
+regardless of how many units are in the data set.
+
+However, that multiple grows with $k$.  The reason is that as $k$
+grows, the number of groups needed to partition the variables grows as
+well.  Since there are more groups, we need more evaluations of the
+gradient to recover the Hessian.  For each additional $N$, each
+gradient takes longer to compute, but the number of gradient
+evaluations goes only with the number of groups.  The key to the
+scalability of \pkg{sparseHessianFD} for hierarchical models is that even as the number of
+heterogeneous units goes up, the number of groups stays the same.
+
+
+
+
 
     \section{Theory and Implementation}\label{sec:theory}
 
@@ -1064,17 +1118,6 @@ We implement this substitution method using Algorithm \ref{alg:subst}.
   \end{algorithmic}
   \caption{Triangular substitution method}\label{alg:subst}
 \end{algorithm}
-
-
-
-
-
-
-
-
-
-
-\subsection{Partitioning the variables}
 
 
 

@@ -7,6 +7,7 @@
 #' @param L  nMatrix with sparsity pattern of lower triangle of Hessian
 #' @return Integer vector of length nvars with color assignments for each variable.
 #' @description cyclic coloring from a lower triangular pattern matrix
+#' @export
 coloring <- function(L) {
 
     stopifnot(is(L,"nMatrix"),
