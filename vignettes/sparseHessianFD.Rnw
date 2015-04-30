@@ -133,7 +133,7 @@ and are typically known in advance, before computing the values of
 those elements.
 
 The \pkg{sparseHessianFD} package is a tool for estimating
-sparse Hessians using \emph{finite differencing}.  Section \ref{sec:theory} will
+sparse Hessians using \emph{finite differencing}.  Section \ref{sec:numdiff} will
 cover the specifics, but the basic idea is as follows.  Consider a
 function $f(x)$, its gradient $\parD{}{}{f(x)}^\top$ (the transpose of the
 derivative), and its Hessian $\hess{}{x}$.  Let $e_m$ be the $m$th
@@ -946,51 +946,80 @@ that computes numerical approximations to derivatives.  It differs from
 \end{enumerate}
 
 Nevertheless, it is an easy-to-use tool for numerical differentiation,
-so it is worthwhile to compare its performance to that of \pkg{sparseHessianFD}.
-
-<<echo=FALSE>>=
-options(scipen=0)
-@
-
-<<numDerivCompare>>=
-hess.time <- system.time(H1 <- obj$hessian(P)) #$
-print(hess.time)
-fd.time <- system.time(H2 <- hessian(obj$fn, P)) #$
-print(fd.time)
-@
-
-Since the time and storage requirements for \pkg{numDeriv} grow
-quadratically in the number of variables, it would not be useful to
-compare its performance to \pkg{sparseHessianFD} for larger matrices.
-But it may still be interesting to better understand just how scalable
-\pkg{sparseHessianFD} is for hierarchical models, as the number of
-heterogeneous units increases.
+so it is worthwhile to compare its performance to that of
+\pkg{sparseHessianFD}.  To prepare Table \ref{tab:numDeriv}, we
+estimated Hessians of the hierarchical model with different numbers of
+units ($N$) and within-unit parameters ($k$).  As in the previous
+section, the total number of
+variables is $M=(N+1)k$.  Table \ref{tab:numDeriv} shows the mean
+and standard deviations (across 20 replications) for the time (in milliseconds) to
+to compute a Hessian using each package.  The difference in run times is dramatic,
+especially because the computation time for \pkg{numDeriv} grows
+quadratically in the number of variables.  The setup time for
+\pkg{sparseHessianFD} was about 7 milliseconds for all cases.  Time
+were collected using the \pkg{microbenchmark} package \citep{R_microbenchmark}.
 
 
 
+\begin{table}
+\input{table_numDeriv_fixed.tex}
+\caption{Computation times (milliseconds) for computing Hessians using
+  \pkg{numDeriv} and \pkg{sparseHessian}.  Rows are ordered by the
+  number of variables.}\label{tab:numDeriv}
+\end{table}
 
-To better understand just how scalable \pkg{sparseHessianFD} is, we
-recorded run times for different steps of the computation of the
-Hessian for the binary example. In the plots in Figure XX,
-each panel is a different step in the computation.
+
+Because \pkg{numDeriv} does not scale, we cannot use it as a benchmark
+against which to assess the performance of \pkg{sparseHessianFD} for
+large, sparse Hessians.  To help us understand just how scalable
+\pkg{sparseHessianFD} is, we ran another set of simulations, for the
+same hierarchical model, for different values of $N$ and $k$.  We then
+recorded the run times  for 200 replications for different tasks in the sparse Hessian estimation.
+
+The time measures are:
 
 \begin{enumerate}
-\item[Coloring] Time to find a consistent partitioning of the
-  variables
-\item[Setup] Total setup time (including coloring time)
-\item[f] Time to estimate the objective function
-\item[gr] Time to estimate the gradient
-\item[Hessian] Time to compute the Hessian
-  \item[Hessian/gr] Ratio of the Hessian time to the
+\item[Function] estimating the objective function;
+\item[Gradient] estimating the gradient;
+\item[Hessian] computing the Hessian (not including initialization or
+  partitioning time);
+   \item[Partitioning] finding a valid partitioning of the
+  variables (the vertex coloring problem);
+\item[Initialization] total setup time (including the partitioning time);
+  \item[Hessian/Gradient] ratio of the Hessian time to the
     gradient time
 \end{enumerate}
 
-The x-axes represent $N$ (the number of hierarchical units in the binary choice example)
-and each curve is $k$ (both the number of parameters within each unit,
-and the number of population parameters) units.  The y-axes are mean
-times across 200 replications,
-in milliseconds, as recorded by the routines in the
-\pkg{microbenchmark} package.
+In the plots in Figure \ref{fig:timing}, the number of heterogeneous units ($N$) is
+on the x-axis, and mean run time, in milliseconds, is on the y-axis.  Each panel shows the
+relationship between $N$ and run time for a different measure of time,
+and each curve in a panel represents a different number of within-unit
+parameters ($k$).  Recall that for the binary choice example, $k$ is
+also the number of population-level parameters, so the total number of
+variables is $M=(N+1)k$.
+
+
+
+\begin{figure}[tbh]
+  \centering
+\includegraphics{timings}
+  \caption{Run times for sparse Hessian computation}
+  \label{fig:timing}
+\end{figure}
+
+We include Hessian/Gradient in this list because it can take
+more time to compute even a sparse Hessian as the total number of
+variables increases.  No matter how we compute the Hessian, the
+function and gradient computations take longer as the number of
+variables and the amount of data increases.  There are simply more
+arithmetic operations involved. The time to evaluate the Hessian,
+relative to the time to compute the gradient, is a more useful measure
+of the scalability of the Hessian estimation method than the Hessian
+computation time alone.
+
+
+
+
 
 The first thing to note is that the times to compute the function, and the
 gradient grow linearly with the number of
@@ -1022,20 +1051,8 @@ heterogeneous units goes up, the number of groups stays the same.
 
 
 
-    \section{Theory and Implementation}\label{sec:theory}
 
-    This section explains why and how the package works, and can be
-    skipped by end users with little interest in such things.
-
-
-
-
-
-
-
-
-
-\section{Algorithm and Permutations}
+\section{Algorithm and Permutations}\label{sec:algorithms}
 
 At this point, we must note that, in general, vertex coloring problems
 are NP-Hard (CITE HERE).  No algorithm can, as a general rule, find
