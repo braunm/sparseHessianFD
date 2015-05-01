@@ -15,6 +15,7 @@
 
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{tabularx}
 
 \usepackage{colortbl}
 \usepackage{parskip}
@@ -314,6 +315,164 @@ elements in the Hessian.  However, only $\Sexpr{nnz2}$ of those elements are
 non-zero.  If we work with only the lower triangle of the Hessian we only need to work with
 only \Sexpr{nnz2LT} values.
 
+
+\subsection{Sparse matrices in \proglang{R}}
+
+The \pkg{sparseHessianFD} package uses the sparse matrix classes that are defined
+in the \pkg{Matrix} package \citep{R_Matrix}.  \pkg{Matrix} is now a
+recommended \proglang{R} package, with a great deal of functionality
+and flexibility. We refer the reader to that class's documentation for
+all of the details, but we want to highlight a few important points.
+
+
+\subsubsection{Class names and inheritance}
+
+All sparse matrix classes in \pkg{Matrix} are subclasses of
+\class{sparseMatrix}.  Names of classes of sparse matrices, summarized in Table
+\ref{tab:MatrixClasses}, depend on the data type, matrix structure,
+storage format.  The levels of these three factors determines the
+prefix of letters in each class name. For example, a triangular sparse matrix of numeric data, stored in
+column-compressed format, has a class \class{dtCMatrix}.
+
+\begin{table}[htb]
+  \centering
+  \begin{tabular}{ll|lll}
+   Storage&Layout&\multicolumn{3}{c}{Data type}\\
+    &&numeric&logical&pattern\\
+    \hline
+    Triplet&general&\class{dgTMatrix}&\class{lgTMatrix}&\class{ngTMatrix}\\
+    &triangular&\class{dtTMatrix}&\class{ltTMatrix}&\class{ntTMatrix}\\
+      &symmetric&\class{dsTMatrix}&\class{lsTMatrix}&\class{nsTMatrix}\\
+    \hline
+        Row-compressed&general&\class{dgRMatrix}&\class{lgRMatrix}&\class{ngRMatrix}\\
+    &triangular&\class{dtRMatrix}&\class{ltRMatrix}&\class{ntRMatrix}\\
+      &symmetric&\class{dsRMatrix}&\class{lsRMatrix}&\class{nsRMatrix}\\
+    \hline
+            Column-compressed&general&\class{dgCMatrix}&\class{lgCMatrix}&\class{ngCMatrix}\\
+    &triangular&\class{dtCMatrix}&\class{ltCMatrix}&\class{ntCMatrix}\\
+      &symmetric&\class{dsCMatrix}&\class{lsCMatrix}&\class{nsCMatrix}
+  \end{tabular}
+  \caption{Class names for sparse matrices, as defined in the
+    \pkg{Matrix} package.}\label{tab:MatrixClasses}
+\end{table}
+
+In a matrix with a ``general'' layout, all non-zero elements are
+stored.  For symmetric matrices, only the elements in one triangle are
+stored.  Symmetric or triangular matrices take advantage of
+optimized mathematical operations that take advantage of their known
+structure.  Values in numeric and logical matrices correspond to the
+\proglang{R} data types of the same names.  Pattern matrices contain
+row and column information for the non-zero elements, but no values.
+
+Diagonal matrices with classes
+\class{ddiMatrix} and \class{ldiMatrix} can be constructed with
+the \func{Diagonal} function.  \pkg{Matrix} also defines several
+classes of dense matrices that we will not discuss here.
+
+
+\subsubsection{Storage formats}
+
+Matrices with a ``triplet'' format store each non-zero element as a
+(row, column, value) set.  The values are either numeric or logical,
+for \class{d*TMatrix} or \class{l*TMatrix} matrices, respectively.
+Pattern matrices of class \class{n*TMatrix} store only row and column
+indices, but no values at all.
+
+Row-compressed (CSR) and column-compressed (CSC) formats are more
+efficient alternatives.  Instead of storing the row and column indices, CSC
+matrices store only the row indices, and ``pointers''
+to the values in the row index and value vectors that start
+each column\footnote{For the CSR format, switch references to columns and rows
+in the preceding sentence.}.
+
+For example, let's construct a numeric matrix in triplet form using
+the \func{sparseMatrix} function. The arguments \funcarg{i},
+\funcarg{j} and \funcarg{x} are the row and column indices, and
+values, respectively, of the non-zero elements.  By default, \func{sparseMatrix} expects the input vectors \funcarg{i} and \funcarg{j} to
+have one-based indexing, and stores $X$ in CSC format.
+<<trip>>=
+A <- sparseMatrix(i=c(1,2,3,4,3,4), j=c(1,2,2,2,3,4), x=c(6,7,8,9,10,11))
+A
+str(A)
+@
+
+The slot \funcarg{x} contains the matrix values exactly as we entered
+them.  Slot \funcarg{i} stores the row indices of those values, and
+slot \funcarg{p} stores column pointers.  The column indices are not
+stored explicitly.  To reduce confusion,
+let's just print the values, row indices and pointer values with one-based indexing.
+
+<<indexing>>=
+print(x <- A@x)
+print(i <- A@i+1)
+print(p <- A@p+1)
+@
+
+Let's go through the values column-by-column, starting with column 1.
+Pointer element $p_1$ is 1, so the first element in column 1 is in row
+$i_1=1$, with value $x_1=6$.  Thus, $A_{11}=6$.  Since $p_2$ is 2,
+column 2 begins with $x_2=7$, at row $i_2=2$, so $A_{22}=7$.  Column 3
+does not start until element $p_3=5$ in $i$ and $x$, so the next two non-zeros, in
+rows $i_3=3$ and $i_4=4$, must still be in column 2.  That means that
+$A_{32}=8$ and $A_{42}=9$.  Now we move to column 3, where
+$A_{33}=10$, and to column 4, where $A_{44}=11$.  The final value in
+$p$ is the number of non-zeros in the matrix.  The differences between
+adjacent elements in $p$ are the number of non-zeros in each column of $A$.
+
+There are two important advantages to storing sparse matrices in a
+compressed format.  First, the storage requirements are usually smaller.  A
+matrix with $M$ columns and $N$ non-zeros requires $3N$ elements in a
+triplet format, but only $2N+M+1$ elements in a compressed format.
+Second, computation on the matrix is more efficient, since all elements in a
+single column (CSC) or row (CSR) are stored in contiguous memory, in
+order.  In contrast, there is no unique storage order for the triplet format.
+
+
+\subsubsection{Conversion of sparse matrices}
+
+The \pkg{Matrix} package uses the \func{as} function to convert sparse
+matrices from one format to another, and to convert a \pkg{base}
+\proglang{R} matrix to one of the \pkg{Matrix} classes.
+
+In addition,, this package defines helper functions to convert
+between sparse matrices, and the vectors of row and column indices
+required by the \class{sparseHessianFD} initializer (see Section
+\ref{sec:using}).  These functions are summarized in Table \ref{tab:helpers}.
+
+\begin{table}[tbh]
+  \centering
+  \setlength\extrarowheight{.25em}
+  \begin{tabularx}{1.0\linewidth}{lX}
+   \func{Matrix.to.Coord} & Returns a list of vectors containing row
+                            and column indices of the non-zero
+                            elements of a matrix.\\
+    \func{Coord.to.Pattern.Matrix}& Converts vectors of row and column
+                                    indices to a sparse pattern matrix
+                                    (useful for visualizing a sparsity pattern).\\
+    \func{Matrix.to.Pointers}&Returns indices and pointers from a
+                               sparse matrix.\\
+    \func{Coord.to.Pointers}&Converts list of row and column indices
+                              (triplet format) to a list of indices
+                              and pointers (compressed format).
+  \end{tabularx}
+  \caption{\class{sparseHessianFD} Matrix conversion functions}
+  \label{tab:helpers}
+\end{table}
+
+
+
+\subsubsection{Matrix operations}
+
+The \pkg{Matrix} package defines some specialized methods for objects
+of \class{sparseMatrix} subclasses.  Many of these methods have the
+same name as their \pkg{base} \proglang{R} counterparts, such as
+\func{t()} and \func{rowSums()}.  In some
+cases, it may be necessary to prefix functions with \func{Matrix::} to
+ensure that the correct version is called.
+
+
+
+
 \subsection{Numerical differentiation}\label{sec:numdiff}
 
 The partial derivative of a scalar-valued function $f(x)$ with respect to $x_j$ (the $j$th
@@ -493,7 +652,7 @@ from $\Mat{Y}$.  We discuss these algorithms next.
 
 \subsection{Partitioning the variables}\label{sec:coloring}
 
-It turns out that finding valid, efficient partitions can be
+It turns out that finding consistent, efficient partitions can be
 characterized as a vertex coloring problem from graph theory \citep{ColemanMore1984}.  In this
 sense, each variable is a vertex in an undirected graph, and an edge connects two
 vertices $i$ and $j$ if and only if $\hess{ij}{x}\neq 0$.  The
@@ -723,35 +882,40 @@ considered optional reading.
 \section{Using the package}\label{sec:using}
 
 In this section we discuss how to use \pkg{sparseHessianFD} to
-estimate sparse Hessians.    The package functionality is implemented
-as a reference class.  A \class{sparseHessianFD} object is initialized
-with \proglang{R} routines that compute the function and its gradient,
-as well as the sparsity pattern of the lower triangle of the Hessian.
+estimate sparse Hessians.
 
 \subsection{The \class{sparseHessianFD} class}
 
+The function \func{sparseHessianFD} is an initializer that returns a reference to a
+\class{sparseHessianFD} object.  The initializer determines an
+appropriate permutation and partitioning
+of the variables, and performs some additional validation tests.  The arguments to the initializer are
+described in Table \ref{tab:init}.
 
-The function \func{sparseHessianFD} is an initializer that takes the
-following arguments, and returns a reference to a
-\class{sparseHessianFD} object.
-\begin{itemize}
-\item[x] A numeric vector, with length $M$ at which the object will be
-  initialized and tested.
-\item[fn,gr] \proglang{R} Functions that return the value of the
+{
+\setlength{\extrarowheight}{.25em}
+\begin{table}[h]
+\begin{tabularx}{\linewidth}{>{\bfseries}r X}
+x& A numeric vector, with length $M$ at which the object will be
+  initialized and tested.\\
+fn,gr& \proglang{R} Functions that return the value of the
   objective function, and its gradient. The first argument is the numeric
   variable vector.  Other named arguments can be passed to \func{fn}
-  and {gr} as well (see the \funcarg{...} argument below).
-\item[rows, cols] Integer vectors of the row and column indices of
-  the non-zero elements in the \emph{lower triangle} of the Hessian.
-\item[direct] This argument is deprecated, and is included only for
-  backwards compatibility with earlier versions.
-\item[eps] The perturbation amount for finite differencing of the
+  and {gr} as well (see the \funcarg{...} argument below).\\
+rows, cols& Integer vectors of the row and column indices of
+  the non-zero elements in the \emph{lower triangle} of the Hessian.\\
+direct& This argument is deprecated, and is included only for
+  backwards compatibility with earlier versions.\\
+eps& The perturbation amount for finite differencing of the
   gradient to compute the Hessian (the $\delta$ in Section \ref{sec:numdiff}).  Defaults to
-  \code{sqrt(.Machine\$double.eps)}.
-\item [index1] If \variable{TRUE} (the default), \funcarg{row} and \funcarg{col} use one-based
-  indexing.  If \variable{FALSE}, zero-based indexing is used.
-\item [...] Additional arguments to be passed to \func{fn} and \func{gr}.
-\end{itemize}
+  \code{sqrt(.Machine\$double.eps)}.\\
+index1& If \variable{TRUE} (the default), \funcarg{row} and \funcarg{col} use one-based
+  indexing.  If \variable{FALSE}, zero-based indexing is used.\\
+...& Additional arguments to be passed to \func{fn} and \func{gr}.
+\end{tabularx}
+\caption{Arguments to the \class{sparseHessianFD} initializer}\label{tab:init}
+\end{table}
+}
 
 To create a \class{sparseHessianFD} object, just call
 \func{sparseHessianFD}.  If you are accepting all of the default
@@ -764,9 +928,7 @@ where \funcarg{...} represents all other named arguments that are
 passed to \funcarg{fn} and \funcarg{gr}.
 
 The class defines a number of different fields, none of which should
-be accessed directly.    The initializer automatically calls the graph
-coloring subroutine, evaluates the Hessian at $x$, and performs some
-other tests, so it may take some time to create the object.
+be accessed directly.
 
 
 \subsection{Providing the sparsity pattern}
@@ -776,15 +938,15 @@ indices of the non-zero elements in the \emph{lower triangle} the
 Hessian.  It is the responsibility of the user to ensure that
 the sparsity pattern is correct.
 
-The \func{Matrix.to.Coord} function extracts
-row and column indices from a sparse matrix.  The input matrix to \func{Matrix.to.Coord} does not have to include
-the values (if the full Hessian were known, that would possibly defeat the
-purpose of this package).  It is sufficient to supply a logical
-or pattern matrix, such as \class{lgCMatrix} or \class{ngCMatrix}.
 In practice, rather than trying to keep track of the row and column indices
 directly, it might be easier to construct a pattern matrix first,
 check visually that the matrix has the right pattern, and then extract
-the indices.
+the indices.  The \func{Matrix.to.Coord} function extracts
+row and column indices from a sparse matrix.  The input matrix to
+\func{Matrix.to.Coord} does not have to include
+the values.  It is sufficient to supply a logical
+or pattern matrix, such as \class{lgCMatrix} or \class{ngCMatrix}.
+
 
 The following code constructs a block diagonal matrix, and extracts
 the sparsity pattern from its lower triangle.
@@ -796,13 +958,14 @@ tril(Mat)
 mc <- Matrix.to.Coord(tril(Mat))
 mc
 @
+
 The vectors \funcarg{mc\$row} and \funcarg{mc\$col} can be
 passed to \func{sparseHessianFD} as the \funcarg{row} and
 \funcarg{col} arguments, respectively.
 
 To visually check that a proposed sparsity pattern represents the
 intended matrix, use the \func{Coord.to.Pattern.Matrix} function,
-which is just a wrapper to \pkg{Matrix}'s \func{sparseMatrix} constructor.
+which is a wrapper to \pkg{Matrix}'s \func{sparseMatrix} constructor.
 
 <<>>=
 pattern <- Coord.to.Pattern.Matrix(mc$rows, mc$cols, dims=dim(Mat))
@@ -826,12 +989,12 @@ hess <- obj$hessian(x) #$
 
 The \func{fn} and \func{gr} methods call the same functions that were
 provided to the class initializer.  Since the
-additional arguments were already supplied as \funcarg{...}, they do
-not need to be supplied again.  This feature makes subsequent calling
-of \func{fn} and \func{gr} simpler, because only the variable is
+additional arguments were already supplied to the initializer as \funcarg{...}, they do
+not need to be supplied again.  This feature simplifies calls
+to \func{fn} and \func{gr}, because only the variable is
 included in the call.
 
-Similarly, the \func{hessian} method takes the single argument $x$.
+Similarly, the \func{hessian} method takes a single argument.
 The return value is always a \class{dgCMatrix} object (defined in the
 \pkg{Matrix} package).  \class{dgCMatrix} objects are sparse matrices,
 stored in a compressed, column-oriented format, and includes all
@@ -961,7 +1124,7 @@ were collected using the \pkg{microbenchmark} package \citep{R_microbenchmark}.
 
 
 
-\begin{table}
+\begin{table}\centering
 \input{table_numDeriv_fixed.tex}
 \caption{Computation times (milliseconds) for computing Hessians using
   \pkg{numDeriv} and \pkg{sparseHessian}.  Rows are ordered by the
@@ -976,19 +1139,22 @@ large, sparse Hessians.  To help us understand just how scalable
 same hierarchical model, for different values of $N$ and $k$.  We then
 recorded the run times  for 200 replications for different tasks in the sparse Hessian estimation.
 
-The time measures are:
+The time measures are summarized in Table \ref{tab:timeMeasures}.
 
-\begin{enumerate}
-\item[Function] estimating the objective function;
-\item[Gradient] estimating the gradient;
-\item[Hessian] computing the Hessian (not including initialization or
-  partitioning time);
-   \item[Partitioning] finding a valid partitioning of the
-  variables (the vertex coloring problem);
-\item[Initialization] total setup time (including the partitioning time);
-  \item[Hessian/Gradient] ratio of the Hessian time to the
+\begin{table}\centering
+  \begin{tabularx}{1.0\linewidth}{>{\bfseries}l X}
+Function&estimating the objective function\\
+Gradient&estimating the gradient\\
+Hessian&computing the Hessian (not including initialization or
+  partitioning time)\\
+Partitioning&finding a consistent partitioning of the
+  variables (the vertex coloring problem)\\
+Initialization&total setup time (including the partitioning time)\\
+Hessian/Gradient&ratio of the Hessian time to the
     gradient time
-\end{enumerate}
+  \end{tabularx}
+  \caption{Summary of timing tests (see Figure \ref{fig:timing})}\label{tab:timeMeasures}
+\end{table}
 
 In the plots in Figure \ref{fig:timing}, the number of heterogeneous units ($N$) is
 on the x-axis, and mean run time, in milliseconds, is on the y-axis.  Each panel shows the
@@ -1055,7 +1221,7 @@ heterogeneous units goes up, the number of groups stays the same.
 \section{Algorithm and Permutations}\label{sec:algorithms}
 
 At this point, we must note that, in general, vertex coloring problems
-are NP-Hard (CITE HERE).  No algorithm can, as a general rule, find
+are NP-Hard.  No algorithm can, as a general rule, find
 the \emph{smallest} number of colors needed to color a graph, or
 determine the coloring associated with that number.  Fortunately, for
 practical purposes we do not need to partition the variables in an
@@ -1067,83 +1233,68 @@ optimal, or even ``best available.''  But we do expect them to
 generate the correct results faster than the other alternatives.
 
 
+\subsection{Partitioning variables}
+An efficient partitioning of the variables is one that minimizes the
+number of gradient evaluations required to recover the Hessian.  The
+partitioning is consistent with a substitution method if it can be characterized as a cyclic coloring
+of the graph of the sparsity pattern, or, equivalently, as a proper
+coloring of the intersection graph.
 
-
-
-
-
-The \pkg{sparseHessianFD} implements algorithms for the following tasks:
-
-\begin{enumerate}
-\item Permuting rows and columns of the matrix to reduce the number of
-  colors;
-\item Finding a cyclic coloring that is consistent with the
-  substitution method;
-\item Computing the compressed matrix of finite differences of
-  gradients; and
-\item Solving triangular linear system to estimate the non-zero
-  elements of the Hessian.
-\end{enumerate}
-
-None of these algorithms are meant to be optimal, or even the ``best
-available.''  However, they are meant to be easy to implement and
-maintain with standard libraries.
-
-\subsubsection{Permuting Hessian}
-
-Finding an appropriate permutation of the Hessian is similar to, but
-exactly the same as, finding a fill-reducing permutation for a
-Cholesky decomposition.  Instead of reducing the total number of zeros
-in the lower triangle, we want to reduce the number of columns with
-common non-zero rows.  A reasonable heuristic is to permute the matrix
-such that the number of non-zero elements in each row is decreasing.
-This is the ``smallest-last'' ordering discussed in
-\citet{ColemanMore1984}.  The reason for this order is simple.
-Suppose non-zeros within a row are randomly distributed across
+The first step is to permute the rows and columns of the Hessian.   A
+reasonable choice is a permutation that sorts the rows and columns in
+decreasing order of the number of elements.
+This is the ``smallest-last'' ordering suggested by
+\citet[Theorem 6.2]{ColemanMore1984}.  To justify this permutation, suppose
+non-zeros within a row are randomly distributed across
 columns.  If the row is near the top of the matrix, there is a higher
 probability that the non-zero element is in the upper triangle, not in
-the lower.  We can put sparser rows near the bottom, since the cells
-that are in the lower triangle are less likely to be non-zero.
+the lower.  We can put sparser rows near the bottom.  This ordering
+does not affect the total number of non-zeros in the lower triangle,
+but it should minimize the number of non-zeros in each row.  Thus, we
+would expect the number of columns with non-zero elements in common
+rows to be smaller, and the intersection graph to be sparser.
 
-\subsubsection{Cyclic coloring}
-
-
-As discussed above, we can get a triangular coloring of the sparsity
-graph with a proper coloring of the intersection graph of the
-columns.  Let $\hessLT{\pi}{\cdot}$ be the lower triangle of the
+Call the chosen permutation $\pi$.   Let $\hessLT{\pi}{}$ be the lower triangle of the
 sparsity pattern of the Hessian, with rows and columns permuted by
 $\pi$.  The adjacency matrix of the intersection graph $\Gamma$ is the Boolean
-crossproduct, $\Gamma = L^\top L$.
+crossproduct, $\Gamma = L^\top L$.  Algorithm \ref{alg:coloring} is a
+``greedy'' vertex coloring algorithm, in which vertices are colored
+sequentially.  Running Algorithm \ref{alg:coloring} on $\Gamma$
+generates a proper coloring on $\hessLT{\pi}{}$, which in turn is a
+consistent partitioning of the variables.
 
-
-This is a ``greedy'' coloring algorithm on the permuted matrix.
 
 \begin{algorithm}
   \begin{algorithmic}
-    \FOR{$i=1$ \TO $M$}
-        \STATE{$P[i]\leftarrow$ set of column indices of non-zero
-      elements in row $i$}
-       \STATE{Initialize $F[i]$ as set of  ``forbidden'' colors for vertex $i$.}
-        \STATE{$C[i]\leftarrow 0$.}
-    \ENDFOR
-    \STATE{$k\leftarrow 0$}
+    \REQUIRE{$P[i],i=1,\mathellipsis,M$: sets of column indices  of
+      non-zero elements in row $i$.}
+    \REQUIRE{$F[i],i=1,\mathellipsis,M$:  sets of ``forbidden'' colors for
+         vertex $i$ (initially empty)}
+    \REQUIRE{$U$:  set of used colors (initially empty)}
+    \REQUIRE{$C[i], i=1,\mathellipsis,M$: vector to store output of
+      assigned colors (initially all zero)}.
+    \STATE{$k\leftarrow 0$}\COMMENT{Largest color index used}
     \STATE{Insert $0$ in $U$}
     \FOR{$i=1$ \TO $M$}
-       \IF{$F[i]$ is empty}
+       \IF{$F[i]$ is empty (no forbidden colors)}
            \STATE{$C[i]\leftarrow 0$}
         \ELSE
-           \STATE{$V\leftarrow U\cap F[i]$}
+           \STATE{$V\leftarrow U - F[i]$}\COMMENT{Used colors that are
+             not forbidden}
            \IF{$V$ is empty}
               \STATE{$k\leftarrow k+1$}
               \STATE{Insert $k$ into $U$}
               \STATE{$C[i]\leftarrow k$}
         \ELSE
              \STATE{$C[i]\leftarrow\min(V)$}
-       \ENDIF
+\COMMENT{Assign smallest existing non-forbidden color to $i$}
+             \ENDIF
     \ENDIF
     \ENDFOR
     \FOR{$j$ in $P[i]$}
     \STATE{Insert $C[i]$ into $F[j]$}
+\COMMENT{Make $i$'s color forbidden to all of
+      its uncolored neighbors}
     \ENDFOR
     \RETURN{$C$}
     \end{algorithmic}
@@ -1151,23 +1302,27 @@ This is a ``greedy'' coloring algorithm on the permuted matrix.
       substitution method}\label{alg:coloring}
     \end{algorithm}
 
-\subsection{Implementing the substitution method}
+\subsection{Computing the Hessian by substitution}
 
-Now we can fill in the matrix.  Let $C_m$ be the assigned color to
-variable $m$.  From \citet[Equation 6.1]{ColemanMore1984},
+Let $C_m$ be the assigned color to variable $m$.  From \citet[Equation 6.1]{ColemanMore1984},
 \begin{align}
   \label{eq:2}
   \hess{ij}{x}&=Y_{i,C_j}/\delta - \sum_{l>i,l\in C_j}\hess{li}{x}
 \end{align}
 
-We implement this substitution method using Algorithm \ref{alg:subst}.
+We implement the substitution method using Algorithm \ref{alg:subst}.
+This algorithm completes the bottom row of the lower triangle, copies
+values to the corresponding column in the upper triangle, and advances upwards.
+
 \begin{algorithm}
   \begin{algorithmic}
-    \STATE{Initialize Hessian $H$.}
-    \STATE{Initialize $B\leftarrow$ a $k\times M$ matrix of zeros}
+    \REQUIRE{$P[i],i=1,\mathellipsis,M$: sets of column indices  of
+      non-zero elements in row $i$.}
+    \REQUIRE{$C[i], i=1,\mathellipsis,M$: vector of
+      assigned colors}
+    \REQUIRE{$H$, an $M\times M$ Hessian (initialized to zero)}
+    \REQUIRE{$B$, a $\max(C)\times M$ matrix (initialized to zero)}
     \FOR{$i$ = $M$ \TO $1$}
-      \STATE{$P_i\leftarrow$ set of column indices of non-zero
-      elements in row $i$}
     \FOR{All $j$ in $P_i$}
     \STATE{$z\leftarrow Y[i,C[j]]/\delta - B[C[j], i]$}
     \STATE{$B[C[i], j]\leftarrow B[C[i], j] + z$}
@@ -1179,80 +1334,6 @@ We implement this substitution method using Algorithm \ref{alg:subst}.
   \caption{Triangular substitution method}\label{alg:subst}
 \end{algorithm}
 
-
-
-
-
-
-
-
-
- \subsection{Note:  Who proved what}
-
-
- *** \Citet{ColemanMore1984} The ``no nonzero in same row'' rule for
-the permuted lower triangular matrix is equivalent to the
-\emph{intersection graph}.  Theorem 6.1 shows that a proper coloring of the
-intersection graph of $L_\pi$ is also a triangular coloring of the
-full symmetric graph.
-
-Theorem 6.2 justifies the sequential smallest-last ordering.
-
-This is what our algorithm does.
-
-
-
-
-Consistent partitioning of $L$:  No column in the same group has a
-non-zero element in the same row.
-
-\Citet{PowellToint1979} showed that a consistent partitioning of $L$
-allows for a substitution method (mentioned by
-\citet{ColemanMore1984}.  This is a substitutable partition.
-
-\Citet{PowellToint1979} show that the order in which variables are
-assigned to partitions affects the partition.
-
-\Citet{ColemanMore1984} characterize \cite{PowellToint1979} as a graph
-coloring problem.  Also justify using the smallest-last ordering on the lower
-triangle to color the variables
-
-
-
-\Citet{ColemanCai1986}:  there are other substitutable partitions than
-lower triangular.  Theorem 2.2.  A mapping induces a substitution
-method if and only if the mapping is a cyclic coloring.
-
-Cyclic coloring:  At least 3 colors in every cycle.
-
-From \citet{ColemanCai1986}, general result of substitutable
-(beyond \citet{PowellToint1979}.  Order nonzero elements
-  $1\mathellipsis M$. If, for nonzero element $(i_m, j_m)$,
-
-
-  \begin{enumerate}
-\item  columns  $j_m$ and another other $j_{m'}$ are in the same
-  group, and both $j_m$ and $j_{m'}$ have a nonzero in row $i_m$, then
-  $i_{m'}, j_{m'}$ must be ordered before $i_m, j_m$; \emph{or}
-\item  columns  $i_m$ and another other $i_{m'}$ are in the same
-  group, and both $i_m$ and $i_{m'}$ have a nonzero in row $j_m$, then
-  $j_{m'}, i_{m'}$ must be ordered before $j_m, i_m$
-  \end{enumerate}
-
-  What this means is that we can ignore column intersections that
-  occur in lower rows (what?).
-
-  The point is that lower triangular substitution qualifies, which
-  means that we just need a cyclic coloring of the graph.
-
-
-  Note:  My coloring algorithm is a smallest last ordering of the full
-  symmetric Hessian  This is \emph{slpt} in \citet{ColemanMore1984}.
-  What I should really do is a smallest-last on the lower triangle
-  (\emph{slsl} in citet{ColemanMore1984}.  So I need to change that.
-
-  In any event, it's still finding a cyclic coloring of the adjacency
-  graph.  Just using a different heuristic for the coloring.
 
 \printbibliography
 

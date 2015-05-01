@@ -6,7 +6,7 @@ library(reshape2)
 
 theme_set(theme_bw())
 
-data.file <- "timings3.Rdata"
+data.file <- "inst/examples/timings3.Rdata"
 load(data.file)
 
 tab <- mutate(res, ms=bench.time/1000000) %>%
