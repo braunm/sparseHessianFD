@@ -7,74 +7,64 @@
 
 \usepackage{amsmath}
 \usepackage{amsfonts}
-\usepackage{placeins} %% for \FloatBarrier
 \usepackage{subcaption}
-
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{tabularx}
-
-\usepackage{colortbl}
-
 \usepackage{etoolbox}
 \newtoggle{tikz}
-\togglefalse{tikz}
+\toggletrue{tikz}
 
 \iftoggle{tikz}{
 \usepackage{tikz}
 }{}
 
-
-
 %%\newcommand{\pkg}[1]{\emph{#1}}
 %%\newcommand{\proglang}[1]{\textsf{#1}}
-\newcommand{\func}[1]{\texttt{#1}}
-\newcommand{\class}[1]{\texttt{#1}}
-\newcommand{\funcarg}[1]{\texttt{#1}}
 %%\newcommand{\filename}[1]{\textit{#1}}
 %%\newcommand{\code}[1]{\texttt{#1}}
-\newcommand{\variable}[1]{\texttt{#1}}
-\newcommand{\method}[1]{\textsl{#1}}
+\newcommand{\func}[1]{\code{#1}}
+\newcommand{\class}[1]{\textsl{#1}}
+\newcommand{\funcarg}[1]{\code{#1}}
+\newcommand{\variable}[1]{\code{#1}}
+\newcommand{\method}[1]{\func{#1}}
 
 
  \newcommand{\df}[3]{\mathsf{d}^{#1}f(#2;#3)}
  \newcommand{\parD}[3]{\mathsf{D}^{#1}_{#2}#3}
-\newcommand{\hess}[2]{\mathsf{H}_{#1}f(#2)}
-\newcommand{\hessLT}[2]{\mathsf{L}_{#1}f(#2)}
+\newcommand{\hess}[2]{\mathsf{H}_{#1}#2}
+\newcommand{\hessLT}[2]{\mathsf{L}_{#1}#2}
 \newcommand{\Mat}[1]{#1}
 
-\author{Michael Braun\\Edwin L. Cox School of Business\\Southern Methodist University}
-%% \Plainauthor{Michael Braun}
-%% \title{\pkg{sparseHessianFD}: An \proglang{R} Package for Estimating Sparse Hessian Matrices}
-%% \Shorttitle{sparseHessianFD:  Sparse Hessians}
-%% %% \Abstract{
-%%   Abstract goes here
-%%   }
-
-%%   \Keywords{sparse Hessians, sparse matrices}
-%%   \Address{
-%%     Michael Braun\\
-%%     Edwin L. Cox School of Business\\
-%%     Southern Methodist University\\
-%%     6212 Bishop Blvd.\\
-%%     Dallas, TX 75275\\
-%%     E-mail:  \email{braunm@smu.edu}\\
-%%     URL:  \url{http://coxprofs.cox.smu.edu/braunm/}
-%%   }
+ \author{Michael Braun\\Edwin L. Cox School of Business\\Southern Methodist University}
+ \Plainauthor{Michael Braun}
+ \title{sparseHessianFD: An R Package for Estimating Sparse Hessian Matrices}
+ \Shorttitle{sparseHessianFD:  Sparse Hessians}
+  \Keywords{sparse Hessians, sparse matrices}
+  \Address{
+    Michael Braun\\
+    Edwin L. Cox School of Business\\
+    Southern Methodist University\\
+    6212 Bishop Blvd.\\
+    Dallas, TX 75275\\
+    E-mail:  \email{braunm@smu.edu}\\
+    URL:  \url{http://coxprofs.cox.smu.edu/braunm/}
+  }
 
   %% need no \usepackage{Sweave.sty}
 
 \date{April 30, 2015}
-
+%%\usepackage{colortbl}
 \begin{document}
 
 <<setup1, echo=FALSE, cache=FALSE>>=
+suppressPackageStartupMessages(require(Matrix))
 library(methods, quietly = TRUE)
 library(numDeriv, quietly = TRUE)
-library(Matrix, quietly = TRUE)
 library(sparseHessianFD, quietly=TRUE)
-knitr::opts_chunk[["set"]](collapse = FALSE, eval=TRUE, echo=TRUE,
-                          message=FALSE, tidy=FALSE, cache = TRUE)
+##knitr::opts_chunk[["set"]](collapse = FALSE, eval=TRUE, echo=TRUE,
+  ##                        message=FALSE, tidy=FALSE, cache = TRUE)
+render_sweave()
 @
 
 The Hessian matrix of a log likelihood function or log posterior
@@ -116,10 +106,10 @@ The \pkg{sparseHessianFD} package is a tool for estimating
 sparse Hessians using \emph{finite differencing}.  Section \ref{sec:numdiff} will
 cover the specifics, but the basic idea is as follows.  Consider a
 function $f(x)$, its gradient $\parD{}{}{f(x)}^\top$ (the transpose of the
-derivative), and its Hessian $\hess{}{x}$.  Let $e_m$ be the $m$th
+derivative), and its Hessian $\hess{}{f(x)}$.  Let $e_m$ be the $m$th
 coordinate vector, and let $\delta$ be a sufficiently small scalar
-constant. The vector $\hess{m}{x}\approx\left(\parD{}{}{f(x+\delta e_m)}- \parD{}{}{f(x)}\right)/\delta$ is
-a linear approximation to $\hess{m}{x}$, the $m$th column of the
+constant. The vector $\hess{m}{f(x)}\approx\left(\parD{}{}{f(x+\delta e_m)}- \parD{}{}{f(x)}\right)/\delta$ is
+a linear approximation to $\hess{m}{f(x)}$, the $m$th column of the
 Hessian. Estimating a dense Hessian in this way involves $M+1$ calculations of the
 gradient: one for the gradient at $x$, and one after perturbing each
 of the $M$ elements of $x$, one at a time.  However, if the Hessian has
@@ -266,7 +256,7 @@ Now the Hessian has an "banded" sparsity pattern, as in Figure \ref{fig:banded}.
 \begin{figure}[htb]
   \begin{subfigure}[b]{.5\textwidth}
 <<blockarrow, echo=FALSE>>=
-Mat <- as(Matrix::kronecker(Matrix::Diagonal(N),Matrix(1,k,k)),"nMatrix")
+Mat <- as(Matrix::kronecker(diag(N),matrix(1,k,k)),"nMatrix")
 Mat <- rBind(Mat, Matrix(TRUE,k,N*k))
 Mat <- cBind(Mat, Matrix(TRUE, k*(N+1), k))
 print(Mat)
@@ -275,7 +265,7 @@ print(Mat)
 \end{subfigure}
 \begin{subfigure}[b]{.5\textwidth}
 <<banded, echo=FALSE>>=
-Mat <- as(Matrix::kronecker(Matrix(1,k,k), Matrix::Diagonal(N)),"nMatrix")
+Mat <- as(Matrix::kronecker(Matrix(1,k,k), diag(N)),"nMatrix")
 Mat <- rBind(Mat, Matrix(TRUE,k,N*k))
 Mat <- cBind(Mat, Matrix(TRUE, k*(N+1), k))
 print(Mat)
@@ -313,9 +303,8 @@ storage format.  The levels of these three factors determines the
 prefix of letters in each class name. For example, a triangular sparse matrix of numeric data, stored in
 column-compressed format, has a class \class{dtCMatrix}.
 
-\begin{table}[htb]
-  \centering
-  \begin{tabular}{ll|lll}
+\begin{table}
+    \begin{tabularx}{1.0\linewidth}{ll|lll}
    Storage&Layout&\multicolumn{3}{c}{Data type}\\
     &&numeric&logical&pattern\\
     \hline
@@ -330,7 +319,7 @@ column-compressed format, has a class \class{dtCMatrix}.
             Column-compressed&general&\class{dgCMatrix}&\class{lgCMatrix}&\class{ngCMatrix}\\
     &triangular&\class{dtCMatrix}&\class{ltCMatrix}&\class{ntCMatrix}\\
       &symmetric&\class{dsCMatrix}&\class{lsCMatrix}&\class{nsCMatrix}
-  \end{tabular}
+  \end{tabularx}
   \caption{Class names for sparse matrices, as defined in the
     \pkg{Matrix} package.}\label{tab:MatrixClasses}
 \end{table}
@@ -477,7 +466,7 @@ We define the second-order partial derivative as
 and the Hessian matrix as
 \begin{align}
   \label{eq:15}
-  \hess{}{x}=
+  \hess{}{f(x)}=
   \begin{pmatrix}
     \parD{2}{11}{f(x)}&  \parD{2}{12}{f(x)}&  \mathellipsis &  \parD{2}{1M}{f(x)}\\
     \parD{2}{21}{f(x)}&  \parD{2}{22}{f(x)}&  \mathellipsis &  \parD{2}{2M}{f(x)}\\
@@ -488,18 +477,18 @@ and the Hessian matrix as
 
 The Hessian is symmetric, so $\parD{2}{ij}{}=\parD{2}{ji}{}$.
 
-To estimate the $k$th column of $\hess{}{x}$, we again choose a
+To estimate the $k$th column of $\hess{}{f(x)}$, we again choose a
 sufficiently small $\delta$, and compute
 \begin{align}
   \label{eq:1}
-  \hess{k}{x}&\approx\frac{\parD{}{}{f(x+\delta e_k)}-\parD{}{}{f(x)}}{\delta}
+  \hess{k}{f(x)}&\approx\frac{\parD{}{}{f(x+\delta e_k)}-\parD{}{}{f(x)}}{\delta}
 \end{align}
 
 
-For $M=2$, our estimate of a general $\hess{}{x}$ would be
+For $M=2$, our estimate of a general $\hess{}{f(x)}$ would be
 \begin{align}
   \label{eq:FDhess2}
-  \hess{}{x}&=
+  \hess{}{f(x)}&=
   \begin{pmatrix}
     \parD{}{1}{f(x_1+\delta, x_2)}-\parD{}{1}{f(x_1,x_2)}& \parD{}{1}{f(x_1,x_2+\delta)}-\parD{}{1}{f(x_1,x_2)}\\
         \parD{}{2}{f(x_1+\delta, x_2)}-\parD{}{2}{f(x_1,x_2)}&  \parD{}{2}{f(x_1,x_2+\delta)}-\parD{}{2}{f(x_1,x_2)}
@@ -526,7 +515,7 @@ but also,
 Therefore,
 \begin{align}
   \label{eq:FDhess2sp}
-  \hess{}{x}&=
+  \hess{}{f(x)}&=
   \begin{pmatrix}
     \parD{}{1}{f(x_1+\delta, x_2+\delta)}-\parD{}{1}{f(x_1,x_2)}&0\\
         0&  \parD{}{2}{f(x_1+\delta,x_2+\delta)}-\parD{}{2}{f(x_1,x_2)}
@@ -552,12 +541,12 @@ difference in gradients.
 \end{align}
 
 If $C=K$, then $\Mat{G}$ is a diagonal matrix with $\delta$ in each
-diagonal element.  The matrix equation $\hess{}{x}G=Y$ represents the linear approximation
-$\hess{im}{x}\delta\approx y_{im}$, and we can solve for all elements of $\hess{}{x}$
+diagonal element.  The matrix equation $\hess{}{f(x)}G=Y$ represents the linear approximation
+$\hess{im}{f(x)}\delta\approx y_{im}$, and we can solve for all elements of $\hess{}{f(x)}$
 just by computing $Y$. But if $C<M$,
 there must be at least one $G_c$ with $\delta$ in at least two
 rows. Column $Y_c$ would have been computed by perturbing two variables at
-once, and we would not have been able to solve for any $\hess{im}{x}$
+once, and we would not have been able to solve for any $\hess{im}{f(x)}$
 without further constraints.
 
 These constraints come from the sparsity pattern and symmetry
@@ -566,7 +555,7 @@ sparsity pattern.
 
 \begin{align}
   \label{eq:7}
- \hess{}{x}= \begin{pmatrix}
+ \hess{}{f(x)}= \begin{pmatrix}
     h_{11}&0&h_{31}&0&0\\
     0&h_{22}&0&h_{42}&0\\
     h_{31}&0&h_{33}&0&h_{53}\\
@@ -588,7 +577,7 @@ group 2.  For the moment, we will postpone the discussion of how to
 choose $C$ and how to partition the variables until Section \ref{sec:coloring}.
 
 Next, compute the columns of $\Mat{Y}$ using Equation \ref{eq:Yg}.  We now
-have the following system of linear equations from $\hess{}{x}\Mat{G}=\Mat{Y}$.
+have the following system of linear equations from $\hess{}{f(x)}\Mat{G}=\Mat{Y}$.
 \begin{align}
   \label{eq:11}
   \begin{aligned}[c]
@@ -611,21 +600,21 @@ have the following system of linear equations from $\hess{}{x}\Mat{G}=\Mat{Y}$.
 Note that this system is overdetermined.  Both $h_{31}=y_{12}$ and $h_{53}=y_{52}$
 can be determined directly, but $h_{31}+h_{53}=y_{31}$, and $h_{42}$
 could be either $y_{41}$ or $y_{22}$.  \Citet{PowellToint1979} prove
-that it is sufficient to solve $\hessLT{}{x}G=Y$ instead via a \emph{substitution method}, where $\hessLT{}{x}$ is the lower
-triangular part of $\hess{}{x}$.  This has the effect of removing the equations
+that it is sufficient to solve $\hessLT{}{f(x)}G=Y$ instead via a \emph{substitution method}, where $\hessLT{}{f(x)}$ is the lower
+triangular part of $\hess{}{f(x)}$.  This has the effect of removing the equations
 $h_{42}=y_{22}$ and $h_{31}=y_{12}$ from the system, but retaining
 $h_{53}=y_{52}$.  We can then solve for
 $h_{31}=y_{31}-y_{52}$. Thus, we have determined a
 $5\times 5$ Hessian matrix with only three gradient evaluations, in
-contrast with the six that would have been needed had $\hess{}{x}$ been treated
+contrast with the six that would have been needed had $\hess{}{f(x)}$ been treated
 as dense.
 
 The $\Mat{Y}$ matrix is, in essence, a compressed representation of
-$\hess{}{x}$.  The values in $Y_c$ are finite differences after
+$\hess{}{f(x)}$.  The values in $Y_c$ are finite differences after
 one \emph{or more} variables are perturbed.  Hence, we need two
 different algorithms to estimate a sparse Hessian.  The first is to
 determine which variables can be perturbed together when computing
-$\Mat{Y}$, and the second is to extract the values of $\hess{}{x}$
+$\Mat{Y}$, and the second is to extract the values of $\hess{}{f(x)}$
 from $\Mat{Y}$.  We discuss these algorithms next.
 
 
@@ -634,7 +623,7 @@ from $\Mat{Y}$.  We discuss these algorithms next.
 It turns out that finding consistent, efficient partitions can be
 characterized as a vertex coloring problem from graph theory \citep{ColemanMore1984}.  In this
 sense, each variable is a vertex in an undirected graph, and an edge connects two
-vertices $i$ and $j$ if and only if $\hess{ij}{x}\neq 0$.  The
+vertices $i$ and $j$ if and only if $\hess{ij}{f(x)}\neq 0$.  The
 sparsity pattern of the Hessian is the adjacency matrix of the graph.
 By ``color,'' we mean nothing more than group assignment; if a
 variable is in a group, then its vertex has the color associated with
@@ -651,9 +640,9 @@ to each vertex a set of other characteristics.  The ``intersection
 set'' contains characteristics that are common to two vertices, and
 the ``intersection graph'' connects vertices whose intersection set is
 not empty.  In our context, the set in question is the row indices of
-the non-zero elements in each column of $\hessLT{}{x}$.  In the
+the non-zero elements in each column of $\hessLT{}{f(x)}$.  In the
 intersection graph, two vertices are connected if the corresponding
-columns in $\hessLT{}{x}$ have at least one non-zero element in the same row.
+columns in $\hessLT{}{f(x)}$ have at least one non-zero element in the same row.
 
 \Citet{PowellToint1979} write that a partitioning is consistent with a
 substitution method if and only if no columns
@@ -662,20 +651,20 @@ in the same group have a non-zero element in the same
 row.  An equivalent statement is that no two vertices in the
 intersection graph can have the same color.  Thus, we can partition
 the variables by creating a proper coloring of the intersection graph
-of $\hessLT{}{x}$.
+of $\hessLT{}{f(x)}$.
 
 This intersection graph, and the number of colors needed to
 color it, are not invariant to
-permutation of the rows and columns of $\hess{}{x}$.  Let $\pi$
-represent such a permutation, and let $\hessLT{\pi}{x}$ be the lower
-triangle of $\pi\hess{}{x}{\pi^\top}$.    \Citet[Theorem 6.1]{ColemanMore1984} show that a coloring is
+permutation of the rows and columns of $\hess{}{f(x)}$.  Let $\pi$
+represent such a permutation, and let $\hessLT{\pi}{f(x)}$ be the lower
+triangle of $\pi\hess{}{f(x)}{\pi^\top}$.    \Citet[Theorem 6.1]{ColemanMore1984} show that a coloring is
 triangular if and only if it is also a coloring of the intersection
-graph of $\hessLT{\pi}{x}$ for some permutation $\pi$.  Furthermore, \citet{ColemanCai1986} prove that a partitioning is consistent with a
+graph of $\hessLT{\pi}{f(x)}$ for some permutation $\pi$.  Furthermore, \citet{ColemanCai1986} prove that a partitioning is consistent with a
 substitution method if and only if it is an acyclic coloring of the
 graph of the sparsity pattern of the Hessian.   Therefore,
 finding an optimal partitioning of the variables involves finding an
 optimal combination of a permutation $\pi$, and coloring algorithm
-for the intersection graph of $\hessLT{\pi}{x}$.
+for the intersection graph of $\hessLT{\pi}{f(x)}$.
 
 These ideas are illustrated in Figures \ref{fig:graph1} and
 \ref{fig:graph2}.  Figure
@@ -691,7 +680,7 @@ sparse Hessian with this partitioning scheme would be no more
 efficient than if treating the Hessian as if it were dense.
 
 \begin{figure}
-  \begin{subfigure}[b]{.33\textwidth}\centering
+  \begin{subfigure}[b]{.32\textwidth}\centering
   \begin{tabular}{r|ccccccc}
    & 1&2&3&4&5&6&7\\
     \hline
@@ -705,7 +694,7 @@ efficient than if treating the Hessian as if it were dense.
   \end{tabular}
   \caption{Adjacency matrix}\label{fig:graph1adj}
 \end{subfigure}
-\begin{subfigure}[b]{.33\textwidth}\centering
+\begin{subfigure}[b]{.32\textwidth}\centering
 \iftoggle{tikz}{
 \begin{tikzpicture}
 \tikzstyle{every node}=[draw, shape=circle]
@@ -730,7 +719,7 @@ efficient than if treating the Hessian as if it were dense.
 }{} %% end toggle
 \caption{Sparsity graph}\label{fig:graph1pic}
 \end{subfigure}
-\begin{subfigure}[b]{.33\textwidth}\centering
+\begin{subfigure}[b]{.32\textwidth}\centering
 \iftoggle{tikz}{
 \begin{tikzpicture}
 \tikzstyle{every node}=[draw, shape=circle]
@@ -770,7 +759,7 @@ efficient than if treating the Hessian as if it were dense.
 \caption{Unpermuted matrix}\label{fig:graph1}
 \end{figure}
 
-Now suppose that we were to rearrange $\hess{}{x}$ so the last row and
+Now suppose that we were to rearrange $\hess{}{f(x)}$ so the last row and
 and column were moved to the front.  The variables are reordered, but the meanings of the cross-partial
 derivatives have not changed.  However, as we see in Figure
 \ref{fig:graph2}, the lower triangular adjacency matrix and
@@ -781,7 +770,7 @@ Figure \ref{fig:graph2pic} has many fewer edges, and can be colored
 with only three colors.
 
 \begin{figure}
-  \begin{subfigure}[b]{.33\textwidth}\centering
+  \begin{subfigure}[b]{.32\textwidth}\centering
   \begin{tabular}{r|ccccccc}
    & 7&1&2&3&4&5&6\\
     \hline
@@ -795,7 +784,7 @@ with only three colors.
   \end{tabular}
   \caption{Adjacency matrix}\label{fig:graph2adj}
 \end{subfigure}
-\begin{subfigure}[b]{.33\textwidth}\centering
+\begin{subfigure}[b]{.32\textwidth}\centering
 \iftoggle{tikz}{
 \begin{tikzpicture}
 \tikzstyle{every node}=[draw, shape=circle]
@@ -820,7 +809,7 @@ with only three colors.
 }{} %% end toggle
 \caption{Sparsity graph}\label{fig:graph2pic}
 \end{subfigure}
-\begin{subfigure}[b]{.33\textwidth}\centering
+\begin{subfigure}[b]{.32\textwidth}\centering
 \iftoggle{tikz}{
 \begin{tikzpicture}
 \tikzstyle{every node}=[draw, shape=circle]
@@ -931,7 +920,7 @@ The following code constructs a block diagonal matrix, and extracts
 the sparsity pattern from its lower triangle.
 
 <<exPattern>>=
-Mat <- as(kronecker(Diagonal(3), Matrix(T,2,2)),"nMatrix")
+Mat <- as(kronecker(diag(3), matrix(T,2,2)),"nMatrix")
 Mat
 tril(Mat)
 mc <- Matrix.to.Coord(tril(Mat))
@@ -1132,7 +1121,7 @@ Initialization&total setup time (including the partitioning time)\\
 Hessian/Gradient&ratio of the Hessian time to the
     gradient time
   \end{tabularx}
-  \caption{Summary of timing tests (see Figure \ref{fig:timing})}\label{tab:timeMeasures}
+  \caption{Summary of timing tests (see Figure )}\label{tab:timeMeasures}
 \end{table}
 
 In the plots in Figure \ref{fig:timing}, the number of heterogeneous units ($N$) is
@@ -1286,7 +1275,7 @@ consistent partitioning of the variables.
 Let $C_m$ be the assigned color to variable $m$.  From \citet[Equation 6.1]{ColemanMore1984},
 \begin{align}
   \label{eq:2}
-  \hess{ij}{x}&=Y_{i,C_j}/\delta - \sum_{l>i,l\in C_j}\hess{li}{x}
+  \hess{ij}{f(x)}&=Y_{i,C_j}/\delta - \sum_{l>i,l\in C_j}\hess{li}{f(x)}
 \end{align}
 
 We implement the substitution method using Algorithm \ref{alg:subst}.
@@ -1314,6 +1303,6 @@ values to the corresponding column in the upper triangle, and advances upwards.
 \end{algorithm}
 
 
-\bibliography{braun_refs}
+\bibliography{/Users/mbraun92/OneDriveBusiness/References/Papers/braun_refs}
 
 \end{document}

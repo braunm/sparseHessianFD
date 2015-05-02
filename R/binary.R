@@ -161,7 +161,7 @@ binary.hess <- function(P, data, priors, order.row=FALSE) {
 }
 
 .d2.cross <- function(N, inv.Sigma) {
-  res <- kronecker(Matrix(rep(1,N),nrow=1),inv.Sigma)
+  res <- kronecker(matrix(rep(1,N),nrow=1),inv.Sigma)
   return(res)
 }
 
