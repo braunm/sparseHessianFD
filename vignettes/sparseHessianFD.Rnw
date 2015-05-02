@@ -1,15 +1,12 @@
-\documentclass[10pt]{article}
+\documentclass[nojss]{jss}
 
 
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{sparseHessianFD}
 
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage{mathpazo}
+
 \usepackage{amsmath}
 \usepackage{amsfonts}
-\usepackage[margin=1in]{geometry}
 \usepackage{placeins} %% for \FloatBarrier
 \usepackage{subcaption}
 
@@ -18,10 +15,6 @@
 \usepackage{tabularx}
 
 \usepackage{colortbl}
-\usepackage{parskip}
-\usepackage{setspace}
-\linespread{1.1}
-
 
 \usepackage{etoolbox}
 \newtoggle{tikz}
@@ -31,23 +24,15 @@
 \usepackage{tikz}
 }{}
 
-\usepackage{xcolor}
-\usepackage{hyperref}
 
-%%make knitr environment line spacing separate from LaTeX
-\renewenvironment{knitrout}{\begin{singlespace}}{\end{singlespace}}
 
-\DeclareMathOperator\logit{logit}
-\DeclareMathOperator\Chol{Chol }
-\DeclareMathOperator\cov{cov}
-
-\newcommand{\pkg}[1]{\emph{#1}}
-\newcommand{\proglang}[1]{\textsf{#1}}
+%%\newcommand{\pkg}[1]{\emph{#1}}
+%%\newcommand{\proglang}[1]{\textsf{#1}}
 \newcommand{\func}[1]{\texttt{#1}}
 \newcommand{\class}[1]{\texttt{#1}}
 \newcommand{\funcarg}[1]{\texttt{#1}}
-\newcommand{\filename}[1]{\textit{#1}}
-\newcommand{\code}[1]{\texttt{#1}}
+%%\newcommand{\filename}[1]{\textit{#1}}
+%%\newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\variable}[1]{\texttt{#1}}
 \newcommand{\method}[1]{\textsl{#1}}
 
@@ -58,36 +43,30 @@
 \newcommand{\hessLT}[2]{\mathsf{L}_{#1}f(#2)}
 \newcommand{\Mat}[1]{#1}
 
-\usepackage[style=authoryear,%
-			backend=biber,%
-			maxbibnames=99,%
-                        bibencoding=utf8,%
-                        maxcitenames=1,
-                        citetracker=true,
-                        dashed=false,
-                        maxalphanames=1,%
-                        backref=false,%
-			doi=true,%
-                        url=true, %
-			isbn=false,%
-                        mergedate=basic,%
-                        dateabbrev=true,%
-                        natbib=true,%
-                        uniquename=false,%
-                        uniquelist=false,%
-                        useprefix=true,%
-                        firstinits=false
-			]{biblatex}
+\author{Michael Braun\\Edwin L. Cox School of Business\\Southern Methodist University}
+%% \Plainauthor{Michael Braun}
+%% \title{\pkg{sparseHessianFD}: An \proglang{R} Package for Estimating Sparse Hessian Matrices}
+%% \Shorttitle{sparseHessianFD:  Sparse Hessians}
+%% %% \Abstract{
+%%   Abstract goes here
+%%   }
 
- %%\addbibresource{~/OneDriveBusiness/References/Papers/braun_refs.bib}
-\addbibresource{./braun_refs.bib}
-\title{\pkg{sparseHessianFD}: An \proglang{R} Package for Estimating Sparse Hessian Matrices}
-\author{Michael Braun\\Cox School of Business\\Southern Methodist University}
+%%   \Keywords{sparse Hessians, sparse matrices}
+%%   \Address{
+%%     Michael Braun\\
+%%     Edwin L. Cox School of Business\\
+%%     Southern Methodist University\\
+%%     6212 Bishop Blvd.\\
+%%     Dallas, TX 75275\\
+%%     E-mail:  \email{braunm@smu.edu}\\
+%%     URL:  \url{http://coxprofs.cox.smu.edu/braunm/}
+%%   }
+
+  %% need no \usepackage{Sweave.sty}
+
 \date{April 30, 2015}
 
 \begin{document}
-
-\maketitle
 
 <<setup1, echo=FALSE, cache=FALSE>>=
 library(methods, quietly = TRUE)
@@ -316,7 +295,7 @@ non-zero.  If we work with only the lower triangle of the Hessian we only need t
 only \Sexpr{nnz2LT} values.
 
 
-\subsection{Sparse matrices in \proglang{R}}
+\subsection{Sparse matrices in R}
 
 The \pkg{sparseHessianFD} package uses the sparse matrix classes that are defined
 in the \pkg{Matrix} package \citep{R_Matrix}.  \pkg{Matrix} is now a
@@ -884,7 +863,7 @@ considered optional reading.
 In this section we discuss how to use \pkg{sparseHessianFD} to
 estimate sparse Hessians.
 
-\subsection{The \class{sparseHessianFD} class}
+\subsection{The sparseHessianFD class}
 
 The function \func{sparseHessianFD} is an initializer that returns a reference to a
 \class{sparseHessianFD} object.  The initializer determines an
@@ -1335,6 +1314,6 @@ values to the corresponding column in the upper triangle, and advances upwards.
 \end{algorithm}
 
 
-\printbibliography
+\bibliography{braun_refs}
 
 \end{document}
