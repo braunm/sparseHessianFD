@@ -34,7 +34,7 @@
  \newcommand{\parD}[3]{\mathsf{D}^{#1}_{#2}#3}
 \newcommand{\hess}[2]{\mathsf{H}_{#1}#2}
 \newcommand{\hessLT}[2]{\mathsf{L}_{#1}#2}
-\newcommand{\Mat}[1]{#1}
+\newcommand{\Mat}[1]{\mathbf{#1}}
 
  \author{Michael Braun\\Edwin L. Cox School of Business\\Southern Methodist University}
  \Plainauthor{Michael Braun}
@@ -59,12 +59,12 @@
 
 <<setup1, echo=FALSE, cache=FALSE>>=
 suppressPackageStartupMessages(require(Matrix))
-library(methods, quietly = TRUE)
-library(numDeriv, quietly = TRUE)
-library(sparseHessianFD, quietly=TRUE)
-##knitr::opts_chunk[["set"]](collapse = FALSE, eval=TRUE, echo=TRUE,
-  ##                        message=FALSE, tidy=FALSE, cache = TRUE)
 render_sweave()
+knitr::opts_chunk$set(prompt=TRUE)
+options(replace.assign=TRUE, width=90, prompt="R> ")
+##knitr::opts_chunk[["set"]](prompt="R> ")
+##collapse = FALSE, eval=TRUE, echo=TRUE,
+  ##                        message=FALSE, tidy=FALSE, cache = TRUE)
 @
 
 The Hessian matrix of a log likelihood function or log posterior
@@ -199,17 +199,17 @@ Hessian.  Suppose we have a dataset of $N$ households, each with $T$
 
 The coefficients are distributed across the population of households
 following a multivariate normal distribution with mean $\mu$ and
-covariance $\Sigma$.   Assume that we know $\Sigma$, but not $\mu$.
+covariance $\Mat{\Sigma}$.   Assume that we know $\Mat{\Sigma}$, but not $\mu$.
 Instead, place a multivariate normal prior on $\mu$, with mean $0$ and
-covariance $\Omega_0$.  Thus, each $\beta_i$, and $\mu$ are
+covariance $\Mat{\Omega}$.  Thus, each $\beta_i$, and $\mu$ are
 $k-$dimensional vectors, and the total number of unknown variables in the model is $(N+1)k$.
 
 The log posterior density, ignoring any normalization constants, is
 \begin{align}
   \label{eq:LPD}
-  \log \pi(\beta_{1:N},\mu|Y, X, \Sigma_0,\Omega_0)=\sum_{i=1}^Np_i^{y_i}(1-p_i)^{T-y_i}
-  -\frac{1}{2}\left(\beta_i-\mu\right)'\Sigma^{-1}\left(\beta_i-\mu\right)
--\frac{1}{2}\mu'\Omega_0^{-1}\mu
+  \log \pi(\beta_{1:N},\mu|\Mat{Y}, \Mat{X}, \Mat{\Sigma},\Mat{\Omega})=\sum_{i=1}^Np_i^{y_i}(1-p_i)^{T-y_i}
+  -\frac{1}{2}\left(\beta_i-\mu\right)'\Mat{\Sigma}^{-1}\left(\beta_i-\mu\right)
+-\frac{1}{2}\mu'\Mat{\Omega}_0^{-1}\mu
 \end{align}
 We will return to this example throughout the article.
 
@@ -231,7 +231,7 @@ options(scipen=999)
 @
 
 The log posterior density in Equation \ref{eq:LPD} has a sparse
-Hessian.  Since the $\beta_i$ are MVN-distributed, and the $y_i$ are
+Hessian.  Since the $\beta_i$ are independently distributed, and the $y_i$ are
 conditionally independent, the cross-partial derivatives
 $\hess{\beta_i,\beta_j}{}=\parD{2}{\beta_i, \beta_j}{}=0$ for all $i\neq
 j$.  However, all of the $\beta_i$ are correlated with
@@ -266,7 +266,7 @@ Mat <- rBind(Mat, Matrix(1,k,N*k))
 Mat <- cBind(Mat, Matrix(1, k*(N+1), k))
 printSpMatrix(as(Mat,"nMatrix"))
 @
-\caption{A ``block-arrow sparsity pattern''}\label{fig:blockarrow}
+\caption{A ``block-arrow'' sparsity pattern.}\label{fig:blockarrow}
 \end{subfigure}
 \begin{subfigure}[b]{.5\textwidth}
 <<banded, echo=FALSE>>=
@@ -275,9 +275,9 @@ Mat <- rBind(Mat, Matrix(1,k,N*k))
 Mat <- cBind(Mat, Matrix(1, k*(N+1), k))
 printSpMatrix(as(Mat,"nMatrix"))
 @
-\caption{A ``banded'' sparsity pattern}\label{fig:banded}
+\caption{A ``banded'' sparsity pattern.}\label{fig:banded}
 \end{subfigure}
-\caption{Two examples of sparsity patterns for a hierarchical model}\label{fig:patterns}
+\caption{Two examples of sparsity patterns for a hierarchical model.}\label{fig:patterns}
 \end{figure}
 
 In both cases, the number of non-zeros is the same.   There are \Sexpr{nels1} elements in this symmetric matrix, but only \Sexpr{nnz1} are
@@ -290,7 +290,7 @@ non-zero.  If we work with only the lower triangle of the Hessian we only need t
 only \Sexpr{nnz2LT} values.
 
 
-\subsection{Sparse matrices in R}
+\subsection[Sparse matrices in R]{Sparse matrices in \proglang{R}}
 
 The \pkg{sparseHessianFD} package uses the sparse matrix classes that are defined
 in the \pkg{Matrix} package \citep{R_Matrix}. We refer the reader to that class's documentation for
@@ -306,7 +306,7 @@ storage format.  The levels of these three factors determines the
 prefix of letters in each class name. For example, a triangular sparse matrix of numeric data, stored in
 column-compressed format, has a class \class{dtCMatrix}.
 
-\begin{table}
+\begin{table}[tbp]
     \begin{tabularx}{1.0\linewidth}{ll|lll}
    Storage&Layout&\multicolumn{3}{c}{Data type}\\
     &&numeric&logical&pattern\\
@@ -324,7 +324,7 @@ column-compressed format, has a class \class{dtCMatrix}.
       &symmetric&\class{dsCMatrix}&\class{lsCMatrix}&\class{nsCMatrix}
   \end{tabularx}
   \caption{Class names for sparse matrices, as defined in the
-    \pkg{Matrix} package.}\label{tab:MatrixClasses}
+    Matrix package.}\label{tab:MatrixClasses}
 \end{table}
 
 In a matrix with a ``general'' layout, all non-zero elements are
@@ -363,11 +363,11 @@ to the values in the row index and value vectors that start
 each column\footnote{For the CSR format, switch references to columns and rows
 in the preceding sentence.}.
 
-For example, let's construct a numeric matrix in triplet form using
+For example, let's construct a numeric matrix $\Mat{A}$ in triplet form using
 the \func{sparseMatrix} function. The arguments \funcarg{i},
 \funcarg{j} and \funcarg{x} are the row and column indices, and
 values, respectively, of the non-zero elements.  By default, \func{sparseMatrix} expects the input vectors \funcarg{i} and \funcarg{j} to
-have one-based indexing, and stores $X$ in CSC format.  We can then
+have one-based indexing, and stores $\Mat{A}$ in CSC format.  We can then
 look at the values directly, and the pointers (using the familiar
 one-based indexing scheme) using \func{Matrix.to.Pointers}.
 
@@ -384,15 +384,15 @@ them.  The column indices are not stored explicitly, but the pointers in \variab
 determine where in the sequence of values and row indices (\variable{iRow}) the next
 column will start. The first pointer is always 1, so the first element in column 1 is in
  row \code{iRow[1]=1}, and has value \code{x[1]=6}.  Since \code{jpntr[2]=3}, \code{x[2]=7} is still in
-the first column, in row \code{iRow[2]=4}, so $A_{41}=7$.  Elements 3 and 4 in
+the first column, in row \code{iRow[2]=4}, so $\Mat{A}_{41}=7$.  Elements 3 and 4 in
 \code{x} and \code{iRow} refer to values in column 2, since
 \code{jpntr[3]=5} means that column 3 does not begin until the element
-5. Hence, $A_{22}=x_3=8$ and $A_{32}=x_4=9$.
-Column 3 begins with $A_{33}=x_5=10$ (\code{iRow[5]=3} gives us the
+5. Hence, $\Mat{A}_{22}=x_3=8$ and $\Mat{A}_{32}=x_4=9$.
+Column 3 begins with $\Mat{A}_{33}=x_5=10$ (\code{iRow[5]=3} gives us the
 row index).  Continuing,
-$A_{44}=x_6=11$.  The final value in
+$\Mat{A}_{44}=x_6=11$.  The final value in
 \variable{jpntr} is always the number of non-zeros in the matrix.  The differences between
-adjacent elements in \variable{jpntr} are the number of non-zeros in each column of $A$.
+adjacent elements in \variable{jpntr} are the number of non-zeros in each column of $\Mat{A}$.
 
 There are two important advantages to storing sparse matrices in a
 compressed format.  First, the storage requirements are usually smaller.  A
@@ -415,7 +415,7 @@ between sparse matrices, and the vectors of row and column indices
 required by the \class{sparseHessianFD} initializer (see Section
 \ref{sec:using}).  These functions are summarized in Table \ref{tab:helpers}.
 
-\begin{table}[tbh]
+\begin{table}[tbp]
   \centering
   \setlength\extrarowheight{.25em}
   \begin{tabularx}{1.0\linewidth}{lX}
@@ -431,7 +431,7 @@ required by the \class{sparseHessianFD} initializer (see Section
                               (triplet format) to a list of indices
                               and pointers (compressed format).
   \end{tabularx}
-  \caption{\class{sparseHessianFD} Matrix conversion functions}
+  \caption{sparseHessianFD matrix conversion functions}
   \label{tab:helpers}
 \end{table}
 
@@ -525,21 +525,21 @@ The ``trick'' for the general case of sparse Hessians is to partition
 the decision variables into $C$ mutually exclusive groups so that the number of gradient
 evaluations is minimized.  Let $\Mat{G}$ be a $M\times C$
 matrix, where $\Mat{G}_{mc}=\delta$ if variable $m$ belongs to group $c$, and zero
-otherwise.  Define $G_c$ as the $c$th column of $G$.
+otherwise.  Define $\Mat{G}_c$ as the $c$th column of $\Mat{G}$.
 
 Next, let $\Mat{Y}$ be a $M\times C$ matrix, where each column is a
 difference in gradients.
 \begin{align}
   \label{eq:Yg}
-  Y_c&=\nabla f(x+G_c)-\nabla f(x)
+  \Mat{Y}_c&=\nabla f(x+G_c)-\nabla f(x)
 \end{align}
 
 If $C=M$, then $\Mat{G}$ is a diagonal matrix with $\delta$ in each
-diagonal element.  The matrix equation $\hess{}{}G=Y$ represents the linear approximation
+diagonal element.  The matrix equation $\hess{}{}\Mat{G}=\Mat{Y}$ represents the linear approximation
 $\hess{im}{}\delta\approx y_{im}$, and we can solve for all elements of $\hess{}{}$
 just by computing $Y$. But if $C<M$,
-there must be at least one $G_c$ with $\delta$ in at least two
-rows. Column $Y_c$ would have been computed by perturbing two variables at
+there must be at least one $\Mat{G}_c$ with $\delta$ in at least two
+rows. Column $\Mat{Y}_c$ would have been computed by perturbing two variables at
 once, and we would not have been able to solve for any $\hess{im}{}$
 without further constraints.
 
@@ -571,7 +571,7 @@ group 2.  For the moment, we will postpone the discussion of how to
 choose $C$ and how to partition the variables until Section \ref{sec:coloring}.
 
 Next, compute the columns of $\Mat{Y}$ using Equation \ref{eq:Yg}.  We now
-have the following system of linear equations from $\hess{}{f(x)}\Mat{G}=\Mat{Y}$.
+have the following system of linear equations from $\hess{}{}\Mat{G}=\Mat{Y}$.
 \begin{align}
   \label{eq:11}
   \begin{aligned}[c]
@@ -594,17 +594,17 @@ have the following system of linear equations from $\hess{}{f(x)}\Mat{G}=\Mat{Y}
 Note that this system is overdetermined.  Both $h_{31}=y_{12}$ and $h_{53}=y_{52}$
 can be determined directly, but $h_{31}+h_{53}=y_{31}$, and $h_{42}$
 could be either $y_{41}$ or $y_{22}$.  \Citet{PowellToint1979} prove
-that it is sufficient to solve $\hessLT{}{}G=Y$ instead via a \emph{substitution method}, where $\hessLT{}{}$ is the lower
+that it is sufficient to solve $\hessLT{}{}\Mat{G}=\Mat{Y}$ instead via a \emph{substitution method}, where $\hessLT{}{}$ is the lower
 triangular part of $\hess{}{}$.  This has the effect of removing the equations
 $h_{42}=y_{22}$ and $h_{31}=y_{12}$ from the system, but retaining
 $h_{53}=y_{52}$.  We can then solve for
 $h_{31}=y_{31}-y_{52}$. Thus, we have determined a
 $5\times 5$ Hessian matrix with only three gradient evaluations, in
-contrast with the six that would have been needed had $\hess{}{f(x)}$ been treated
+contrast with the six that would have been needed had $\hess{}{}$ been treated
 as dense.
 
 The $\Mat{Y}$ matrix is, in essence, a compressed representation of
-$\hess{}{}$.  The values in $Y_c$ are finite differences after
+$\hess{}{}$.  The values in $\Mat{Y}_c$ are finite differences after
 one \emph{or more} variables are perturbed.  Hence, we need two
 different algorithms to estimate a sparse Hessian.  The first is to
 determine which variables can be perturbed together when computing
@@ -673,7 +673,7 @@ intersection graph (Figure \ref{fig:graph1int}), which requires seven colors for
 sparse Hessian with this partitioning scheme would be no more
 efficient than if treating the Hessian as if it were dense.
 
-\begin{figure}
+\begin{figure}[tbp]
   \begin{subfigure}[b]{.32\textwidth}\centering
   \begin{tabular}{r|ccccccc}
    & 1&2&3&4&5&6&7\\
@@ -686,7 +686,7 @@ efficient than if treating the Hessian as if it were dense.
     6&1&0&0&0&1&1&\\
     7&1&1&1&1&1&1&1
   \end{tabular}
-  \caption{Adjacency matrix}\label{fig:graph1adj}
+  \caption{Adjacency matrix.}\label{fig:graph1adj}
 \end{subfigure}
 \begin{subfigure}[b]{.32\textwidth}\centering
 \iftoggle{tikz}{
@@ -711,7 +711,7 @@ efficient than if treating the Hessian as if it were dense.
 (v5) -- (v6);
 \end{tikzpicture}
 }{} %% end toggle
-\caption{Sparsity graph}\label{fig:graph1pic}
+\caption{Sparsity graph.}\label{fig:graph1pic}
 \end{subfigure}
 \begin{subfigure}[b]{.32\textwidth}\centering
 \iftoggle{tikz}{
@@ -748,22 +748,19 @@ efficient than if treating the Hessian as if it were dense.
 (v1) -- (v2);
 \end{tikzpicture}
 }{} %% end toggle
-\caption{Intersection graph}\label{fig:graph1int}
+\caption{Intersection graph.}\label{fig:graph1int}
 \end{subfigure}
-\caption{Unpermuted matrix}\label{fig:graph1}
+\caption{Unpermuted matrix.}\label{fig:graph1}
 \end{figure}
 
 Now suppose that we were to rearrange $\hess{}{}$ so the last row and
-and column were moved to the front.  The variables are reordered, but the meanings of the cross-partial
-derivatives have not changed.  However, as we see in Figure
-\ref{fig:graph2}, the lower triangular adjacency matrix and
-the corresponding intersection graph are different from Figure \ref{fig:graph2} .  In Figure \ref{fig:graph2adj}, all columns share at least one non-zero row with
+and column were moved to the front.  In Figure \ref{fig:graph2adj}, all columns share at least one non-zero row with
 the column for variable 7, but variable groups $\{2,4,6\}$ and
 $\{1,3,5\}$ have empty intersection sets.  The intersection graph in
-Figure \ref{fig:graph2pic} has many fewer edges, and can be colored
+Figure \ref{fig:graph2pic} has fewer edges, and can be colored
 with only three colors.
 
-\begin{figure}
+\begin{figure}[tbp]
   \begin{subfigure}[b]{.32\textwidth}\centering
   \begin{tabular}{r|ccccccc}
    & 7&1&2&3&4&5&6\\
@@ -776,7 +773,7 @@ with only three colors.
     5&1&0&0&0&0&1&\\
     6&1&0&0&0&0&1&1
   \end{tabular}
-  \caption{Adjacency matrix}\label{fig:graph2adj}
+  \caption{Adjacency matrix.}\label{fig:graph2adj}
 \end{subfigure}
 \begin{subfigure}[b]{.32\textwidth}\centering
 \iftoggle{tikz}{
@@ -801,7 +798,7 @@ with only three colors.
 (v5) -- (v6);
 \end{tikzpicture}
 }{} %% end toggle
-\caption{Sparsity graph}\label{fig:graph2pic}
+\caption{Sparsity graph.}\label{fig:graph2pic}
 \end{subfigure}
 \begin{subfigure}[b]{.32\textwidth}\centering
 \iftoggle{tikz}{
@@ -826,16 +823,21 @@ with only three colors.
 (v5) -- (v6);
 \end{tikzpicture}
 }{} %% end toggle
-\caption{Intersection graph}\label{fig:graph2int}
+\caption{Intersection graph.}\label{fig:graph2int}
 \end{subfigure}
-\caption{Permuted matrix}\label{fig:graph2}
+\caption{Permuted matrix.}\label{fig:graph2}
 \end{figure}
 
 
-The specifics of how to permute and partition the variables, and how
-to implement the substitution method to compute the Hessian, should be
-invisible to the user of the \pkg{sparseHessianFD} package.  These are
-all discussed in Section \ref{sec:algorithms}, which should be
+The practical implication of all of this is that by permuting the
+rows and columns of the Hessian, we may be able to reduce the
+number of colors needed for a cyclic coloring of the graph of the
+sparsity pattern.  Fewer colors means fewer partitions of the
+variables, and that means fewer gradient evaluations to
+estimate the Hessian.  The \class{sparseHessianFD}
+class finds a permutation, and partitions the variables, when it is
+initialized.  This is all invisible to the end user.  The technical
+details of the algorithm are in Section \ref{sec:algorithms}, which should be
 considered optional reading.
 
 
@@ -846,7 +848,7 @@ considered optional reading.
 In this section we discuss how to use \pkg{sparseHessianFD} to
 estimate sparse Hessians.
 
-\subsection{The sparseHessianFD class}
+\subsection[The sparseHessianFD class]{The \class{sparseHessianFD} class}
 
 The function \func{sparseHessianFD} is an initializer that returns a reference to a
 \class{sparseHessianFD} object.  The initializer determines an
@@ -856,7 +858,7 @@ described in Table \ref{tab:init}.
 
 {
 \setlength{\extrarowheight}{.25em}
-\begin{table}[h]
+\begin{table}[tbp]
 \begin{tabularx}{\linewidth}{>{\bfseries}r X}
 x& A numeric vector, with length $M$ at which the object will be
   initialized and tested.\\
@@ -875,7 +877,7 @@ index1& If \variable{TRUE} (the default), \funcarg{row} and \funcarg{col} use on
   indexing.  If \variable{FALSE}, zero-based indexing is used.\\
 ...& Additional arguments to be passed to \func{fn} and \func{gr}.
 \end{tabularx}
-\caption{Arguments to the \class{sparseHessianFD} initializer}\label{tab:init}
+\caption{Arguments to the sparseHessianFD initializer.}\label{tab:init}
 \end{table}
 }
 
@@ -884,6 +886,7 @@ To create a \class{sparseHessianFD} object, just call
 arguments, the call will look like:
 
 <<eval=FALSE>>=
+library("sparseHessianFD")
 obj <- sparseHessianFD(x, fn, gr, rows, cols, ...)
 @
 where \funcarg{...} represents all other named arguments that are
@@ -961,22 +964,20 @@ The package includes functions that compute the value
 are accessed with the \func{data} function.
 
 To start, we load the data, set some dimension parameters, set prior
-values for $\Sigma^{-1}$ and $\Omega^{-1}$, and simulate a
+values for $\Mat{\Sigma}^{-1}$ and $\Mat{\Omega}^{-1}$, and simulate a
 vector of variables at which to evaluate the function. The \func{binary.f} and \func{binary.grad} functions take the data and
-priors as lists.  The \func{data()} call adds the appropriate data
+priors as lists.  The \func{data(``binary'')} call adds the appropriate data
 list to the environment, but we need to construct the prior list ourselves.
 
 <<binaryInit>>=
-library(sparseHessianFD)
+library("sparseHessianFD")
 set.seed(123)
-data(binary_small)
-binary <- binary_small
+data("binary")
 str(binary)
 N <- length(binary[["Y"]])
 k <- NROW(binary[["X"]])
 T <- binary[["T"]]
 nvars <- as.integer(N*k + k)
-P <- rnorm(nvars) ## random starting values
 priors <- list(inv.Sigma = rWishart(1,k+5,diag(k))[,,1],
                inv.Omega = diag(k))
 @
@@ -993,6 +994,7 @@ will have a banded pattern.  If \funcarg{order.row} is \variable{FALSE}, then th
 Hessian will have a block-arrow pattern.
 
 <<trueValues>>=
+P <- rnorm(nvars)
 true.f <- binary.f(P, binary, priors, order.row=FALSE)
 true.grad <- binary.grad(P, binary, priors, order.row=FALSE)
 true.hess <- binary.hess(P, binary, priors, order.row=FALSE)
@@ -1059,13 +1061,12 @@ were collected using the \pkg{microbenchmark} package \citep{R_microbenchmark}.
 
 
 
-\begin{table}\centering
+\begin{table}[tbp]\centering
 \input{table_numDeriv_fixed.tex}
-\caption{Computation times (milliseconds) for computing Hessians using
-  \pkg{numDeriv} and \pkg{sparseHessian}.  Rows are ordered by the
+\caption{Computation times (milliseconds) for computing Hessians using the
+  numDeriv and sparseHessianFD packages.  Rows are ordered by the
   number of variables.}\label{tab:numDeriv}
 \end{table}
-
 
 Because \pkg{numDeriv} does not scale, we cannot use it to benchmark \pkg{sparseHessianFD} for
 larger sparse Hessians.  To help us understand just how scalable
@@ -1074,9 +1075,7 @@ same hierarchical model, for different values of $N$ and $k$.  We then
 recorded the run times for different tasks in the sparse Hessian
 estimation, across 200 replications.  The tasks are summarized in Table \ref{tab:timeMeasures}.
 
-
-
-\begin{table}\centering
+\begin{table}[tbp]\centering
   \begin{tabularx}{1.0\linewidth}{>{\bfseries}l X}
     Measure&Description\\
     \hline
@@ -1090,7 +1089,7 @@ Initialization&total setup time (including the partitioning time)\\
 Hessian/Gradient&ratio of the Hessian time to the
     gradient time
   \end{tabularx}
-  \caption{Summary of timing tests (see Figure )}\label{tab:timeMeasures}
+  \caption{Summary of timing tests (see Figure \ref{fig:timing}).}\label{tab:timeMeasures}
 \end{table}
 
 In the plots in Figure \ref{fig:timing}, the number of heterogeneous units ($N$) is
@@ -1100,10 +1099,10 @@ and each curve in a panel represents a different number of within-unit
 parameters ($k$).
 
 
-\begin{figure}[tb]
+\begin{figure}[tbp]
   \centering
 \includegraphics{timings}
-  \caption{Run times for sparse Hessian computation}
+  \caption{Run times for sparse Hessian computation.}
   \label{fig:timing}
 \end{figure}
 
@@ -1125,33 +1124,26 @@ of the data set increases.  We can conclude that the
 hierarchical models.
 
 
-\section{Algorithm and Permutations}\label{sec:algorithms}
+\section{Algorithms}\label{sec:algorithms}
 
-At this point, we must note that, in general, vertex coloring problems
-are NP-Hard.  No algorithm can, as a general rule, find
-the \emph{smallest} number of colors needed to color a graph, or
-determine the coloring associated with that number.  Fortunately, for
-practical purposes we do not need to partition the variables in an
-optimal way.  We just need a reasonably good partition that will
-reduce the number of gradient evaluations enough to offer a
-substantial resource savings when estimating the Hessian.  We make no
-claims that any of the algorithms in \pkg{sparseHessianFD} are
-optimal, or even ``best available.''  But we do expect them to
+At this point, we must note that the problem of finding a cycling
+coloring of the graph of the sparsity pattern is NP-complete
+\citep{ColemanCai1986}.  As such, we will not attempt to find an ``optimal''
+partitioning of the variables.  Fortunately, we just need the
+partitioning to be reasonably good, to make the effort worth our
+while.  A plethora of vertex coloring heuristics have been proposed,
+and we make no
+claims that any of the algorithms in \pkg{sparseHessianFD} are even ``best available.''  But we do expect them to
 generate the correct results faster than the other alternatives.
 
 
 \subsection{Partitioning variables}
-An efficient partitioning of the variables is one that minimizes the
-number of gradient evaluations required to recover the Hessian.  The
-partitioning is consistent with a substitution method if it can be characterized as a cyclic coloring
+A partitioning of the variables is consistent with a substitution method if it can be characterized as a cyclic coloring
 of the graph of the sparsity pattern, or, equivalently, as a proper
-coloring of the intersection graph.
-
-The first step is to permute the rows and columns of the Hessian.   A
+coloring of the intersection graph.  The first step is to permute the rows and columns of the Hessian.   A
 reasonable choice is a permutation that sorts the rows and columns in
 decreasing order of the number of elements.
-This is the ``smallest-last'' ordering suggested by
-\citet[Theorem 6.2]{ColemanMore1984}.  To justify this permutation, suppose
+To justify this permutation, suppose
 non-zeros within a row are randomly distributed across
 columns.  If the row is near the top of the matrix, there is a higher
 probability that the non-zero element is in the upper triangle, not in
@@ -1159,15 +1151,15 @@ the lower.  We can put sparser rows near the bottom.  This ordering
 does not affect the total number of non-zeros in the lower triangle,
 but it should minimize the number of non-zeros in each row.  Thus, we
 would expect the number of columns with non-zero elements in common
-rows to be smaller, and the intersection graph to be sparser.
+rows to be smaller, and the intersection graph to be sparser.  This is the ``smallest-last'' ordering suggested by
+\citet[Theorem 6.2]{ColemanMore1984}.
 
 Call the chosen permutation $\pi$.   Let $\hessLT{\pi}{}$ be the lower triangle of the
 sparsity pattern of the Hessian, with rows and columns permuted by
-$\pi$.  The adjacency matrix of the intersection graph $\Gamma$ is the Boolean
-crossproduct, $\Gamma = L^\top L$.  Algorithm \ref{alg:coloring} is a
+$\pi$.  The adjacency matrix of the intersection graph is the Boolean
+crossproduct, $\hessLT{\pi}{}^\top \hessLT{\pi}{}$.  Algorithm \ref{alg:coloring} is a
 ``greedy'' vertex coloring algorithm, in which vertices are colored
-sequentially.  Running Algorithm \ref{alg:coloring} on $\Gamma$
-generates a proper coloring on $\hessLT{\pi}{}$, which in turn is a
+sequentially.  The result is a cyclic coloring on the sparsity graph, which in turn is a
 consistent partitioning of the variables.
 
 
@@ -1206,7 +1198,7 @@ consistent partitioning of the variables.
     \RETURN{$C$}
     \end{algorithmic}
     \caption{Consistent partitioning of variables for a triangular
-      substitution method}\label{alg:coloring}
+      substitution method.}\label{alg:coloring}
     \end{algorithm}
 
 \subsection{Computing the Hessian by substitution}
@@ -1214,7 +1206,7 @@ consistent partitioning of the variables.
 Let $C_m$ be the assigned color to variable $m$.  From \citet[Equation 6.1]{ColemanMore1984},
 \begin{align}
   \label{eq:2}
-  \hess{ij}{f(x)}&=Y_{i,C_j}/\delta - \sum_{l>i,l\in C_j}\hess{li}{f(x)}
+  \hess{ij}{f(x)}&=\Mat{Y}_{i,C_j}/\delta - \sum_{l>i,l\in C_j}\hess{li}{f(x)}
 \end{align}
 
 We implement the substitution method using Algorithm \ref{alg:subst}.
@@ -1227,18 +1219,18 @@ values to the corresponding column in the upper triangle, and advances upwards.
       non-zero elements in row $i$.}
     \REQUIRE{$C[i], i=1,\mathellipsis,M$: vector of
       assigned colors}
-    \REQUIRE{$H$, an $M\times M$ Hessian (initialized to zero)}
-    \REQUIRE{$B$, a $\max(C)\times M$ matrix (initialized to zero)}
+    \REQUIRE{$\Mat{H}$, an $M\times M$ Hessian (initialized to zero)}
+    \REQUIRE{$\Mat{B}$, a $\max(C)\times M$ matrix (initialized to zero)}
     \FOR{$i$ = $M$ \TO $1$}
     \FOR{All $j$ in $P_i$}
     \STATE{$z\leftarrow Y[i,C[j]]/\delta - B[C[j], i]$}
-    \STATE{$B[C[i], j]\leftarrow B[C[i], j] + z$}
+    \STATE{$\Mat{B}[C[i], j]\leftarrow B[C[i], j] + z$}
     \STATE{$H[i,j]\leftarrow z$}
     \STATE{$H[j,i]\leftarrow H[i,j]$}
     \ENDFOR
     \ENDFOR
   \end{algorithmic}
-  \caption{Triangular substitution method}\label{alg:subst}
+  \caption{Triangular substitution method.}\label{alg:subst}
 \end{algorithm}
 
 

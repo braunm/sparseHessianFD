@@ -41,10 +41,10 @@ P2 <- ggplot(D2, aes(x=N,y=mean, color=as.factor(k), linetype=as.factor(k))) %>%
   + scale_y_continuous("Computation time (milliseconds)") %>%
   + guides(color=guide_legend("k"), linetype=guide_legend("k")) %>%
   + facet_wrap(~stat, scales="free") %>%
-  + theme(text=element_text(size=8))
+  + theme(text=element_text(size=8), legend.position="right")
 
 
-pdf(file="vignettes/timings.pdf", width=6.5, height=4)
+pdf(file="vignettes/timings.pdf", width=8, height=4.5)
 print(P2)
 dev.off()
 
