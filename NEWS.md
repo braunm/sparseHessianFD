@@ -1,8 +1,23 @@
 # NEWS file for sparseHessianFD package 
 
-## VERSION 0.2.0.9990 (development)
+## VERSION 0.3.0
 
+*  An even more major rewrite of the package.  All ACM code was
+removed, and replaced with original R/C++ implementations.
 
+*  sparseHessianFD is now an R reference class, and not an Rcpp
+module.  The `sparseHessianFD.new` function is deprecated.  Use
+`sparseHessianFD` instead.
+
+*  The 'direct' computation method has been removed.  All computation
+   uses the 'indirect' triangular substitution method.  The 'direct'
+   argument in the initializer for the sparseHessianFD class is now deprecated.
+
+* New matrix helper functions  `Matrix.to.Pointers` and `Coord.to.Pointers`.
+
+*  Matrix helper function `Coord.to.Pattern.Matrix` is deprecated.
+   Use the `spMatrix` or `sparseMatrix` functions in the *Matrix*
+   package instead.
 
 ## VERSION 0.2.0 (Jan. 28, 2015)
 
@@ -14,7 +29,7 @@
 
 *  Added unit tests using testthat
 
-*  Core class has been renamed sparseHessianFD. Construction and initialization are now two seaprate steps.
+*  Core class has been renamed sparseHessianFD. Construction and initialization are now two separate steps.
 
 *  New function sparseHessianFD.new is a wrapper around the construction and initialization steps.
 

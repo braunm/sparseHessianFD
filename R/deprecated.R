@@ -1,8 +1,5 @@
 ## deprecated.R -- Part of the sparseHessianFD package
 ## Copyright (C) 2013-2015 Michael Braun
-## See LICENSE file for details.
-
-
 
 ## Place to hold functions that will not be maintained in the future
 
@@ -41,7 +38,7 @@ Sym.CSC.to.Matrix <- function(H,nvars) {
 #' @export
 Coord.to.Sym.Pattern.Matrix <- function(H, nvars) {
 
-    .Deprecated("Coord.to.Pattern.Matrix")
+    .Deprecated("Matrix::sparseMatrix")
 
 ## coords are for lower triangle, but coerces to symmetric pattern matrix
 ## H is a list with two integer vectors:  iRow and jCol
@@ -54,6 +51,38 @@ Coord.to.Sym.Pattern.Matrix <- function(H, nvars) {
     return(res)
 
 }
+
+#' @name Coord.to.Pattern.Matrix
+#' @aliases Coord.to.Pattern.Matrix
+#' @title Pattern matrix from row and column indices.
+#' @description Converts row and column indices to a pattern Matrix
+#' object of Matrix class
+#' @param rows,cols row and column indices of non-zero elements
+#' @param dims 2-element vector for number of rows and columns in
+#' matrix
+#' @param compressed If TRUE, returns a matrix is compressed column (default=TRUE)
+#' @param symmetric If TRUE, matrix will be symmetric, and only the
+#' lower triangular elements need to be provided (default=FALSE)
+#' @param index1 TRUE if input row and col use 1-based indexing, and FALSE for 0-based indexing.
+#' @return A sparse pattern matrix
+#' @details This function is useful to prototype a sparsity pattern.
+#' No assumptions are made about symmetry.
+#' @rdname sparseHessianFD-deprecated
+#' @export
+Coord.to.Pattern.Matrix <- function(rows, cols, dims, compressed=TRUE,
+                                    symmetric=FALSE, index1=TRUE) {
+
+    res <- sparseMatrix(i=as.integer(rows),
+                        j=as.integer(cols),
+                        dims=dims,
+                        giveCsparse=compressed,
+                        symmetric=symmetric,
+                        index1=index1)
+    return(res)
+}
+
+
+
 
 #' @name new.sparse.hessian.obj
 #' @title Deprecated constructor
@@ -79,7 +108,7 @@ Coord.to.Sym.Pattern.Matrix <- function(H, nvars) {
 #' @export
 new.sparse.hessian.obj <- function(x, fn, gr, hs, fd.method=0L, eps=sqrt(.Machine$double.eps),...) {
 
-    .Deprecated("sparseHessianFD.new")
+    .Deprecated("sparseHessianFD")
     if (is.null(hs))
         stop("sparseHessianFD: you must supply structure of the Hessian.")
     if (!is.list(hs))
@@ -93,8 +122,34 @@ new.sparse.hessian.obj <- function(x, fn, gr, hs, fd.method=0L, eps=sqrt(.Machin
         stop ("sparseHessianFD:  Names of hs must be either (\"iRow, jCol\") or (\"rows, cols\")")
     }
     direct <- as.logical(fd.method)
-    return(sparseHessianFD.new(x, fn, gr, hs$rows, hs$cols, direct, eps, ...))
+    sparseHessianFD(x, fn=fn, gr=gr, rows=hs$rows, cols=hs$cols,
+                    eps, index1=TRUE, ...)
 }
 
+
+#' @name sparseHessianFD.new
+#' @title Create and initialize a new sparseHessianFD object
+#' @param x A intital vector of variables at which to evaluate value, gradient
+#' and Hessian during initialization.
+#' @param fn R function that returns function value
+#' @param gr R function that returns the gradient of the function
+#' @param rows Integer vector of row indices of non-zero elements of
+#' the lower triangle of the Hessian
+#' @param cols Integer vector of column indices of non-zero elements
+#' of the lower triangle of the Hessian
+#' @param direct If TRUE, use direct method for computatation.  Otherwise, use
+#' indirect/substitution method.  See references.
+#' @param eps The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).
+#' @param ... Other parameters to be passed to fn and gr.
+#' @return An object of class sparseHessianFD
+#' @export
+sparseHessianFD.new <- function(x, fn, gr, rows, cols, direct=FALSE,
+                            eps=sqrt(.Machine$double.eps), ...) {
+
+    .Deprecated("sparseHessianFD")
+    sparseHessianFD(x, fn=fn, gr=gr,
+                           rows=rows, cols=cols, eps=eps,
+                           index1=TRUE, ...)
+}
 
 

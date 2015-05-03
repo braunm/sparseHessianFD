@@ -1,28 +1,15 @@
 Package: sparseHessianFD
 Type: Package
 Title: Numerical Estimation of Sparse Hessians
-Version: 0.2.0.9000
-Date: 2015-04-04
-Author: R interface code by Michael Braun
-    Original Fortran code by Thomas F. Coleman, Burton S. Garbow and
-    Jorge J. More.
-Maintainer: Michael Braun <braunm@smu.edu>
+Version: 0.3.0
+Date: 2015-05-04
+Authors@R: person(family="Braun", given="Michael", role=c("aut","cre","cph"), email="braunm@smu.edu")
 URL: coxprofs.cox.smu.edu/braunm
-Description: Computes Hessian of a scalar-valued function, and returns it in
-    sparse Matrix format, using ACM TOMS Algorithm 636. The user must supply the objective function, the
-    gradient, and the row and column indices of the non-zero elements of the
-    lower triangle of the Hessian (i.e., the sparsity structure must be known
-    in advance). The algorithm exploits this sparsity, so Hessians can be
-    computed quickly even when the number of arguments to the objective
-    functions is large. This package is intended to be useful for numeric
-    optimization (e.g., with the trustOptim package) or in simulation (e.g.,
-    the sparseMVN package). The underlying algorithm is ACM TOMS Algorithm 636,
-    written by Coleman, Garbow and More (ACM Transactions on Mathematical
-    Software, 11:4, Dec. 1985).
-License: file LICENSE
+Description: Estimates Hessian of a scalar-valued function, and returns it in a sparse Matrix format. The sparsity pattern must be known in advance.  The algorithm is especially efficient for hierarchical models with a large number of heterogeneous units.
+License: MPL (== 2.0)
 LazyData: true
 Depends:
-    R (>= 3.1.2),
+    R (>= 3.2.0),
     Rcpp (>= 0.11.5),
     Matrix (>= 1.2.0),
     methods
@@ -30,7 +17,6 @@ Suggests:
     testthat,
     numDeriv,
     knitr
-RcppModules: sparseHessianFD
 Roxygen: list(wrap=TRUE)
 LinkingTo: Rcpp, RcppEigen (>= 0.3.2.3)
 VignetteBuilder: knitr

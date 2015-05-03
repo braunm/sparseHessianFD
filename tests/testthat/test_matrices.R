@@ -144,31 +144,3 @@ test_that("Coord.to.Pointers", {
     expect_equal(M2.true, P2)
     expect_equal(M2.trueS, P3)
 })
-
-context("Coord.to.Pattern.Matrix")
-test_that("Coord.to.Pattern.Matrix", {
-
-    k <- 5
-    rows <- c(1,2,5,3,4,5,2)
-    cols <- c(1,2,2,3,4,5,5)
-    rowsLT <- c(1,2,5,3,4,4,5)
-    colsLT <- c(1,2,2,3,3,4,5)
-
-    M1.true <- sparseMatrix(i=rows, j=cols, dims=c(k,k))
-    M2.true <- as(tril(sparseMatrix(i=rowsLT, j=colsLT, dims=c(k,k))),"ngCMatrix")
-    M2.trueS <- as(sparseMatrix(i=rowsLT, j=colsLT, dims=c(k,k), symmetric=TRUE),"ngCMatrix")
-
-    P1 <- Coord.to.Pattern.Matrix(rows, cols, dims=c(k,k),
-                                  symmetric=FALSE)
-
-    P2 <- Coord.to.Pattern.Matrix(rowsLT, colsLT, dims=c(k,k),
-                                  symmetric=FALSE)
-
-    P3 <- as(Coord.to.Pattern.Matrix(rowsLT, colsLT, dims=c(k,k),
-                                     symmetric=TRUE), "ngCMatrix")
-
-    expect_equal(M1.true, P1)
-    expect_equal(M2.true, P2)
-    expect_equal(M2.trueS, P3)
-
-})

@@ -425,9 +425,6 @@ required by the \class{sparseHessianFD} initializer (see Section
    \func{Matrix.to.Coord} & Returns a list of vectors containing row
                             and column indices of the non-zero
                             elements of a matrix.\\
-    \func{Coord.to.Pattern.Matrix}& Converts vectors of row and column
-                                    indices to a sparse pattern matrix
-                                    (useful for visualizing a sparsity pattern).\\
     \func{Matrix.to.Pointers}&Returns indices and pointers from a
                                sparse matrix.\\
     \func{Coord.to.Pointers}&Converts list of row and column indices
@@ -889,11 +886,10 @@ passed to \func{sparseHessianFD} as the \funcarg{row} and
 \funcarg{col} arguments, respectively.
 
 To visually check that a proposed sparsity pattern represents the
-intended matrix, use the \func{Coord.to.Pattern.Matrix} function,
-which is a wrapper to \pkg{Matrix}'s \func{sparseMatrix} constructor.
+intended matrix, use the \pkg{Matrix} \func{sparseMatrix} constructor.
 
 <<>>=
-pattern <- Coord.to.Pattern.Matrix(mc$rows, mc$cols, dims=dim(Mat))
+pattern <- sparseMatrix(i=mc$rows, j=mc$cols)
 printSpMatrix(pattern)
 @
 

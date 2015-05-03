@@ -1,6 +1,6 @@
 ## matrices.R -- Part of the sparseHessianFD package
 ## Copyright (C) 2013-2015 Michael Braun
-## See LICENSE file for details.
+
 
 #' @name Matrix.to.Coord
 #' @title Row and column indices from sparse matrix.
@@ -23,33 +23,7 @@ Matrix.to.Coord <- function(M, index1=TRUE) {
   return(res)
 }
 
-#' @name Coord.to.Pattern.Matrix
-#' @aliases Coord.to.Pattern.Matrix
-#' @title Pattern matrix from row and column indices.
-#' @description Converts row and column indices to a pattern Matrix
-#' object of Matrix class
-#' @param rows,cols row and column indices of non-zero elements
-#' @param dims 2-element vector for number of rows and columns in
-#' matrix
-#' @param compressed If TRUE, returns a matrix is compressed column (default=TRUE)
-#' @param symmetric If TRUE, matrix will be symmetric, and only the
-#' lower triangular elements need to be provided (default=FALSE)
-#' @param index1 TRUE if input row and col use 1-based indexing, and FALSE for 0-based indexing.
-#' @return A sparse pattern matrix
-#' @details This function is useful to prototype a sparsity pattern.
-#' No assumptions are made about symmetry.
-#' @export
-Coord.to.Pattern.Matrix <- function(rows, cols, dims, compressed=TRUE,
-                                    symmetric=FALSE, index1=TRUE) {
 
-    res <- sparseMatrix(i=as.integer(rows),
-                        j=as.integer(cols),
-                        dims=dims,
-                        giveCsparse=compressed,
-                        symmetric=symmetric,
-                        index1=index1)
-    return(res)
-}
 
 
 #' @name Matrix.to.Pointers
