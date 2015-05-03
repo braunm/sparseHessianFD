@@ -3,6 +3,7 @@
 vignettes/.*\.bbl$
 vignettes/.*\.blg$
 vignettes/prv\_.*
+vignettes/missfont.log
 ^\\.git$
 ^\\.Rbuildignore$
 ^\\.Rhistory$
@@ -12,6 +13,7 @@ README\.md
 inst/old/*
 data-raw/*
 ^nobuild/*
+^cache/*
 ^README\.Rmd$
 ^README-.*\.png$
 ^README\.R

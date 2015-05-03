@@ -44,7 +44,7 @@ P2 <- ggplot(D2, aes(x=N,y=mean, color=as.factor(k), linetype=as.factor(k))) %>%
   + theme(text=element_text(size=8), legend.position="right")
 
 
-pdf(file="vignettes/timings.pdf", width=8, height=4.5)
+pdf(file="vignettes/timings.pdf", width=6, height=4)
 print(P2)
 dev.off()
 
