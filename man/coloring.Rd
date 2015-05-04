@@ -7,8 +7,8 @@
 coloring(L)
 }
 \arguments{
-  \item{L}{nMatrix with sparsity pattern of lower triangle
-  of Hessian}
+  \item{L}{sparsity pattern of the Hessian as a lower
+  triangular pattern matrix}
 }
 \value{
 Integer vector of length nvars with color assignments for

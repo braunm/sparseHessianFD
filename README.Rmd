@@ -64,7 +64,7 @@ the gradient of the target function.
    elements of the lower triangle of the Hessian, and one for the
    column indices.
 
-The `sparseHessian.new` function returns an object of class
+The `sparseHessianFD` function returns an object of class
 sparseHessianFD.  This class contains methods to return the function
 value, gradient and Hessian.  The Hessian is returned in a sparse,
 compressed format as a `dgCMatrix` object (defined in the *Matrix*
@@ -74,7 +74,7 @@ A typical usage might look like this.
 
 ```{r, eval=FALSE}
 P <- rnorm(N) ## random "starting value" for initialization
-obj <- sparseHessianFD.new(P, f, df, rows, cols)
+obj <- sparseHessianFD(P, f, df, rows, cols)
 X <- rnorm(N) ## another set of variables at which the function is evaluated
 val <- obj$fn(X) ## function value
 gr <- obj$gr(X) ## gradient

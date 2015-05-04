@@ -1,17 +1,18 @@
+// Part of the sparseHessianFD package
+// Copyright (C) 2013-2015 Michael Braun
+
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include <Eigen/Core>
 #include <Eigen/Sparse>
 
 
-
-
 //' @title Estimate sparse Hessian
 //' @description Estimate Hessian using triangular subsitution algorithm
-//' @param Y Matrix of finite differences
+//' @param Y Matrix of finite differences of gradients
 //' @param colors Vector of length nvars that identifies color of each variable
-//' @param jCol,ipntr Column indices and row pointers for non-zero elements of lower triangle of Hessian.
-//' @param delta Perturbation factor used to compute finite differences.
+//' @param jCol,ipntr Column indices and row pointers for non-zero elements of lower triangle of Hessian (row-oriented compressed format).
+//' @param delta Perturbation factor used to compute finite differences of gradients.
 //' @param nvars Dimension of Hessian (number of variables)
 //' @param nnz Number of non-zero elements in the lower triangle of the Hessian.
 //' @return A sparse Hessian of class dgCMatrix.

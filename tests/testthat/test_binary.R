@@ -1,6 +1,5 @@
 ## Part of the sparseHessianFD package
 ## Copyright (C) 2013-2015 Michael Braun
-## See LICENSE file for details.
 
 context("binary example")
 

@@ -7,16 +7,17 @@
 subst(Y, colors, jCol, ipntr, delta, nvars, nnz)
 }
 \arguments{
-  \item{Y}{Matrix of finite differences}
+  \item{Y}{Matrix of finite differences of gradients}
 
   \item{colors}{Vector of length nvars that identifies
   color of each variable}
 
   \item{jCol,ipntr}{Column indices and row pointers for
-  non-zero elements of lower triangle of Hessian.}
+  non-zero elements of lower triangle of Hessian
+  (row-oriented compressed format).}
 
   \item{delta}{Perturbation factor used to compute finite
-  differences.}
+  differences of gradients.}
 
   \item{nvars}{Dimension of Hessian (number of variables)}
 

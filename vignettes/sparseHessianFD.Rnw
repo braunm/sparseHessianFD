@@ -1,9 +1,7 @@
 \documentclass[nojss]{jss}
 
-
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{sparseHessianFD}
-
 
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -901,7 +899,7 @@ function, gradient and Hessian at a variable vector $x$.
 <<eval=FALSE>>=
 f <- obj$fn(x)
 df <- obj$gr(x)
-hess <- obj$hessian(x) #$
+hess <- obj$hessian(x)
 @
 The \func{fn} and \func{gr} methods call the same functions that were
 provided to the class initializer.  Since the
@@ -979,11 +977,11 @@ the true values.
 obj <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
        rows=pattern[["rows"]], cols=pattern[["cols"]],
        data=binary, priors=priors, order.row=FALSE)
-f <- obj$fn(P) #$
+f <- obj$fn(P)
 all.equal(f, true.f)
-gr <- obj$gr(P) #$
+gr <- obj$gr(P)
 all.equal(gr, true.grad)
-hs <- obj$hessian(P) #$
+hs <- obj$hessian(P)
 all.equal(hs, true.hess)
 @
 
@@ -1093,7 +1091,7 @@ think that the time
 to compute a Hessian should not increase with $N$ \emph{at all}.  The
 reason it does is that each gradient evaluation takes longer.  The
 plot of the ratio of Hessian-to-gradient run times is relatively flat as the size
-of the data set increases.  We can conclude that the
+of the dataset increases.  We can conclude that the
 \pkg{sparseHessianFD} algorithms are quite efficient and scalable for
 hierarchical models.
 

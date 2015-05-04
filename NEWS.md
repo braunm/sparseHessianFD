@@ -3,12 +3,12 @@
 ## VERSION 0.3.0
 
 *  An even more major rewrite of the package.  All ACM code was
-removed, and replaced with original R/C++ implementations.
+   removed, and replaced with original R/C++ implementations.
 
 *  The sparseHessianFD class is now implemented as an R reference
-class, and not as an Rcpp module.  The `sparseHessianFD.new` function is deprecated.  Instead, use
-`sparseHessianFD` to initialize an object.  Initialization once again
-takes place in a single step.
+  class, and not as an Rcpp module.  The `sparseHessianFD.new`
+  function is deprecated.  Instead, use `sparseHessianFD` to
+  initialize an object.  Initialization once again takes place in a single step.
 
 *  The 'direct' computation method has been removed.  All computation
    uses the 'indirect' triangular substitution method.  The 'direct'
@@ -19,7 +19,7 @@ takes place in a single step.
 *  There is a new vignette with a lot more detail about what the
    package does and how it works.
 
-* New matrix helper functions  `Matrix.to.Pointers` and
+*  New matrix helper functions  `Matrix.to.Pointers` and
    `Coord.to.Pointers`.  The `Coord.to.Pattern.Matrix` function is deprecated.
    Use the `spMatrix` or `sparseMatrix` functions in the *Matrix*
    package instead.

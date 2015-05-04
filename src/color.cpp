@@ -1,46 +1,23 @@
-#include <Rcpp.h>
+// Part of the sparseHessianFD package
+// Copyright (C) 2013-2015 Michael Braun
 
+#include <Rcpp.h>
 
 using Rcpp::List;
 using Rcpp::IntegerVector;
 using Rcpp::Rcout;
 
-
 typedef std::set<int> S;
 
-template<typename T>
-void print_container(const T& X) {
-  int z = 0;
-  for (auto i : X) {
-    Rcout << i << "   ";
-    z++;
-    if (fmod(z,10) == 0) Rcout << "\n";
-  }
-  Rcout << "\n";
-}
-
-static void chkIntFn(void *dummy) {
-  R_CheckUserInterrupt();
-}
-
-void checkInterrupt() {
-   if( ! R_ToplevelExec(chkIntFn, NULL) )
-     Rcpp::stop( "user interuption" );
-}
-
-
-//' @title Vertex coloring of sparse symmetric matrix
-//' @description Generate proper coloring of a sparse symmetric matrix.
-//' @param pntr,idx row pointers and column indices (CSC or CSR format; same since  matrix is symmetric). Must use zero-based indexing.
-//' @param nvars Dimension of matrix (number of variables)
-//' @return A list.  Each element of the list represents a color, and contains an integer vector with the indices of the variables with that color.  Indices are zero-based.
+//' @title Vertex coloring of a sparse undirected graph
+//' @description Generate proper vertex coloring of a sparse undirected graph.
+//' @param pntr,idx row pointers and column indices of the adjacency matrix, in compressed column-oriented format. Must use zero-based indexing.
+//' @param nvars Number of vertices.
+//' @return An integer vector of length nvars, where each element represents the color of the corresponding vertex. Indices are zero-based.
 //[[Rcpp::export]]
 Rcpp::IntegerVector get_colors(const IntegerVector& pntr, //row/col pointer
 			 const IntegerVector& idx, // col/row index
 			 const int nvars) {
-  
-  // All pointers and indices are ZERO-BASED
-  // and for the FULL MATRICES (not just LT)
   
   std::vector<std::set<int> > P(nvars);
   std::vector<std::set<int> > forb(nvars);
@@ -80,5 +57,26 @@ Rcpp::IntegerVector get_colors(const IntegerVector& pntr, //row/col pointer
   return(Rcpp::wrap(colors));
 }
 
+
+
+// template<typename T>
+// void print_container(const T& X) {
+//   int z = 0;
+//   for (auto i : X) {
+//     Rcout << i << "   ";
+//     z++;
+//     if (fmod(z,10) == 0) Rcout << "\n";
+//   }
+//   Rcout << "\n";
+// }
+
+// static void chkIntFn(void *dummy) {
+//   R_CheckUserInterrupt();
+// }
+
+// void checkInterrupt() {
+//    if( ! R_ToplevelExec(chkIntFn, NULL) )
+//      Rcpp::stop( "user interuption" );
+// }
 
 

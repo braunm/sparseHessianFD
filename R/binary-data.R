@@ -1,14 +1,18 @@
 #' @name binary-data
 #' @aliases binary_small binary_large binary_super
-#' @title Sample simulated data for binary choice model in vignette
-#' @description Simulated data.  See vignette.  Generated from data-raw/binary.R
+#' @title Sample simulated data for binary choice example in vignette
+#' @details The package provides four sample datasets for the hierarchical binary choice model described in the vignette. These datasets are:
+#' \describe{
+#' \item{binary}{$N=50$, $k=3$}
+#' \item{binary_small}{$N=20$, $k=2$}
+#' \item{binary_large}{$N=800$, $k=3$}
+#' \item{binary_super}{$N=1200$, $k=3$}
+#' }
+#' The datasets were generated using the code in data-raw/binary_sim.R.
 #' @docType data
 NULL
 
 #' @name binary_small-data
-#' @title Sample simulated data for binary choice model in vignette
-#' @description Simulated data, with $N=20$ and $k=2$.  See vignette.  Generated from
-#' data-raw/binary.R
 #' @docType data
 #' @rdname binary-data
 NULL
@@ -16,17 +20,11 @@ NULL
 
 
 #' @name binary_large-data
-#' @title Sample simulated data for binary choice model in vignette
-#' @description Simulated data, with $N=800$ and $k=3$.  See vignette.  Generated from
-#' data-raw/binary.R
 #' @docType data
 #' @rdname binary-data
 NULL
 
 #' @name binary_super-data
-#' @title Sample simulated data for binary choice model in vignette
-#' @description Simulated data, with $N=1200$ and $k=3$.  See vignette.  Generated from
-#' data-raw/binary.R
 #' @docType data
 #' @rdname binary-data
 NULL

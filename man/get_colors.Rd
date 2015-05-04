@@ -2,23 +2,24 @@
 % Please edit documentation in R/RcppExports.R
 \name{get_colors}
 \alias{get_colors}
-\title{Vertex coloring of sparse symmetric matrix}
+\title{Vertex coloring of a sparse undirected graph}
 \usage{
 get_colors(pntr, idx, nvars)
 }
 \arguments{
-  \item{pntr,idx}{row pointers and column indices (CSC or
-  CSR format; same since matrix is symmetric). Must use
-  zero-based indexing.}
+  \item{pntr,idx}{row pointers and column indices of the
+  adjacency matrix, in compressed column-oriented format.
+  Must use zero-based indexing.}
 
-  \item{nvars}{Dimension of matrix (number of variables)}
+  \item{nvars}{Number of vertices.}
 }
 \value{
-A list.  Each element of the list represents a color, and
-contains an integer vector with the indices of the
-variables with that color.  Indices are zero-based.
+An integer vector of length nvars, where each element
+represents the color of the corresponding vertex. Indices
+are zero-based.
 }
 \description{
-Generate proper coloring of a sparse symmetric matrix.
+Generate proper vertex coloring of a sparse undirected
+graph.
 }
 

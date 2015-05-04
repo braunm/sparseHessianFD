@@ -39,4 +39,8 @@ An object of class sparseHessianFD
 \description{
 Create and initialize a new sparseHessianFD object
 }
+\details{
+This function is deprecated.  Use \code{sparseHessianFD}
+instead.
+}
 
