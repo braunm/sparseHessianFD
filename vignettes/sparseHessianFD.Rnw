@@ -374,10 +374,10 @@ look at the values directly, and the pointers (using the familiar
 one-based indexing scheme) using \func{Matrix.to.Pointers}.
 
 <<trip>>=
+library("sparseHessianFD")
 A <- sparseMatrix(i=c(1,4,2,3,3,4), j=c(1,1,2,2,3,4), x=c(6,7,8,9,10,11))
 printSpMatrix(A)
-A@x
-sparseHessianFD::Matrix.to.Pointers(A, order="column", index1=TRUE)
+Matrix.to.Pointers(A, values=TRUE, order="column", index1=TRUE)
 @
 
 

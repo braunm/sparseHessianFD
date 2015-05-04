@@ -62,7 +62,9 @@ sparseHessianFD <-
                         }
                         nnz <<- length(iRow)
 
-                        tmp <- sparseMatrix(i=iRow, j=jCol, index1=index1, symmetric=TRUE)
+                        tmp <- sparseMatrix(i=iRow, j=jCol,
+                                            index1=index1, symmetric=TRUE,
+                                            giveCsparse=FALSE)
                         perm <<- order(Matrix::rowSums(tmp), decreasing=TRUE)
                         invperm <<- invPerm(perm)
 
@@ -113,6 +115,13 @@ sparseHessianFD <-
                                   check.index1.col,
                                   is.finite(val)
                                   )
+
+                        dups <- which(duplicated(cbind(rows, cols)))
+                        if (length(dups)>0) {
+                            cat("Duplicates in sparsity pattern:\n",dups,"\n")
+                            stop("sparseHessianFD does not allow duplicates")
+                        }
+
                     },
 
                     fd = function(d, x, grad.x) {

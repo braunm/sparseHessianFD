@@ -1,39 +1,5 @@
 ## Part of the sparseHessianFD package
 ## Copyright (C) 2013-2015 Michael Braun
-## See LICENSE file for details.
-
-## context("Matrix utility functions")
-## test_that("Matrix.to.Coord", {
-##     ## LT matrix data
-##     nnz <- 7
-##     k <- 5
-##     rows <- c(1,2,5,3,4,5,2)
-##     cols <- c(1,2,2,3,4,5,5)
-##     vals <- c(1,2,6,3,4,5,6)
-
-##     M1 <- sparseMatrix(i=rows, j=cols, x=vals, dims=c(k,k) )
-##     C1 <- Matrix.to.Coord(M1)
-##     expect_equal(names(C1), c("rows","cols"))
-##     M2 <- sparseMatrix(i=C1$rows, j=C1$cols, dims=c(k,k))
-##     M3 <- as(M1, "nMatrix")
-##     expect_equal(M2, M3)
-
-##     P1 <- Coord.to.Pattern.Matrix(C1$rows, C1$cols, c(k,k))
-##     expect_is(P1, "ngCMatrix")
-##     T1 <- tril(M3)
-##     expect_equal(P1, M3)
-##     expect_equal(T1, tril(M3))
-
-##     C2 <- Matrix.to.Coord(tril(M1))
-##     P2 <- Coord.to.Pattern.Matrix(C2$rows, C2$cols, c(k,k), symmetric=TRUE)
-##     expect_that(P2, is_a("nsCMatrix"))
-##     expect_equal(forceSymmetric(tril(P1)), P2)
-
-##     P3 <- Coord.to.Pattern.Matrix(C2$rows, C2$cols, c(k,k), compressed=FALSE)
-##     expect_is(P3, "ngTMatrix")
-##     expect_equivalent(P1, P3)
-## })
-
 
 context("Matrix.to.Coord")
 test_that("Matrix.to.Coord", {
@@ -64,8 +30,9 @@ test_that("Matrix.to.Pointers", {
     M1.true <- sparseMatrix(i=rows, j=cols, dims=c(k,k) )
     C1r <- Matrix.to.Pointers(M1.true, order="row", index1=TRUE)
     C1c <- Matrix.to.Pointers(M1.true, order="column", index1=TRUE)
-    expect_equal(names(C1r), c("jCol","ipntr"))
-    expect_equal(names(C1c), c("iRow","jpntr"))
+
+    expect_equal(names(C1r), c("jCol","ipntr","class"))
+    expect_equal(names(C1c), c("iRow","jpntr","class"))
 
     M1r <- sparseMatrix(j=C1r$jCol, p=C1r$ipntr-1, dims=c(k,k))
     M1c <- sparseMatrix(i=C1c$iRow, p=C1c$jpntr-1, dims=c(k,k))
@@ -93,7 +60,8 @@ test_that("Coord.to.Pointers", {
 
     M1.true <- sparseMatrix(i=rows, j=cols, dims=c(k,k) )
     C1s <- Coord.to.Pointers(rows, cols, c(k,k), triangle=FALSE,
-                             order="symmetric")
+                             symmetric=TRUE,
+                             order="column")
     C1r <- Coord.to.Pointers(rows, cols, c(k,k), triangle=FALSE,
                              order="row")
     C1c <- Coord.to.Pointers(rows, cols, c(k,k), triangle=FALSE,
@@ -116,11 +84,11 @@ test_that("Coord.to.Pointers", {
     M2.trueS <- as(sparseMatrix(i=rowsLT, j=colsLT, dims=c(k,k), symmetric=TRUE),"ngCMatrix")
     expect_true(Matrix::isTriangular(M2.true))
     C2s <- Coord.to.Pointers(rowsLT, colsLT, c(k,k), triangle=TRUE,
-                             order="symmetric")
+                             symmetric=TRUE, order="column")
     C2r <- Coord.to.Pointers(rowsLT, colsLT, c(k,k), triangle=TRUE,
-                             order="row")
+                             symmetric=FALSE, order="row")
     C2c <- Coord.to.Pointers(rowsLT, colsLT, c(k,k), triangle=TRUE,
-                             order="column")
+                             symmetric=FALSE, order="column")
 
     M2s <- sparseMatrix(i=C2s$idx, p=C2s$pntr-1)
     M2r <- sparseMatrix(j=C2r$jCol, p=C2r$ipntr-1)

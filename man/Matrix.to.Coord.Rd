@@ -7,10 +7,8 @@
 Matrix.to.Coord(M, index1 = TRUE)
 }
 \arguments{
-  \item{M}{A matrix that can be coerced into a
-  \code{TsparseMatrix} object, as defined in the Matrix
-  package.  Base R matrices, and most Matrix matrices, are
-  valid.}
+  \item{M}{A sparse matrix, as defined in the Matrix
+  package.}
 
   \item{index1}{TRUE if the index of the first element
   should be 1, and FALSE if 0.}
@@ -24,5 +22,11 @@ non-zero elements} }
 \description{
 Returns list of row and column indices of the non-zero
 elements of a sparse matrix.
+}
+\details{
+This function is a wrapper to Matrix.to.Pointers for
+\code{order='triplet'} and \code{values=FALSE}.  It can be
+used to extract the row and column indices of a sparsity
+pattern from a matrix that has that same pattern.
 }
 

@@ -17,7 +17,9 @@ coloring <- function(L) {
     nvars <- NROW(L)
     L <- as(L,"nMatrix")
     G <- Matrix::crossprod(L)  # intersection graph
-    ptr <- Matrix.to.Pointers(G, order="symmetric", index1=FALSE)
+ ##   ptr <- Matrix.to.Pointers(G, order="symmetric", index1=FALSE)
+
+    ptr <- Matrix.to.Pointers(G, index1=FALSE)
 
     colors_vec <- get_colors(ptr[[2]], ptr[[1]], nvars)
     return(colors_vec)

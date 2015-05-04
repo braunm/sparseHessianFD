@@ -2,10 +2,10 @@
 % Please edit documentation in R/matrices.R
 \name{Coord.to.Pointers}
 \alias{Coord.to.Pointers}
-\title{Column (row) indices and row (column) pointers from sparse matrix.}
+\title{Convert a matrix defined by row and column indices to one defined by a row- or column-oriented compression scheme.}
 \usage{
 Coord.to.Pointers(rows, cols, dims, triangle = TRUE, lower = TRUE,
-  order = c("column", "row", "symmetric"), index1 = TRUE)
+  symmetric = FALSE, order = c("column", "row", "triplet"), index1 = TRUE)
 }
 \arguments{
   \item{rows,cols}{row and column indices of non-zero
@@ -20,29 +20,29 @@ Coord.to.Pointers(rows, cols, dims, triangle = TRUE, lower = TRUE,
   \code{order}.}
 
   \item{lower}{If \code{triangular} is true, this argument
-  identifies if the input matrix is lower- or
+  identifies the input matrix as lower- or
   upper-triangular.  This argument is ignored if
   \code{triangle} is FALSE.}
 
-  \item{order}{Pointers can be ordered according to a
-  row-oriented or column-oriented compression pattern.  If
-  symmetric is chosen, the compression method does not
-  matter.  The input matrix must be symmetric (although not
-  necessarily stored that way) to get symmetric output.
-  For symmetric input, the only difference between
-  "symmetric," and either "row" or "column," is the names
-  of the elements in the list. See details.}
+  \item{symmetric}{If TRUE, and matrix is triangular, then
+  the matrix will be treated as symmetric, with only the
+  triangular elements provided.  If matrix is neither
+  triangular nor symmetric, then symmetric=TRUE will
+  probably trigger an error.}
+
+  \item{order}{See Matrix.to.Pointers}
 
   \item{index1}{TRUE if using 1-based indexing.  FALSE for
   0-based indexing.}
 }
 \value{
-A list with two named elements.  See 'Matrix.to.Pointers'.
+A list.  See Matrix.to.Pointers (no values are included in
+return list).
 }
 \description{
-Returns list of column (row) indices row (column) pointers
-of the non-zero elements of a sparse matrix stored in row
-(column)-oriented compressed format.
+Returns indices and pointers that define a sparse Hessian
+in compressed format.  Inputs are the row and column
+indices.
 }
 \details{
 \code{triangle} and \code{order} have the following
@@ -54,6 +54,9 @@ list will be for only the lower or upper triangle.  Any
 elements outside of the specified triangle will trigger an
 error.} \item{triangle=FALSE}{Input \code{rows} and {cols}
 represent a full matrix. If that matrix is not symmetric,
-then \code{order=="symmetric"} will trigger an error.} }
+then \code{order=="symmetric"} will trigger an error.} If
+\code{symmetric=FALSE} and \code{order='triplet'}, the
+output list should contain the same row and column indices
+as the input list. }
 }
 

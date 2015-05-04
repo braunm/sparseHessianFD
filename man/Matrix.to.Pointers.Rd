@@ -2,43 +2,58 @@
 % Please edit documentation in R/matrices.R
 \name{Matrix.to.Pointers}
 \alias{Matrix.to.Pointers}
-\title{Column (row) indices and row (column) pointers from sparse matrix.}
+\title{Extract row and column indices, pointers and values from a sparse matrix.}
 \usage{
-Matrix.to.Pointers(M, order = "symmetric", index1 = TRUE)
+Matrix.to.Pointers(M, as.symmetric = Matrix::isSymmetric(M), values = !is(M,
+  "nMatrix"), order = NULL, index1 = TRUE)
 }
 \arguments{
   \item{M}{A sparse Matrix, as defined in the Matrix
   package.}
 
-  \item{order}{Pointers can be ordered according to a
-  row-oriented or column-oriented compression pattern.  If
-  symmetric is chosen, the compression method does not
-  matter.  The input matrix must be symmetric (although not
-  necessarily stored that way) to get symmetric output.
-  The only difference between "symmetric," and either "row"
-  or "column," is the names of the elements in the list.}
+  \item{as.symmetric}{Defaults to isSymmetric(M).  If M is
+  symmetric, and as.symmetric is FALSE, then index/pointer
+  elements in the output list will be labeled according to
+  order. If M is not symmetric, and as.symmetric is TRUE,
+  then an error will be triggered.  See details.}
 
-  \item{index1}{TRUE if return values use 1-based indexing,
-  and FALSE for 0-based indexing.}
+  \item{values}{If TRUE, values are returned in list as
+  'x'.  Defaults to TRUE for numeric and logical matrices,
+  and FALSE for pattern matrices.  If M is a pattern
+  matrix, values=TRUE will trigger a warning.}
+
+  \item{order}{Determines the indexing/compression scheme
+  for the output matrix.  Use 'triplet" to get row and
+  column indices.  Defaults to the same class as M.}
+
+  \item{index1}{TRUE (default) if return indices and
+  pointers should use 1-based indexing.  FALSE for 0-based
+  indexing.}
 }
 \value{
-A list with two named elements. If matrix is row-oriented,
+A list with the following elements. If order=='row',
 \describe{ \item{jCol}{ Integer vector containing column
 indices of non-zero elements} \item{ipntr}{ Integer vector
 containing pointers to elements of jCol at which the next
-row begins.} } If matrix is column-oriented, \describe{
-\item{iRow}{ Integer vector containing row indices of
-non-zero elements} \item{jpntr}{ Integer vector containing
-pointers to elements of iRow at which the next column
-begins.} } If the matrix is symmetric, then the row/column
+row begins.} } If order=='column' \describe{ \item{iRow}{
+Integer vector containing row indices of non-zero elements}
+\item{jpntr}{ Integer vector containing pointers to
+elements of iRow at which the next column begins.} } If
+order=='triplet' \describe{ \item{rows}{Row indices of
+non-zero elements} \item{cols}{Column indices of non-zero
+elements} } If as.symmetric is TRUE, then the row/column
 orientation does not matter.  \describe{ \item{idx}{
 Integer vector containing indices of non-zero elements}
 \item{pntr}{ Integer vector containing pointers to elements
-of idx at which the next row or column begins.} }
+of idx at which the next row or column begins.} } If
+values=TRUE, the return list includes x, the values of the
+non-zero elements. The 'class' element is the name of the
+sparse matrix class to which the output corresponds
+(identifies numeric type, pattern, and indexing/compression
+scheme).
 }
 \description{
-Returns list of column (row) indices row (column) pointers
-of the non-zero elements of a sparse matrix stored in row
-(column)-oriented compressed format.
+Returns a list of row indices, column indices, pointers,
+and/or values of a sparse Hessian.  See details.
 }
 
