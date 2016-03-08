@@ -129,6 +129,8 @@ new.sparse.hessian.obj <- function(x, fn, gr, hs, fd.method=0L, eps=sqrt(.Machin
 
 #' @name sparseHessianFD.new
 #' @title Create and initialize a new sparseHessianFD object
+#' @details This function is deprecated.  Use \code{sparseHessianFD} instead.
+#' @description This function is deprecated.  Use \code{sparseHessianFD} instead.
 #' @param x A intital vector of variables at which to evaluate value, gradient
 #' and Hessian during initialization.
 #' @param fn R function that returns function value
@@ -142,7 +144,6 @@ new.sparse.hessian.obj <- function(x, fn, gr, hs, fd.method=0L, eps=sqrt(.Machin
 #' @param eps The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).
 #' @param ... Other parameters to be passed to fn and gr.
 #' @return An object of class sparseHessianFD
-#' @details This function is deprecated.  Use \code{sparseHessianFD} instead.
 #' @export
 sparseHessianFD.new <- function(x, fn, gr, rows, cols, direct=FALSE,
                             eps=sqrt(.Machine$double.eps), ...) {

@@ -8,26 +8,33 @@ sparseHessianFD.new(x, fn, gr, rows, cols, direct = FALSE,
   eps = sqrt(.Machine$double.eps), ...)
 }
 \arguments{
-  \item{x}{A intital vector of variables at which to evaluate
-  value, gradient and Hessian during initialization.}
-  \item{fn}{R function that returns function value} \item{gr}
-  {R function that returns the gradient of the function}
-  \item{rows}{Integer vector of row indices of non-zero
-  elements of the lower triangle of the Hessian} \item{cols}
-  {Integer vector of column indices of non-zero elements
-  of the lower triangle of the Hessian} \item{direct}{If
-  TRUE, use direct method for computatation. Otherwise, use
-  indirect/substitution method. See references.} \item{eps}
-  {The perturbation amount for finite differencing of the
-  gradient to compute the Hessian. Defaults to sqrt(.Machine
-  $double.eps).} \item{...}{Other parameters to be passed to
-  fn and gr.}
+\item{x}{A intital vector of variables at which to evaluate value, gradient
+and Hessian during initialization.}
+
+\item{fn}{R function that returns function value}
+
+\item{gr}{R function that returns the gradient of the function}
+
+\item{rows}{Integer vector of row indices of non-zero elements of
+the lower triangle of the Hessian}
+
+\item{cols}{Integer vector of column indices of non-zero elements
+of the lower triangle of the Hessian}
+
+\item{direct}{If TRUE, use direct method for computatation.  Otherwise, use
+indirect/substitution method.  See references.}
+
+\item{eps}{The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).}
+
+\item{...}{Other parameters to be passed to fn and gr.}
 }
 \value{
 An object of class sparseHessianFD
 }
+\description{
+This function is deprecated.  Use \code{sparseHessianFD} instead.
+}
 \details{
-This function is deprecated. Use \code{sparseHessianFD}
-instead.
+This function is deprecated.  Use \code{sparseHessianFD} instead.
 }
 

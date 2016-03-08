@@ -12,14 +12,17 @@ Description: Estimates Hessian of a scalar-valued function, and returns it
 License: MPL (== 2.0)
 LazyData: true
 Depends:
-    R (>= 3.2.0),
+    R (>= 3.2.0)
+Imports:	
     Matrix (>= 1.2.0),
-    methods
+    methods,
+    Rcpp
 Suggests:
     testthat,
     numDeriv,
+    scales,
     knitr
-Roxygen: list(wrap=TRUE)
+##Roxygen: list(wrap=TRUE)
 LinkingTo: Rcpp, RcppEigen (>= 0.3.2.3)
 VignetteBuilder: knitr
 SystemRequirements: C++11

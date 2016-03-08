@@ -7,24 +7,22 @@
 Matrix.to.Coord(M, index1 = TRUE)
 }
 \arguments{
-  \item{M}{A sparse matrix, as defined in the Matrix package.}
-  \item{index1}{TRUE if the index of the first element should
-  be 1, and FALSE if 0.}
+\item{M}{A sparse matrix, as defined in the Matrix package.}
+
+\item{index1}{TRUE if the index of the first element should be 1, and FALSE if 0.}
 }
 \value{
-A list with two named elements. \describe{ \item{rows}
-{ Integer vector containing row indices of non-zero
-elements} \item{cols}{ Integer vector containing column
-indices of non-zero elements} }
+A list with two named elements.
+\describe{
+\item{rows}{Integer vector containing row indices of non-zero elements}
+\item{cols}{Integer vector containing column indices of non-zero elements}
+}
 }
 \description{
 Returns list of row and column indices of the non-zero
 elements of a sparse matrix.
 }
 \details{
-This function is a wrapper to Matrix.to.Pointers for
-\code{order='triplet'} and \code{values=FALSE}. It can be
-used to extract the row and column indices of a sparsity
-pattern from a matrix that has that same pattern.
+This function is a wrapper to Matrix.to.Pointers for \code{order='triplet'} and \code{values=FALSE}.  It can be used to extract the row and column indices of a sparsity pattern from a matrix that has that same pattern.
 }
 

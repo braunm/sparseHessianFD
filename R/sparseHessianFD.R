@@ -3,6 +3,7 @@
 #' @docType package
 #' @title Estimate sparse Hessians using finite differences of
 #' gradients.
+#' @description Estimate sparse Hessian
 #' @details This package contains methods to return the Hessian of
 #' a function in sparse Matrix format.  The user must supply the
 #' objective function, the gradient, and the row and column indices of

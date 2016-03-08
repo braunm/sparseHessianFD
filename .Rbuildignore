@@ -4,6 +4,8 @@ vignettes/.*\.bbl$
 vignettes/.*\.blg$
 vignettes/prv\_.*
 vignettes/missfont.log
+vignettes/.*\.aux
+vignettes/cache
 ^\\.git$
 ^\\.Rbuildignore$
 ^\\.Rhistory$

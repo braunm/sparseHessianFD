@@ -281,7 +281,7 @@ $\parD{}{}{f(x_1,x_2)}$ and $\parD{}{}{f(x_1+\delta,x_2+\delta)}$.
 Being able to reduce the number of gradient evaluations from 3 to 2 depends on knowing that
 the cross-partial derivatives are zero.
 
-The ``trick'' for the general case of sparse Hessians is to partition
+The \citet{PowellToint1979} approach for the general case of sparse Hessians is to partition
 the decision variables into $C$ mutually exclusive groups so that the number of gradient
 evaluations is minimized.  Let $\Mat{G}$ be a $M\times C$
 matrix, where $\Mat{G}_{mc}=\delta$ if variable $m$ belongs to group $c$, and zero
@@ -361,13 +361,7 @@ $5\times 5$ Hessian matrix with only three gradient evaluations, in
 contrast with the six that would have been needed had $\hess{}{}$ been treated
 as dense.
 
-The $\Mat{Y}$ matrix is, in essence, a compressed representation of
-$\hess{}{}$.  The values in $\Mat{Y}_c$ are finite differences after
-one \emph{or more} variables are perturbed.  Hence, we need two
-different algorithms to estimate a sparse Hessian.  The first is to
-determine which variables can be perturbed together when computing
-$\Mat{Y}$, and the second is to extract the values of $\hess{}{}$
-from $\Mat{Y}$.  We discuss these algorithms in Section \ref{sec:algorithms}.
+
 
 
 \subsection[Sparse matrices in R]{Sparse matrices in \proglang{R}}\label{sec:Rsparse}
@@ -418,8 +412,8 @@ The distinction among sparse matrix classes is important because
 \pkg{sparseHessianFD}'s \method{hessian} method returns a
 \class{dgCMatrix}, even though it is symmetric. Depending on how the
 Hessian is used, it might be useful to coerce the Hessian into a
-\class{dsCMatrix} object.  Also, the helper functions in Section
-\ref{sec:conversion} expect or return certain classes of matrices, so
+\class{dsCMatrix} object.  Also, the helper functions in Table
+\ref{tab:helpers} expect or return certain classes of matrices, so
 some degree of coercion of input and output might be necessary.
 
 \section[Using the package]{Using the package}\label{sec:using}
@@ -699,7 +693,7 @@ true.hess <- binary.hess(P, binary, priors, order.row=FALSE)
 The sparsity pattern of the Hessian is specified by two integer
 vectors:  one each for the row and column indices of the non-zero
 elements of the lower triangule of the Hessian.  We happen to have a matrix with the same sparsity pattern
-of the Hessian we are trying to compute, we can use the
+of the Hessian we are trying to compute, so we can use the
 \func{Matrix.to.Coord} function to extract the appropriate index
 vectors.  It is more likely that we would need to determine the row
 and column indices manually.
@@ -726,7 +720,17 @@ all.equal(hs, true.hess)
 @
 
 
+\section[Algorithms]{Algorithms}\label{sec:algorithms}
 
+In this section, we discuss the computational algorithms for
+\pkg{sparseHessianFD}.  The work can be divided into two fundamental
+tasks
+
+\begin{enumerate}
+\item partitioning the variables into groups;
+  \item computing a ``seed matrix'' $\Mat{Y}$ using finite
+    differences of gradients, and extracting Hessian values through substitution.
+\end{enumerate}
 
 \subsection[Partitioning the variables]{Partitioning the variables}\label{sec:coloring}
 
@@ -931,7 +935,7 @@ considered optional reading.
 
 
 
-\section[Algorithms]{Algorithms}\label{sec:algorithms}
+
 
 At this point, we must note that the problem of finding a cycling
 coloring of the graph of the sparsity pattern is NP-complete
@@ -943,7 +947,6 @@ and we make no
 claims that any of the algorithms in \pkg{sparseHessianFD} are even ``best available.''  But we do expect them to
 generate the correct results faster than the other alternatives.
 
-\subsection[Partitioning the variables]{Partitioning variables}
 A partitioning of the variables is consistent with a substitution method if it can be characterized as a cyclic coloring
 of the graph of the sparsity pattern, or, equivalently, as a proper
 coloring of the intersection graph.  The first step is to permute the rows and columns of the Hessian.   A
@@ -1005,6 +1008,9 @@ consistent partitioning of the variables.
     \caption{Consistent partitioning of variables for a triangular
       substitution method.}\label{alg:coloring}
     \end{algorithm}
+
+
+
 
 \subsection[Computing the Hessian by substitution]{Computing the Hessian by substitution}
 

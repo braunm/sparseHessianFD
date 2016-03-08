@@ -10,8 +10,8 @@
 #' @param index1 TRUE if the index of the first element should be 1, and FALSE if 0.
 #' @return A list with two named elements.
 #' \describe{
-#' \item{rows}{ Integer vector containing row indices of non-zero elements}
-#' \item{cols}{ Integer vector containing column indices of non-zero elements}
+#' \item{rows}{Integer vector containing row indices of non-zero elements}
+#' \item{cols}{Integer vector containing column indices of non-zero elements}
 #' }
 #' @details This function is a wrapper to Matrix.to.Pointers for \code{order='triplet'} and \code{values=FALSE}.  It can be used to extract the row and column indices of a sparsity pattern from a matrix that has that same pattern.
 #' @export
@@ -37,8 +37,7 @@ Matrix.to.Coord <- function(M, index1=TRUE) {
 #' \describe{
 #' \item{triangle=TRUE}{Input \code{rows} and {cols} represent lower or upper triangle of a matrix. If \code{order="symmetric"}, then the output list will be for a full, symmetric matrix. Otherwise, the output list will be for only the lower or upper triangle.  Any elements outside of the specified triangle will trigger an error.}
 #' \item{triangle=FALSE}{Input \code{rows} and {cols} represent a full matrix. If that matrix is not symmetric, then \code{order=="symmetric"} will trigger an error.}
-#' If \code{symmetric=FALSE} and \code{order='triplet'}, the output list should contain the same row and column indices as the input list.
-#' }
+#' If \code{symmetric=FALSE} and \code{order='triplet'}, the output list should contain the same row and column indices as the input list.}
 #' @return A list.  See Matrix.to.Pointers (no values are included in return list).
 #' @export
 Coord.to.Pointers <- function(rows, cols, dims,

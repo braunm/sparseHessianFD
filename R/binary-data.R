@@ -1,6 +1,7 @@
 #' @name binary-data
 #' @aliases binary_small binary_large binary_super
 #' @title Sample simulated data for binary choice example in vignette
+#' @description Sample datasets for vignette
 #' @details The package provides four sample datasets for the hierarchical binary choice model described in the vignette. These datasets are:
 #' \describe{
 #' \item{binary}{$N=50$, $k=3$}

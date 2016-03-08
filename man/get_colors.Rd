@@ -7,17 +7,14 @@
 get_colors(pntr, idx, nvars)
 }
 \arguments{
-  \item{pntr, idx}{row pointers and column indices of the
-  adjacency matrix, in compressed column-oriented format. Must
-  use zero-based indexing.} \item{nvars}{Number of vertices.}
+\item{pntr, idx}{row pointers and column indices of the adjacency matrix, in compressed column-oriented format. Must use zero-based indexing.}
+
+\item{nvars}{Number of vertices.}
 }
 \value{
-An integer vector of length nvars, where each element
-represents the color of the corresponding vertex. Indices
-are zero-based.
+An integer vector of length nvars, where each element represents the color of the corresponding vertex. Indices are zero-based.
 }
 \description{
-Generate proper vertex coloring of a sparse undirected
-graph.
+Generate proper vertex coloring of a sparse undirected graph.
 }
 
