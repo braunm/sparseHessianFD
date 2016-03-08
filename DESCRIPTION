@@ -5,7 +5,10 @@ Version: 0.3.0
 Date: 2015-05-04
 Authors@R: person(family="Braun", given="Michael", role=c("aut","cre","cph"), email="braunm@smu.edu")
 URL: coxprofs.cox.smu.edu/braunm
-Description: Estimates Hessian of a scalar-valued function, and returns it in a sparse Matrix format. The sparsity pattern must be known in advance.  The algorithm is especially efficient for hierarchical models with a large number of heterogeneous units.
+Description: Estimates Hessian of a scalar-valued function, and returns it
+    in a sparse Matrix format. The sparsity pattern must be known in advance. The
+    algorithm is especially efficient for hierarchical models with a large number of
+    heterogeneous units.
 License: MPL (== 2.0)
 LazyData: true
 Depends:
@@ -20,3 +23,4 @@ Roxygen: list(wrap=TRUE)
 LinkingTo: Rcpp, RcppEigen (>= 0.3.2.3)
 VignetteBuilder: knitr
 SystemRequirements: C++11
+RoxygenNote: 5.0.1

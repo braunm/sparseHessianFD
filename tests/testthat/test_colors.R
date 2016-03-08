@@ -13,7 +13,7 @@ test_that("colors", {
     N <- length(binary$Y)
     k <- NROW(binary$X)
     nvars <- as.integer(N*k + k)
-    P <- rnorm(nvars) ## random starting values
+    P <- rnorm(nvars) ## random evaluation values
 
     Omega <- diag(k)
     priors <- list(inv.Omega = solve(Omega),
@@ -44,6 +44,13 @@ test_that("colors", {
 
     g1 <- coloring(as(tril(true.hess1),"nMatrix"))
     g2 <- coloring(as(tril(true.hess2), "nMatrix"))
+
+    pat1 <- Matrix.to.Coord(tril(true.hess1))
+    pat2 <- Matrix.to.Coord(tril(true.hess2))
+
+    obj1 <- sparseHessianFD(P, f1$fn, f1$gr, pat1$rows, pat1$cols)
+    obj2 <- sparseHessianFD(P, f2$fn, f2$gr, pat2$rows, pat2$cols)
+
 
 })
 
