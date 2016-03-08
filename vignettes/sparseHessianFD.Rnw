@@ -585,60 +585,7 @@ printSpMatrix(pattern)
 
 
 
-\subsubsection[Storage formats]{Storage formats}
 
-Matrices with a ``triplet'' format store each non-zero element as a
-(row, column, value) set.  The values are either numeric or logical,
-for \class{d*TMatrix} or \class{l*TMatrix} matrices, respectively.
-Pattern matrices of class \class{n*TMatrix} store only row and column
-indices, but no values at all.
-
-Row-compressed (CSR) and column-compressed (CSC) formats are more
-efficient alternatives.  Instead of storing the row and column indices, CSC
-matrices store only the row indices, and ``pointers''
-to the values in the row index and value vectors that start
-each column\footnote{For the CSR format, switch references to columns and rows
-in the preceding sentence.}.
-
-For example, let's construct a numeric matrix $\Mat{A}$ in triplet form using
-the \func{sparseMatrix} function. The arguments \funcarg{i},
-\funcarg{j} and \funcarg{x} are the row and column indices, and
-values, respectively, of the non-zero elements.  By default, \func{sparseMatrix} expects the input vectors \funcarg{i} and \funcarg{j} to
-have one-based indexing, and stores $\Mat{A}$ in CSC format.  We can then
-look at the values directly, and the pointers (using the familiar
-one-based indexing scheme) using \func{Matrix.to.Pointers}.
-
-<<trip>>=
-library("sparseHessianFD")
-A <- sparseMatrix(i=c(1,4,2,3,3,4), j=c(1,1,2,2,3,4), x=c(6,7,8,9,10,11))
-printSpMatrix(A)
-Matrix.to.Pointers(A, values=TRUE, order="column", index1=TRUE)
-@
-
-
-The slot \funcarg{x} contains the matrix values exactly as we entered
-them.  The column indices are not stored explicitly, but the pointers in \variable{jpntr}
-determine where in the sequence of values and row indices (\variable{iRow}) the next
-column will start. The first pointer is always 1, so the first element in column 1 is in
- row \code{iRow[1]=1}, and has value \code{x[1]=6}.  Since \code{jpntr[2]=3}, \code{x[2]=7} is still in
-the first column, in row \code{iRow[2]=4}, so $\Mat{A}_{41}=7$.  Elements 3 and 4 in
-\code{x} and \code{iRow} refer to values in column 2, since
-\code{jpntr[3]=5} means that column 3 does not begin until the element
-5. Hence, $\Mat{A}_{22}=x_3=8$ and $\Mat{A}_{32}=x_4=9$.
-Column 3 begins with $\Mat{A}_{33}=x_5=10$ (\code{iRow[5]=3} gives us the
-row index).  Continuing,
-$\Mat{A}_{44}=x_6=11$.  The final value in
-\variable{jpntr} is always the number of non-zeros in the matrix.  The differences between
-adjacent elements in \variable{jpntr} are the number of non-zeros in each column of $\Mat{A}$.
-
-There are two important advantages to storing sparse matrices in a
-compressed format.  First, the storage requirements are usually smaller.  A
-matrix with $M$ columns and $N$ non-zeros requires $3N$ elements in a
-triplet format, but only $2N+M+1$ elements in a compressed format.
-Second, computation on the matrix is more efficient, since all elements in a
-single column (CSC) or row (CSR) are stored in contiguous memory, in
-order.  In contrast, matrix triplets could be entered or stored in any
-order.
 
 
 
