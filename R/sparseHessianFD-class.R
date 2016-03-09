@@ -15,7 +15,7 @@
 ##' @field nnz Number of non-zero elements in the lower triangle of the Hessian.
 ##' @field ready TRUE if object has been initialized, and Hessian has been partitioned.
 ##' @field idx,pntr Column indices and row pointers for non-zero elements in lower triangle of the permuted Hessian.  Row-oriented compressed storage.
-##' @field colors A vector representation of the partitioning of the columns.  There are nvars elements, one for each column of the Hessian.  The value corresponds to the "color" for that column.
+##' @field colors A vector representation of the partitioning of the columns.  There are nvars elements, one for each column of the permuted Hessian.  The value corresponds to the "color" for that column.
 ##'@field perm,invperm Permutation vector and its inverse
 ##' @details Do not access any of the fields directly.  Use the initializer instead.
 ##' @export sparseHessianFD
