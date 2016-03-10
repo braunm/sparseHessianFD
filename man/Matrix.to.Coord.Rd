@@ -23,6 +23,12 @@ Returns list of row and column indices of the non-zero
 elements of a sparse matrix.
 }
 \details{
-This function is a wrapper to Matrix.to.Pointers for \code{order='triplet'} and \code{values=FALSE}.  It can be used to extract the row and column indices of a sparsity pattern from a matrix that has that same pattern.
+A wrapper to Matrix.to.Pointers for \code{order='triplet'} and \code{values=FALSE}, for extracting the row and column indices of a sparsity pattern from a matrix that has that same pattern.
+}
+\examples{
+M1 <- as(kronecker(diag(3), matrix(TRUE,2,2)),"sparseMatrix")
+C <- Matrix.to.Coord(Mat)
+M2 <- Matrix::sparseMatrix(i=C$rows, j=C$cols)
+all.equal(M1,M2)
 }
 

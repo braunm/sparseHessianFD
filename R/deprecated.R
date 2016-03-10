@@ -1,24 +1,24 @@
 ## deprecated.R -- Part of the sparseHessianFD package
-## Copyright (C) 2013-2015 Michael Braun
+## Copyright (C) 2013-2016 Michael Braun
 
 ## Place to hold functions that will not be maintained in the future
 
 
-#' @name sparseHessianFD-deprecated
+#' @name deprecated
 #' @aliases Sym.CSC.to.Matrix Coord.to.Sym.Pattern.Matrix
 #' @title Deprecated functions
 #' @description These functions were in earlier versions, but will no
 #' longer be maintained, and are not even guaranteed to work now.
 NULL
 
-#' @title Sym.CSC.to.Matrix
+## #' @title Sym.CSC.to.Matrix
 #' @description Build sparse matrix from data in CSC (column
 #' compressed) format.
 #' @param H a list containing Hessian data.  See details.
 #' @param nvars the number of rows (and columns) in the matrix.
 #' @return An object of Matrix class.
 #' @details Use Matrix::sparseMatrix instead of Sym.CSC.to.Matrix.
-#' @rdname sparseHessianFD-deprecated
+#' @rdname deprecated
 #' @export
 Sym.CSC.to.Matrix <- function(H,nvars) {
 
@@ -34,7 +34,7 @@ Sym.CSC.to.Matrix <- function(H,nvars) {
 #' @inheritParams Sym.CSC.to.Matrix
 #' @details
 #' Use Coord.to.Pattern.Matrix with symmetric=TRUE instead of Coord.to.Sym.Pattern.Matrix.
-#' @rdname sparseHessianFD-deprecated
+#' @rdname deprecated
 #' @export
 Coord.to.Sym.Pattern.Matrix <- function(H, nvars) {
 
@@ -52,8 +52,8 @@ Coord.to.Sym.Pattern.Matrix <- function(H, nvars) {
 
 }
 
-#' @name Coord.to.Pattern.Matrix
-#' @aliases Coord.to.Pattern.Matrix
+## #' @name Coord.to.Pattern.Matrix
+## #' @aliases Coord.to.Pattern.Matrix
 #' @title Pattern matrix from row and column indices.
 #' @description Converts row and column indices to a pattern Matrix
 #' object of Matrix class
@@ -67,7 +67,7 @@ Coord.to.Sym.Pattern.Matrix <- function(H, nvars) {
 #' @return A sparse pattern matrix
 #' @details This function is useful to prototype a sparsity pattern.
 #' No assumptions are made about symmetry.
-#' @rdname sparseHessianFD-deprecated
+#' @rdname deprecated
 #' @export
 Coord.to.Pattern.Matrix <- function(rows, cols, dims, compressed=TRUE,
                                     symmetric=FALSE, index1=TRUE) {
@@ -84,7 +84,7 @@ Coord.to.Pattern.Matrix <- function(rows, cols, dims, compressed=TRUE,
 
 
 
-#' @name new.sparse.hessian.obj
+## #' @name new.sparse.hessian.obj
 #' @title Deprecated constructor
 #' @param x variable vector for initialization
 #' @param fn R function that returns function value
@@ -104,7 +104,7 @@ Coord.to.Pattern.Matrix <- function(rows, cols, dims, compressed=TRUE,
 #' \item{jCol}{ Integer vector of column indices of non-zero elements in
 #' lower triangle of Hessian.}
 #' }
-#' @rdname sparseHessianFD-deprecated
+#' @rdname deprecated
 #' @export
 new.sparse.hessian.obj <- function(x, fn, gr, hs, fd.method=0L, eps=sqrt(.Machine$double.eps),...) {
 
@@ -131,19 +131,10 @@ new.sparse.hessian.obj <- function(x, fn, gr, hs, fd.method=0L, eps=sqrt(.Machin
 #' @title Create and initialize a new sparseHessianFD object
 #' @details This function is deprecated.  Use \code{sparseHessianFD} instead.
 #' @description This function is deprecated.  Use \code{sparseHessianFD} instead.
-#' @param x A intital vector of variables at which to evaluate value, gradient
-#' and Hessian during initialization.
-#' @param fn R function that returns function value
-#' @param gr R function that returns the gradient of the function
-#' @param rows Integer vector of row indices of non-zero elements of
-#' the lower triangle of the Hessian
-#' @param cols Integer vector of column indices of non-zero elements
-#' of the lower triangle of the Hessian
 #' @param direct If TRUE, use direct method for computatation.  Otherwise, use
 #' indirect/substitution method.  See references.
-#' @param eps The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).
-#' @param ... Other parameters to be passed to fn and gr.
 #' @return An object of class sparseHessianFD
+#' @rdname deprecated
 #' @export
 sparseHessianFD.new <- function(x, fn, gr, rows, cols, direct=FALSE,
                             eps=sqrt(.Machine$double.eps), ...) {

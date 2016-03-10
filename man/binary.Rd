@@ -16,20 +16,20 @@ binary.hess(P, data, priors, order.row = FALSE)
 \arguments{
 \item{P}{Numeric vector of length (N+1)*k.  First N*k elements are heterogeneous coefficients. The remaining k elements are population parameters.}
 
-\item{data}{List of data matrices Y and X, and choice count integer T}
+\item{data}{Named list of data matrices Y and X, and choice count integer T}
 
-\item{priors}{List of named matrices inv.Omega and inv.Sigma}
+\item{priors}{Named list of matrices inv.Omega and inv.Sigma}
 
 \item{order.row}{Determines order of heterogeneous coefficients in
-parameter vector. Affects sparsity pattern of Hessian. See vignette.}
+parameter vector. If TRUE, heterogeneous coefficients are ordered by unit.  If FALSE, they are ordered by covariate.}
 }
 \value{
-Log posterior density, gradient and Hessian.
+Log posterior density, gradient and Hessian. The Hessian is a dgcMatrix object.
 }
 \description{
 Functions for binary choice example in the vignette.
 }
 \details{
-Hessian is sparse, and returned as a dgcMatrix object
+These functions are used by the heterogeneous binary choice example in the vignette. There are N heterogeneous units, each making T binary choices.  The choice probabilities depend on k covariates.
 }
 

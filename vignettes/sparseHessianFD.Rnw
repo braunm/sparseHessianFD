@@ -546,7 +546,7 @@ together.
 \beta_{11},\dotsc,\beta_{N1},\beta_{12},\dotsc,\beta_{N2},~\dotsc~,\beta_{1k},\dotsc,\beta_{Nk},\mu_1,\dotsc,\mu_k
 \end{align}
 Now the Hessian has an "banded" sparsity pattern, as in Figure~\ref{fig:banded}.
-\begin{figure}[ptb]
+\begin{figure}[tbp]
   \begin{subfigure}[b]{.5\textwidth}
 <<blockarrow, echo=FALSE>>=
 Mat <- as(kronecker(diag(N),matrix(1,k,k)),"sparseMatrix")
@@ -657,7 +657,7 @@ rows, cols& Sparsity pattern: integer vectors of the row and column indices of
   the non-zero elements in the \emph{lower triangle} of the Hessian.\\
 direct& This argument is deprecated, and is included only for
   backwards compatibility with earlier versions.\\
-eps& The perturbation amount for finite differencing of the
+delta& The perturbation amount for finite differencing of the
   gradient to compute the Hessian (the $\delta$ in Section \ref{sec:numdiff}).  Defaults to
   \code{sqrt(.Machine\$double.eps)}.\\
 index1& If \variable{TRUE} (the default), \funcarg{row} and \funcarg{col} use one-based
@@ -850,7 +850,7 @@ intersection graph (Figure~\ref{fig:graph1int}), which requires seven colors for
 sparse Hessian with this partitioning scheme would be no more
 efficient than treating the Hessian as if it were dense.
 \begin{figure}[ptb]
-  \begin{subfigure}[m]{.32\textwidth}\centering
+  \begin{subfigure}[b]{.32\textwidth}\centering
   \begin{tabular}{r|ccccccc}
    & 1&2&3&4&5&6&7\\
     \hline
@@ -864,7 +864,7 @@ efficient than treating the Hessian as if it were dense.
   \end{tabular}
   \caption{Adjacency matrix.}\label{fig:graph1adj}
 \end{subfigure}
-\begin{subfigure}[m]{.32\textwidth}\centering
+\begin{subfigure}[b]{.32\textwidth}\centering
 \iftoggle{tikz}{
 \begin{tikzpicture}
 \tikzstyle{every node}=[draw, shape=circle]
@@ -885,7 +885,7 @@ efficient than treating the Hessian as if it were dense.
 }{} %% end toggle
 \caption{Sparsity graph.}\label{fig:graph1pic}
 \end{subfigure}
-\begin{subfigure}[m]{.32\textwidth}\centering
+\begin{subfigure}[b]{.32\textwidth}\centering
 \iftoggle{tikz}{
 \begin{tikzpicture}
 \tikzstyle{every node}=[draw, shape=circle]
@@ -1186,9 +1186,9 @@ relationship between $N$ and run time for a different measure of time,
 and each curve in a panel represents a different number of within-unit
 parameters ($k$).
 
-\begin{figure}[ptb]
+\begin{figure}[tbp]
   \centering
-\includegraphics{timings}
+\includegraphics{fig_timings}
   \caption{Run times for sparse Hessian computation.}
   \label{fig:timing}
 \end{figure}

@@ -10,8 +10,7 @@ Coord.to.Pointers(rows, cols, dims, triangle = TRUE, lower = TRUE,
 \arguments{
 \item{rows, cols}{row and column indices of non-zero elements}
 
-\item{dims}{2-element vector for number of rows and columns in
-matrix}
+\item{dims}{2-element vector for number of rows and columns.}
 
 \item{triangle}{Is input intended to be a triangular (TRUE) or full (FALSE) matrix.  See Details for how this argument is interpreted for different values of \code{order}.}
 
@@ -19,7 +18,7 @@ matrix}
 
 \item{symmetric}{If TRUE, and matrix is triangular, then the matrix will be treated as symmetric, with only the triangular elements provided.  If matrix is neither triangular nor symmetric, then symmetric=TRUE will probably trigger an error.}
 
-\item{order}{See Matrix.to.Pointers}
+\item{order}{Determines the indexing/compression scheme for the output matrix.  Use 'triplet" to get row and column indices.  Defaults to the same class as M.}
 
 \item{index1}{TRUE if using 1-based indexing.  FALSE for 0-based indexing.}
 }

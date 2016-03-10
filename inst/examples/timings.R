@@ -129,7 +129,7 @@ cases <- expand.grid(k=c(8, 6, 4, 2),
                      ord=c(TRUE))
 
 res <- adply(cases, 1, run_test, reps=200, .parallel=run.par)
-save(cases, res, file="timings3.Rdata")
+save(cases, res, file="timings.Rdata")
 
 
 

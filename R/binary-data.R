@@ -18,8 +18,6 @@ NULL
 #' @rdname binary-data
 NULL
 
-
-
 #' @name binary_large-data
 #' @docType data
 #' @rdname binary-data

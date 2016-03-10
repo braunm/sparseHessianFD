@@ -6,7 +6,7 @@ library(reshape2)
 
 theme_set(theme_bw())
 
-data.file <- "inst/examples/timings3.Rdata"
+data.file <- "inst/examples/timings.Rdata"
 load(data.file)
 
 tab <- mutate(res, ms=bench.time/1000000) %>%
@@ -47,14 +47,6 @@ P2 <- ggplot(D2, aes(x=N,y=mean, color=as.factor(k), linetype=as.factor(k))) %>%
 pdf(file="vignettes/timings.pdf", width=6, height=4)
 print(P2)
 dev.off()
-
-
-## P3 <- ggplot(filter(D2,k==4), aes(x=N)) %>%
-##   + geom_line(aes(y=mean), linetype=1) %>%
-##   + geom_line(aes(y=upper), linetype=3) %>%
-##   + geom_line(aes(y=lower), linetype=3) %>%
-##   + facet_wrap(~stat, scales="free", nrow=2, ncol=3)
-
 
 
 

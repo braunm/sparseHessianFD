@@ -6,6 +6,7 @@
 #' @param pntr,idx row pointers and column indices of the adjacency matrix, in compressed column-oriented format. Must use zero-based indexing.
 #' @param nvars Number of vertices.
 #' @return An integer vector of length nvars, where each element represents the color of the corresponding vertex. Indices are zero-based.
+#' @details  For internal use.  You should not have to call this function directly.
 get_colors <- function(pntr, idx, nvars) {
     .Call('sparseHessianFD_get_colors', PACKAGE = 'sparseHessianFD', pntr, idx, nvars)
 }
@@ -19,6 +20,7 @@ get_colors <- function(pntr, idx, nvars) {
 #' @param nvars Dimension of Hessian (number of variables)
 #' @param nnz Number of non-zero elements in the lower triangle of the Hessian.
 #' @return A sparse Hessian of class dgCMatrix.
+#' @details For internal use.  You should not have to call this function directly.
 subst <- function(Y, colors, jCol, ipntr, delta, nvars, nnz) {
     .Call('sparseHessianFD_subst', PACKAGE = 'sparseHessianFD', Y, colors, jCol, ipntr, delta, nvars, nnz)
 }

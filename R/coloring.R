@@ -1,12 +1,11 @@
 ## Part of the sparseHessianFD package
-## Copyright (C) 2013-2015 Michael Braun
+## Copyright (C) 2013-2016 Michael Braun
 
 #' @name coloring
 #' @title Triangular partitioning of variables
 #' @param L  sparsity pattern of the Hessian as a lower triangular pattern matrix
 #' @return Integer vector of length nvars with color assignments for each variable.
 #' @description cyclic coloring from a lower triangular pattern matrix
-#' @export
 coloring <- function(L) {
 
     stopifnot(is(L,"nMatrix"),

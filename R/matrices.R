@@ -1,5 +1,5 @@
 ## matrices.R -- Part of the sparseHessianFD package
-## Copyright (C) 2013-2015 Michael Braun
+## Copyright (C) 2013-2016 Michael Braun
 
 
 #' @name Matrix.to.Coord
@@ -13,9 +13,13 @@
 #' \item{rows}{Integer vector containing row indices of non-zero elements}
 #' \item{cols}{Integer vector containing column indices of non-zero elements}
 #' }
-#' @details This function is a wrapper to Matrix.to.Pointers for \code{order='triplet'} and \code{values=FALSE}.  It can be used to extract the row and column indices of a sparsity pattern from a matrix that has that same pattern.
+#' @details A wrapper to Matrix.to.Pointers for \code{order='triplet'} and \code{values=FALSE}, for extracting the row and column indices of a sparsity pattern from a matrix that has that same pattern.
+#' @examples
+#' M1 <- as(kronecker(diag(3), matrix(TRUE,2,2)),"sparseMatrix")
+#' C <- Matrix.to.Coord(Mat)
+#' M2 <- Matrix::sparseMatrix(i=C$rows, j=C$cols)
+#' all.equal(M1,M2)
 #' @export
-#'
 Matrix.to.Coord <- function(M, index1=TRUE) {
     res <- Matrix.to.Pointers(M, values=FALSE, order="triplet", index1=index1)
     list(rows=res$rows, cols=res$cols)
@@ -26,9 +30,8 @@ Matrix.to.Coord <- function(M, index1=TRUE) {
 #' @title Convert a matrix defined by row and column indices to one defined by a row- or column-oriented compression scheme.
 #' @description Returns indices and pointers that define a sparse Hessian in compressed format.  Inputs are the row and column indices.
 #' @param rows,cols row and column indices of non-zero elements
-#' @param dims 2-element vector for number of rows and columns in
-#' matrix
-#' @param order See Matrix.to.Pointers
+#' @param dims 2-element vector for number of rows and columns.
+#' @param order Determines the indexing/compression scheme for the output matrix.  Use 'triplet" to get row and column indices.  Defaults to the same class as M.
 #' @param triangle Is input intended to be a triangular (TRUE) or full (FALSE) matrix.  See Details for how this argument is interpreted for different values of \code{order}.
 #' @param lower If \code{triangular} is true, this argument identifies the input matrix as lower- or upper-triangular.  This argument is ignored if \code{triangle} is FALSE.
 #' @param symmetric If TRUE, and matrix is triangular, then the matrix will be treated as symmetric, with only the triangular elements provided.  If matrix is neither triangular nor symmetric, then symmetric=TRUE will probably trigger an error.
@@ -74,12 +77,13 @@ Coord.to.Pointers <- function(rows, cols, dims,
 
 #' @name Matrix.to.Pointers
 #' @title Extract row and column indices, pointers and values from a sparse matrix.
-#' @description Returns a list of row indices, column indices, pointers, and/or values of a sparse Hessian.  See details.
+#' @description Returns a list of row indices, column indices, pointers, and/or values of a sparse Hessian.
 #' @param M A sparse Matrix, as defined in the Matrix package.
-#' @param as.symmetric Defaults to isSymmetric(M).  If M is symmetric, and as.symmetric is FALSE, then index/pointer elements in the output list will be labeled according to order. If M is not symmetric, and as.symmetric is TRUE, then an error will be triggered.  See details.
+#' @param as.symmetric Defaults to isSymmetric(M).  If M is symmetric, and as.symmetric is FALSE, then index/pointer elements in the output list will be labeled according to order. If M is not symmetric, and as.symmetric is TRUE, then an error will be triggered.
 #' @param values  If TRUE, values are returned in list as 'x'.  Defaults to TRUE for numeric and logical matrices, and FALSE for pattern matrices.  If M is a pattern matrix, values=TRUE will trigger a warning.
 #' @param order Determines the indexing/compression scheme for the output matrix.  Use 'triplet" to get row and column indices.  Defaults to the same class as M.
 #' @param index1 TRUE (default) if return indices and pointers should use 1-based indexing.  FALSE for 0-based indexing.
+#' @details This function is included primarily for debugging purposes.  It is used internally, but would not ordinarily be called by an end user.
 #' @return A list with the following elements. If order=='row',
 #' \describe{
 #' \item{jCol}{ Integer vector containing column indices of non-zero elements}

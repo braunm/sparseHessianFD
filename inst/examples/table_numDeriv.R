@@ -3,6 +3,7 @@ library(plyr)
 library(dplyr)
 library(tidyr)
 library(reshape2)
+library(xtable)
 
 theme_set(theme_bw())
 

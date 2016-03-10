@@ -16,6 +16,7 @@
 //' @param nvars Dimension of Hessian (number of variables)
 //' @param nnz Number of non-zero elements in the lower triangle of the Hessian.
 //' @return A sparse Hessian of class dgCMatrix.
+//' @details For internal use.  You should not have to call this function directly.
 //[[Rcpp::export]]
 Rcpp::S4 subst(const Rcpp::NumericMatrix& Y,
 	       const Rcpp::IntegerVector& colors,	  

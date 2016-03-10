@@ -22,7 +22,6 @@ Suggests:
     numDeriv,
     scales,
     knitr
-##Roxygen: list(wrap=TRUE)
 LinkingTo: Rcpp, RcppEigen (>= 0.3.2.3)
 VignetteBuilder: knitr
 SystemRequirements: C++11

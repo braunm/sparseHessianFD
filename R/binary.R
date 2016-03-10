@@ -1,6 +1,5 @@
 ## Part of the sparseHessianFD package
-## Copyright (C) 2013-2015 Michael Braun
-## See LICENSE file for details.
+## Copyright (C) 2013-2016 Michael Braun
 
 ## Functions to compute objective function, gradient, and Hessian for
 ## binary choice example, and some unit tests.
@@ -10,12 +9,12 @@
 #' @title Binary choice example
 #' @description Functions for binary choice example in the vignette.
 #' @param P Numeric vector of length (N+1)*k.  First N*k elements are heterogeneous coefficients. The remaining k elements are population parameters.
-#' @param data List of data matrices Y and X, and choice count integer T
-#' @param priors List of named matrices inv.Omega and inv.Sigma
+#' @param data Named list of data matrices Y and X, and choice count integer T
+#' @param priors Named list of matrices inv.Omega and inv.Sigma
 #' @param order.row Determines order of heterogeneous coefficients in
-#' parameter vector. Affects sparsity pattern of Hessian. See vignette.
-#' @return Log posterior density, gradient and Hessian.
-#' @details Hessian is sparse, and returned as a dgcMatrix object
+#' parameter vector. If TRUE, heterogeneous coefficients are ordered by unit.  If FALSE, they are ordered by covariate.
+#' @return Log posterior density, gradient and Hessian. The Hessian is a dgcMatrix object.
+#' @details These functions are used by the heterogeneous binary choice example in the vignette. There are N heterogeneous units, each making T binary choices.  The choice probabilities depend on k covariates.
 #' @rdname binary
 #' @export
 binary.f <- function(P, data, priors, order.row=FALSE) {

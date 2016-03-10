@@ -25,4 +25,7 @@ A sparse Hessian of class dgCMatrix.
 \description{
 Estimate Hessian using triangular subsitution algorithm
 }
+\details{
+For internal use.  You should not have to call this function directly.
+}
 

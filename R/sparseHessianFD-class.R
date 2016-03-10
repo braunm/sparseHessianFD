@@ -1,5 +1,5 @@
 ## This file is part of the sparseHessianFD package
-## Copyright (C) 2015 Michael Braun
+## Copyright (C) 2015-2016 Michael Braun
 ##
 ##' @title sparseHessianFD
 ##' @name sparseHessianFD-class
@@ -8,7 +8,7 @@
 ##' @field fn1 A closure for calling fn(x, ...).
 ##' @field gr1 A closure for calling gr(x, ...).
 ##' @field iRow,jCol Numeric vectors with row and column indices of the non-zero elements in the lower triangle (including diagonal) of the Hessian.
-##' @field eps The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).
+##' @field delta The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).
 ##' @field index1 TRUE if rows and cols use 1-based (R format) indexing (FALSE for 0-based (C format) indexing.
 ##' @field D raw finite differences (internal use only)
 ##' @field nvars Number of variables (length of x)
@@ -17,7 +17,29 @@
 ##' @field idx,pntr Column indices and row pointers for non-zero elements in lower triangle of the permuted Hessian.  Row-oriented compressed storage.
 ##' @field colors A vector representation of the partitioning of the columns.  There are nvars elements, one for each column of the permuted Hessian.  The value corresponds to the "color" for that column.
 ##'@field perm,invperm Permutation vector and its inverse
-##' @details Do not access any of the fields directly.  Use the initializer instead.
+##' @details Do not access any of the fields directly.  Use the initializer instead. The internal structure is subject to change in future versions.
+##' @examples
+##' ## Log posterior density of hierarchical binary choice model. See vignette.
+##' data("binary_small")
+##' N <- length(binary[["Y"]])
+##' k <- NROW(binary[["X"]])
+##' T <- binary[["T"]]
+##' priors <- list(inv.Sigma = rWishart(1,k+5,diag(k))[,,1],
+##'                inv.Omega = diag(k))
+##' true.hess <- binary.hess(P, binary, priors)
+##' pattern <- Matrix.to.Coord(tril(true.hess))
+##' str(pattern)
+##' obj <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
+##'        rows=pattern[["rows"]], cols=pattern[["cols"]],
+##'                       data=binary, priors=priors)
+##' hs <- obj$hessian(P)
+##' all.equal(hs, true.hess)
+##'
+##'
+##' f <- obj$fn(P) ## obj function
+##' df <- obj$gr(P) ## gradient
+##' fdf <- obj$fngr(P) ## list of obj function and gradient
+##' fdfhs <- obj$fngrhs(P) ## list of obj function, gradient and Hessian.
 ##' @export sparseHessianFD
 sparseHessianFD <-
     setRefClass("sparseHessianFD",
@@ -26,7 +48,7 @@ sparseHessianFD <-
                     gr1 = "function",
                     iRow = "numeric",
                     jCol = "numeric",
-                    eps = "numeric",
+                    delta = "numeric",
                     index1 = "logical",
                     D = "matrix",
                     nvars = "integer",
@@ -39,21 +61,21 @@ sparseHessianFD <-
                     invperm = "integer"),
                 methods = list(
                     initialize = function(x, fn, gr, rows, cols, direct=NULL,
-                                          eps=sqrt(.Machine$double.eps),
+                                          delta=sqrt(.Machine$double.eps),
                                           index1 = TRUE, ...) {
-                        "Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter eps, flags for 0 or 1-based indexing (index1), whether sparsity pattern is just for the lower triangle (indexLT), and other arguments (...) to be passed to fn and gr."
+                        "Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter delta, flags for 0 or 1-based indexing (index1), whether sparsity pattern is just for the lower triangle (indexLT), and other arguments (...) to be passed to fn and gr."
 
                         if (!is.null(direct)) {
                             warning(" 'direct' argument is ignored. Only indirect method is, and will be, supported.")
                         }
-                        validate(fn, gr, rows, cols, x, eps, index1, ...)
+                        validate(fn, gr, rows, cols, x, delta, index1, ...)
                         ww <- which(cols <= rows)
 
                         initFields(fn1 = function(y) fn(y, ...),
                                    gr1 = function(y) gr(y, ...),
                                    iRow = as.integer(rows[ww]),
                                    jCol = as.integer(cols[ww]),
-                                   eps = eps,
+                                   delta = delta,
                                    index1 = index1,
                                    nvars = length(x),
                                    ready = FALSE)
@@ -77,7 +99,7 @@ sparseHessianFD <-
                         ncolors <- max(colors)+1
 
                         D <<- matrix(0, nvars, ncolors)
-                        D[cbind(perm, colors+1)] <<- eps
+                        D[cbind(perm, colors+1)] <<- delta
 
                         ready <<- TRUE
                     },
@@ -89,7 +111,7 @@ sparseHessianFD <-
                     },
 
                     validate = function(fn, gr, rows, cols, x,
-                                        eps, index1, ...) {
+                                        delta, index1, ...) {
 
                         stopifnot(is.numeric(x),
                                   is.function(fn),
@@ -136,7 +158,7 @@ sparseHessianFD <-
                         Y2 <- apply(D, 2, fd, x = x, grad.x = grad.x)
                         Y <- Y2[perm,]
                         res <- subst(Y, colors,
-                                     idx-index1, pntr-index1, eps, nvars, nnz)
+                                     idx-index1, pntr-index1, delta, nvars, nnz)
                         return(res[invperm,invperm])
                     },
 

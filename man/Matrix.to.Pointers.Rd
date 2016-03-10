@@ -10,7 +10,7 @@ Matrix.to.Pointers(M, as.symmetric = Matrix::isSymmetric(M), values = !is(M,
 \arguments{
 \item{M}{A sparse Matrix, as defined in the Matrix package.}
 
-\item{as.symmetric}{Defaults to isSymmetric(M).  If M is symmetric, and as.symmetric is FALSE, then index/pointer elements in the output list will be labeled according to order. If M is not symmetric, and as.symmetric is TRUE, then an error will be triggered.  See details.}
+\item{as.symmetric}{Defaults to isSymmetric(M).  If M is symmetric, and as.symmetric is FALSE, then index/pointer elements in the output list will be labeled according to order. If M is not symmetric, and as.symmetric is TRUE, then an error will be triggered.}
 
 \item{values}{If TRUE, values are returned in list as 'x'.  Defaults to TRUE for numeric and logical matrices, and FALSE for pattern matrices.  If M is a pattern matrix, values=TRUE will trigger a warning.}
 
@@ -43,6 +43,9 @@ If values=TRUE, the return list includes x, the values of the non-zero elements.
 The 'class' element is the name of the sparse matrix class to which the output corresponds (identifies numeric type, pattern, and indexing/compression scheme).
 }
 \description{
-Returns a list of row indices, column indices, pointers, and/or values of a sparse Hessian.  See details.
+Returns a list of row indices, column indices, pointers, and/or values of a sparse Hessian.
+}
+\details{
+This function is included primarily for debugging purposes.  It is used internally, but would not ordinarily be called by an end user.
 }
 

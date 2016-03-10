@@ -14,6 +14,7 @@ typedef std::set<int> S;
 //' @param pntr,idx row pointers and column indices of the adjacency matrix, in compressed column-oriented format. Must use zero-based indexing.
 //' @param nvars Number of vertices.
 //' @return An integer vector of length nvars, where each element represents the color of the corresponding vertex. Indices are zero-based.
+//' @details  For internal use.  You should not have to call this function directly.
 //[[Rcpp::export]]
 Rcpp::IntegerVector get_colors(const IntegerVector& pntr, //row/col pointer
 			 const IntegerVector& idx, // col/row index
@@ -56,27 +57,3 @@ Rcpp::IntegerVector get_colors(const IntegerVector& pntr, //row/col pointer
 
   return(Rcpp::wrap(colors));
 }
-
-
-
-// template<typename T>
-// void print_container(const T& X) {
-//   int z = 0;
-//   for (auto i : X) {
-//     Rcout << i << "   ";
-//     z++;
-//     if (fmod(z,10) == 0) Rcout << "\n";
-//   }
-//   Rcout << "\n";
-// }
-
-// static void chkIntFn(void *dummy) {
-//   R_CheckUserInterrupt();
-// }
-
-// void checkInterrupt() {
-//    if( ! R_ToplevelExec(chkIntFn, NULL) )
-//      Rcpp::stop( "user interuption" );
-// }
-
-

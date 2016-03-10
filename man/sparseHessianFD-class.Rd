@@ -9,7 +9,7 @@
 A reference class for computing sparse Hessians
 }
 \details{
-Do not access any of the fields directly.  Use the initializer instead.
+Do not access any of the fields directly.  Use the initializer instead. The internal structure is subject to change in future versions.
 }
 \section{Fields}{
 
@@ -20,7 +20,7 @@ Do not access any of the fields directly.  Use the initializer instead.
 
 \item{\code{iRow,jCol}}{Numeric vectors with row and column indices of the non-zero elements in the lower triangle (including diagonal) of the Hessian.}
 
-\item{\code{eps}}{The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).}
+\item{\code{delta}}{The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).}
 
 \item{\code{index1}}{TRUE if rows and cols use 1-based (R format) indexing (FALSE for 0-based (C format) indexing.}
 
@@ -64,10 +64,33 @@ Do not access any of the fields directly.  Use the initializer instead.
 \item{\code{hessian(x)}}{Return sparse Hessian, evaluated at x, as a dgCMatrix object.}
 
 \item{\code{initialize(x, fn, gr, rows, cols, direct = NULL,
-  eps = sqrt(.Machine$double.eps), index1 = TRUE, ...)}}{Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter eps, flags for 0 or 1-based indexing (index1), whether sparsity pattern is just for the lower triangle (indexLT), and other arguments (...) to be passed to fn and gr.}
+  delta = sqrt(.Machine$double.eps), index1 = TRUE, ...)}}{Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter delta, flags for 0 or 1-based indexing (index1), whether sparsity pattern is just for the lower triangle (indexLT), and other arguments (...) to be passed to fn and gr.}
 
 \item{\code{partition()}}{Return the partitioning used to compute finite differences}
 
 \item{\code{pointers(out.index1 = index1)}}{Return list with indices (idx) and pointers (pntr) for sparsity pattern of the compressed sparse Hessian.  Since the Hessian is symmetric, the indices and pointers for row-oriented and column-oriented storage patterns are the same.}
 }}
+\examples{
+## Log posterior density of hierarchical binary choice model. See vignette.
+data("binary_small")
+N <- length(binary[["Y"]])
+k <- NROW(binary[["X"]])
+T <- binary[["T"]]
+priors <- list(inv.Sigma = rWishart(1,k+5,diag(k))[,,1],
+               inv.Omega = diag(k))
+true.hess <- binary.hess(P, binary, priors)
+pattern <- Matrix.to.Coord(tril(true.hess))
+str(pattern)
+obj <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
+       rows=pattern[["rows"]], cols=pattern[["cols"]],
+                      data=binary, priors=priors)
+hs <- obj$hessian(P)
+all.equal(hs, true.hess)
+
+
+f <- obj$fn(P) ## obj function
+df <- obj$gr(P) ## gradient
+fdf <- obj$fngr(P) ## list of obj function and gradient
+fdfhs <- obj$fngrhs(P) ## list of obj function, gradient and Hessian.
+}
 
