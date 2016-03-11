@@ -14,7 +14,8 @@ binary.grad(P, data, priors, order.row = FALSE)
 binary.hess(P, data, priors, order.row = FALSE)
 }
 \arguments{
-\item{P}{Numeric vector of length (N+1)*k.  First N*k elements are heterogeneous coefficients. The remaining k elements are population parameters.}
+\item{P}{Numeric vector of length \eqn{(N+1)k}.  First \eqn{Nk}
+elements are heterogeneous coefficients. The remaining k elements are population parameters.}
 
 \item{data}{Named list of data matrices Y and X, and choice count integer T}
 
@@ -24,12 +25,14 @@ binary.hess(P, data, priors, order.row = FALSE)
 parameter vector. If TRUE, heterogeneous coefficients are ordered by unit.  If FALSE, they are ordered by covariate.}
 }
 \value{
-Log posterior density, gradient and Hessian. The Hessian is a dgcMatrix object.
+Log posterior density, gradient and Hessian. The Hessian is
+a dgCMatrix object.
 }
 \description{
 Functions for binary choice example in the vignette.
 }
 \details{
-These functions are used by the heterogeneous binary choice example in the vignette. There are N heterogeneous units, each making T binary choices.  The choice probabilities depend on k covariates.
+These functions are used by the heterogeneous binary
+choice example in the vignette. There are N heterogeneous units, each making T binary choices.  The choice probabilities depend on k covariates.
 }
 

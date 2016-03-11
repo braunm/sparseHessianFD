@@ -17,6 +17,7 @@ coloring <- function(L) {
     G <- Matrix::crossprod(L)  # intersection graph
     ptr <- Matrix.to.Pointers(G, index1=FALSE)
 
+    ## vertex coloring of intersection graph
     colors_vec <- get_colors(ptr[[2]], ptr[[1]], nvars)
     return(colors_vec)
 }

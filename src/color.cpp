@@ -1,5 +1,5 @@
 // Part of the sparseHessianFD package
-// Copyright (C) 2013-2015 Michael Braun
+// Copyright (C) 2013-2016 Michael Braun
 
 #include <Rcpp.h>
 
@@ -30,7 +30,6 @@ Rcpp::IntegerVector get_colors(const IntegerVector& pntr, //row/col pointer
     P[m] = S(idx.begin()+pntr(m), idx.begin()+pntr(m+1)); // rows
   }
 
-  
   int max_color = 0;
   used.insert(0);
   for (int i=0; i<nvars; i++) { 

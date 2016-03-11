@@ -9,7 +9,8 @@
 A reference class for computing sparse Hessians
 }
 \details{
-Do not access any of the fields directly.  Use the initializer instead. The internal structure is subject to change in future versions.
+Do not access any of the fields directly.  Use the initializer
+instead. The internal structure is subject to change in future versions.
 }
 \section{Fields}{
 
@@ -18,11 +19,11 @@ Do not access any of the fields directly.  Use the initializer instead. The inte
 
 \item{\code{gr1}}{A closure for calling gr(x, ...).}
 
-\item{\code{iRow,jCol}}{Numeric vectors with row and column indices of the non-zero elements in the lower triangle (including diagonal) of the Hessian.}
+\item{\code{iRow,jCol}}{Numeric vectors with row and column indices of}
 
-\item{\code{delta}}{The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).}
+\item{\code{delta}}{The perturbation amount for finite differencing of}
 
-\item{\code{index1}}{TRUE if rows and cols use 1-based (R format) indexing (FALSE for 0-based (C format) indexing.}
+\item{\code{index1}}{TRUE if rows and cols use 1-based (R format)}
 
 \item{\code{D}}{raw finite differences (internal use only)}
 
@@ -30,11 +31,12 @@ Do not access any of the fields directly.  Use the initializer instead. The inte
 
 \item{\code{nnz}}{Number of non-zero elements in the lower triangle of the Hessian.}
 
-\item{\code{ready}}{TRUE if object has been initialized, and Hessian has been partitioned.}
+\item{\code{ready}}{TRUE if object has been initialized, and Hessian has}
 
-\item{\code{idx,pntr}}{Column indices and row pointers for non-zero elements in lower triangle of the permuted Hessian.  Row-oriented compressed storage.}
+\item{\code{idx,pntr}}{Column indices and row pointers for non-zero}
 
-\item{\code{colors}}{A vector representation of the partitioning of the columns.  There are nvars elements, one for each column of the permuted Hessian.  The value corresponds to the "color" for that column.}
+\item{\code{colors}}{A vector representation of the partitioning of the columns.
+There are nvars elements, one for each column of the permuted}
 
 \item{\code{perm,invperm}}{Permutation vector and its inverse}
 }}
@@ -72,21 +74,22 @@ Do not access any of the fields directly.  Use the initializer instead. The inte
 }}
 \examples{
 ## Log posterior density of hierarchical binary choice model. See vignette.
+set.seed(123)
 data("binary_small")
 N <- length(binary[["Y"]])
 k <- NROW(binary[["X"]])
 T <- binary[["T"]]
+P <- rnorm((N+1)*k)
 priors <- list(inv.Sigma = rWishart(1,k+5,diag(k))[,,1],
                inv.Omega = diag(k))
 true.hess <- binary.hess(P, binary, priors)
-pattern <- Matrix.to.Coord(tril(true.hess))
+pattern <- Matrix.to.Coord(Matrix::tril(true.hess))
 str(pattern)
 obj <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
        rows=pattern[["rows"]], cols=pattern[["cols"]],
                       data=binary, priors=priors)
 hs <- obj$hessian(P)
 all.equal(hs, true.hess)
-
 
 f <- obj$fn(P) ## obj function
 df <- obj$gr(P) ## gradient

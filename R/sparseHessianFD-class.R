@@ -7,34 +7,45 @@
 ##' @docType class
 ##' @field fn1 A closure for calling fn(x, ...).
 ##' @field gr1 A closure for calling gr(x, ...).
-##' @field iRow,jCol Numeric vectors with row and column indices of the non-zero elements in the lower triangle (including diagonal) of the Hessian.
-##' @field delta The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).
-##' @field index1 TRUE if rows and cols use 1-based (R format) indexing (FALSE for 0-based (C format) indexing.
+##' @field iRow,jCol Numeric vectors with row and column indices of
+##the non-zero elements in the lower triangle (including diagonal) of
+##the Hessian.
+##' @field delta The perturbation amount for finite differencing of
+##the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).
+##' @field index1 TRUE if rows and cols use 1-based (R format)
+##indexing (FALSE for 0-based (C format) indexing.
 ##' @field D raw finite differences (internal use only)
 ##' @field nvars Number of variables (length of x)
 ##' @field nnz Number of non-zero elements in the lower triangle of the Hessian.
-##' @field ready TRUE if object has been initialized, and Hessian has been partitioned.
-##' @field idx,pntr Column indices and row pointers for non-zero elements in lower triangle of the permuted Hessian.  Row-oriented compressed storage.
-##' @field colors A vector representation of the partitioning of the columns.  There are nvars elements, one for each column of the permuted Hessian.  The value corresponds to the "color" for that column.
+##' @field ready TRUE if object has been initialized, and Hessian has
+##been partitioned.
+##' @field idx,pntr Column indices and row pointers for non-zero
+##elements in lower triangle of the permuted Hessian.  Row-oriented
+##compressed storage.
+##' @field colors A vector representation of the partitioning of the columns.
+##' There are nvars elements, one for each column of the permuted
+##Hessian.  The value corresponds to the "color" for that column.
 ##'@field perm,invperm Permutation vector and its inverse
-##' @details Do not access any of the fields directly.  Use the initializer instead. The internal structure is subject to change in future versions.
+##' @details Do not access any of the fields directly.  Use the initializer
+##'instead. The internal structure is subject to change in future versions.
 ##' @examples
 ##' ## Log posterior density of hierarchical binary choice model. See vignette.
+##' set.seed(123)
 ##' data("binary_small")
 ##' N <- length(binary[["Y"]])
 ##' k <- NROW(binary[["X"]])
 ##' T <- binary[["T"]]
+##' P <- rnorm((N+1)*k)
 ##' priors <- list(inv.Sigma = rWishart(1,k+5,diag(k))[,,1],
 ##'                inv.Omega = diag(k))
 ##' true.hess <- binary.hess(P, binary, priors)
-##' pattern <- Matrix.to.Coord(tril(true.hess))
+##' pattern <- Matrix.to.Coord(Matrix::tril(true.hess))
 ##' str(pattern)
 ##' obj <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
 ##'        rows=pattern[["rows"]], cols=pattern[["cols"]],
 ##'                       data=binary, priors=priors)
 ##' hs <- obj$hessian(P)
 ##' all.equal(hs, true.hess)
-##'
 ##'
 ##' f <- obj$fn(P) ## obj function
 ##' df <- obj$gr(P) ## gradient

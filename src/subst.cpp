@@ -1,5 +1,5 @@
 // Part of the sparseHessianFD package
-// Copyright (C) 2013-2015 Michael Braun
+// Copyright (C) 2013-2016 Michael Braun
 
 #include <Rcpp.h>
 #include <RcppEigen.h>

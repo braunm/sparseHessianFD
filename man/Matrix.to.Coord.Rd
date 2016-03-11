@@ -7,9 +7,11 @@
 Matrix.to.Coord(M, index1 = TRUE)
 }
 \arguments{
-\item{M}{A sparse matrix, as defined in the Matrix package.}
+\item{M}{A matrix that is a subclass of sparseMatrix, as defined in
+the Matrix package.}
 
-\item{index1}{TRUE if the index of the first element should be 1, and FALSE if 0.}
+\item{index1}{TRUE if the index of the first element should be 1,
+and FALSE if 0.}
 }
 \value{
 A list with two named elements.
@@ -19,15 +21,18 @@ A list with two named elements.
 }
 }
 \description{
-Returns list of row and column indices of the non-zero
+Utility function to extract row and column indices of
+the non-zero
 elements of a sparse matrix.
 }
 \details{
-A wrapper to Matrix.to.Pointers for \code{order='triplet'} and \code{values=FALSE}, for extracting the row and column indices of a sparsity pattern from a matrix that has that same pattern.
+A wrapper to \link{Matrix.to.Pointers} for \code{order='triplet'}
+and \code{values=FALSE}, for extracting the row and column indices
+of a sparsity pattern from a matrix that has that same pattern.
 }
 \examples{
 M1 <- as(kronecker(diag(3), matrix(TRUE,2,2)),"sparseMatrix")
-C <- Matrix.to.Coord(Mat)
+C <- Matrix.to.Coord(M1)
 M2 <- Matrix::sparseMatrix(i=C$rows, j=C$cols)
 all.equal(M1,M2)
 }

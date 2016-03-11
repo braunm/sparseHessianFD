@@ -8,13 +8,16 @@
 #' @name binary
 #' @title Binary choice example
 #' @description Functions for binary choice example in the vignette.
-#' @param P Numeric vector of length (N+1)*k.  First N*k elements are heterogeneous coefficients. The remaining k elements are population parameters.
+#' @param P Numeric vector of length \eqn{(N+1)k}.  First \eqn{Nk}
+#' elements are heterogeneous coefficients. The remaining k elements are population parameters.
 #' @param data Named list of data matrices Y and X, and choice count integer T
 #' @param priors Named list of matrices inv.Omega and inv.Sigma
 #' @param order.row Determines order of heterogeneous coefficients in
 #' parameter vector. If TRUE, heterogeneous coefficients are ordered by unit.  If FALSE, they are ordered by covariate.
-#' @return Log posterior density, gradient and Hessian. The Hessian is a dgcMatrix object.
-#' @details These functions are used by the heterogeneous binary choice example in the vignette. There are N heterogeneous units, each making T binary choices.  The choice probabilities depend on k covariates.
+#' @return Log posterior density, gradient and Hessian. The Hessian is
+#' a dgCMatrix object.
+#' @details These functions are used by the heterogeneous binary
+#' choice example in the vignette. There are N heterogeneous units, each making T binary choices.  The choice probabilities depend on k covariates.
 #' @rdname binary
 #' @export
 binary.f <- function(P, data, priors, order.row=FALSE) {
