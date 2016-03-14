@@ -20,7 +20,6 @@ data-raw/*
 ^README-.*\.png$
 ^README\.R
 ^README\.html
-^NEWS\.md
 ^cran-comments\.md$
 \_region\_.*
 ^\.\.pdf
