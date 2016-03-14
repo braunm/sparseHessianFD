@@ -136,12 +136,12 @@ new.sparse.hessian.obj <- function(x, fn, gr, hs, fd.method=0L, eps=sqrt(.Machin
 #' @return An object of class sparseHessianFD
 #' @rdname deprecated
 #' @export
-sparseHessianFD.new <- function(x, fn, gr, rows, cols, direct=FALSE,
+sparseHessianFD.new <- function(x, fn, gr, rows, cols, direct=NULL,
                             eps=sqrt(.Machine$double.eps), ...) {
 
     .Deprecated("sparseHessianFD")
     sparseHessianFD(x, fn=fn, gr=gr,
-                           rows=rows, cols=cols, eps=eps,
+                           rows=rows, cols=cols, delta=eps,
                            index1=TRUE, ...)
 }
 

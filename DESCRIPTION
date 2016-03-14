@@ -2,9 +2,10 @@ Package: sparseHessianFD
 Type: Package
 Title: Numerical Estimation of Sparse Hessians
 Version: 0.3.0
-Date: 2015-05-04
+Date: 2016-03-14
 Authors@R: person(family="Braun", given="Michael", role=c("aut","cre","cph"), email="braunm@smu.edu")
-URL: coxprofs.cox.smu.edu/braunm
+Maintainer: Michael Braun <braunm@smu.edu>
+URL: http://www.smu.edu/Cox/Departments/FacultyDirectory/BraunMichael
 Description: Estimates Hessian of a scalar-valued function, and returns it
     in a sparse Matrix format. The sparsity pattern must be known in advance. The
     algorithm is especially efficient for hierarchical models with a large number of
@@ -12,11 +13,11 @@ Description: Estimates Hessian of a scalar-valued function, and returns it
 License: MPL (== 2.0)
 LazyData: true
 Depends:
-    R (>= 3.2.0)
+    R (>= 3.2.3)
 Imports:	
-    Matrix (>= 1.2.0),
+    Matrix (>= 1.2.4),
     methods,
-    Rcpp
+    Rcpp (>= 0.12.3)
 Suggests:
     testthat,
     numDeriv,

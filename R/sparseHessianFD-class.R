@@ -73,12 +73,17 @@ sparseHessianFD <-
                 methods = list(
                     initialize = function(x, fn, gr, rows, cols, direct=NULL,
                                           delta=sqrt(.Machine$double.eps),
-                                          index1 = TRUE, ...) {
+                                          index1 = TRUE, eps=NULL,...) {
                         "Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter delta, flags for 0 or 1-based indexing (index1), whether sparsity pattern is just for the lower triangle (indexLT), and other arguments (...) to be passed to fn and gr."
 
                         if (!is.null(direct)) {
                             warning(" 'direct' argument is ignored. Only indirect method is, and will be, supported.")
                         }
+                        ## if (!is.null(eps)) {
+                        ##     warning(" 'eps' argument is deprecated and ignored. Use delta instead.")
+                        ## }
+
+
                         validate(fn, gr, rows, cols, x, delta, index1, ...)
                         ww <- which(cols <= rows)
 

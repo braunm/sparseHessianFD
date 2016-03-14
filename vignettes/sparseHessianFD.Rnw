@@ -59,6 +59,7 @@
     URL:  \url{http://www.smu.edu/Cox/Departments/FacultyDirectory/BraunMichael}
   }
 
+
   \Abstract{
     Sparse Hessian matrices occur often
     in statistics, and their fast and accurate estimation can
@@ -625,9 +626,9 @@ mc
 @
 \end{minipage}
 
-
-To visually check that a proposed sparsity pattern represents the
-intended matrix, use the \pkg{Matrix} \func{sparseMatrix} constructor.
+\vspace{1em}
+To check that a proposed sparsity pattern represents the
+intended matrix visually, use the \pkg{Matrix} \func{sparseMatrix} constructor.
 
 <<>>=
 pattern <- sparseMatrix(i=mc$rows, j=mc$cols)
@@ -712,7 +713,6 @@ list to the environment, but we need to construct the prior list
 ourselves.
 
 <<binaryInit>>=
-library("sparseHessianFD")
 set.seed(123)
 data("binary")
 str(binary)

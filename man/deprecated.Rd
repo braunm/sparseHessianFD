@@ -19,7 +19,7 @@ Coord.to.Pattern.Matrix(rows, cols, dims, compressed = TRUE,
 new.sparse.hessian.obj(x, fn, gr, hs, fd.method = 0L,
   eps = sqrt(.Machine$double.eps), ...)
 
-sparseHessianFD.new(x, fn, gr, rows, cols, direct = FALSE,
+sparseHessianFD.new(x, fn, gr, rows, cols, direct = NULL,
   eps = sqrt(.Machine$double.eps), ...)
 }
 \arguments{
