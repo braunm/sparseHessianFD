@@ -1,12 +1,18 @@
+## Code to generate Table 4.  For the manuscript, results
+## were subsequently rounded and formatted. A small amount of random-like
+## variation should be expected in the run times.
+
+
 library(sparseHessianFD)
+library(Matrix)
 library(mvtnorm)
 library(plyr)
+library(dplyr)
+library(tidyr)
+library(reshape2)
 library(microbenchmark)
-library(doParallel)
 library(numDeriv)
 
-run.par <- TRUE
-if (run.par) registerDoParallel(cores=12) else registerDoParallel(cores=1)
 
 binary_sim <- function(N, k, T) {
     x.mean <- rep(0,k)
@@ -71,8 +77,7 @@ run_test <- function(Nk, reps=50) {
 
 cases <- expand.grid(k=c(2,3,4),
                      N=c(9, 12, 15))
-
-runs <- adply(cases, 1, run_test, reps=20, .parallel=run.par)
+runs <- adply(cases, 1, run_test, reps=20)
 
 tab4 <-  mutate(runs, ms=bench.time/1000000) %>%
   select(-bench.time) %>%
@@ -86,6 +91,7 @@ tab4 <-  mutate(runs, ms=bench.time/1000000) %>%
   dcast(N+k+M~stat+method+stat2,value.var="value") %>%
   arrange(M)
 
+print(tab4)
 
 
 

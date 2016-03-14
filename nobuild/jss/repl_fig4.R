@@ -1,17 +1,17 @@
-##library(sparseHessianFD)
+## Code to generate Table 4.  For the manuscript, results
+## were subsequently rounded and formatted. A small amount of random-like
+## variation should be expected in the run times.
+
+library(sparseHessianFD)
 library(Matrix)
 library(mvtnorm)
 library(plyr)
 library(microbenchmark)
-library(doParallel)
 library(dplyr)
 library(tidyr)
 library(reshape2)
 library(ggplot2)
-
-
-run.par <- TRUE
-if (run.par) registerDoParallel(cores=12) else registerDoParallel(cores=1)
+theme_set(theme_bw())
 
 binary_sim <- function(N, k, T) {
     x.mean <- rep(0,k)
@@ -111,10 +111,7 @@ cases <- expand.grid(k=c(8, 6, 4, 2),
                      T=20
                      )
 
-res <- adply(cases, 1, run_test, reps=200, .parallel=run.par)
-
-
-##load("inst/examples/timings.Rdata")
+res <- adply(cases, 1, run_test, reps=200)
 
 tab <- mutate(res, ms=bench.time/1000000) %>%
   dcast(N+k+T+bench.rep+ncolors~bench.expr, value.var="ms")  %>%
@@ -135,7 +132,7 @@ D2$stat <- factor(D2$stat, levels=c("Function","Gradient","Hessian",
                                     "Partitioning","Initialization",
                                     "Hessian/Gradient"))
 
-theme_set(theme_bw())
+
 P2 <- ggplot(D2, aes(x=N,y=mean, color=as.factor(k), linetype=as.factor(k))) %>%
   + geom_line(size=.4) %>%
   + scale_x_continuous("Number of heterogeneous units") %>%
@@ -143,13 +140,7 @@ P2 <- ggplot(D2, aes(x=N,y=mean, color=as.factor(k), linetype=as.factor(k))) %>%
   + guides(color=guide_legend("k"), linetype=guide_legend("k")) %>%
   + facet_wrap(~stat, scales="free") %>%
   + theme(text=element_text(size=8), legend.position="right")
-
-
-pdf(file="vignettes/fig_timings.pdf", width=6, height=4)
 print(P2)
-dev.off()
-
-
 
 
 

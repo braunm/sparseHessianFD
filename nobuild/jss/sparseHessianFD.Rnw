@@ -1,4 +1,4 @@
-\documentclass[nojss]{jss}
+\documentclass[article]{jss}
 
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{sparseHessianFD}
@@ -17,16 +17,11 @@
 \newtoggle{tikz}
 \toggletrue{tikz}
 
-
 \iftoggle{tikz}{
 \usepackage{tikz}
 }{}
 
-   \newcolumntype{d}[1]{D{.}{.}{#1}}
-%%\newcommand{\pkg}[1]{\emph{#1}}
-%%\newcommand{\proglang}[1]{\textsf{#1}}
-%%\newcommand{\filename}[1]{\textit{#1}}
-%%\newcommand{\code}[1]{\texttt{#1}}
+ \newcolumntype{d}[1]{D{.}{.}{#1}}
 \newcommand{\func}[1]{\code{#1}}
 \newcommand{\class}[1]{\textsl{#1}}
 \newcommand{\funcarg}[1]{\code{#1}}
@@ -1127,7 +1122,9 @@ to compute a Hessian using each package.  The difference in run times is dramati
 especially because the computation time for \pkg{numDeriv} grows
 quadratically in the number of variables.  The setup time for
 \pkg{sparseHessianFD} was about 7 milliseconds for all cases.  Times
-were collected using the \pkg{microbenchmark} package \citep{R_microbenchmark}.
+were collected using the \pkg{microbenchmark} package
+\citep{R_microbenchmark}, using a 2013-edition Mac Pro with 12
+processing cores and 64GB of RAM.
 
 
 \begin{table}[ptb]\centering
@@ -1214,6 +1211,6 @@ hierarchical models.
 
 
 \FloatBarrier
-\bibliography{sparseHessianFD}
+\bibliography{./sparseHessianFD}
 
 \end{document}
