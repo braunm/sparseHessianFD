@@ -1,7 +1,7 @@
 Package: sparseHessianFD
 Type: Package
 Title: Numerical Estimation of Sparse Hessians
-Version: 0.3.0
+Version: 0.3.0.990
 Date: 2016-03-14
 Authors@R: person(family="Braun", given="Michael", role=c("aut","cre","cph"), email="braunm@smu.edu")
 Maintainer: Michael Braun <braunm@smu.edu>

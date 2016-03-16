@@ -1,5 +1,7 @@
 # NEWS file for sparseHessianFD package 
 
+## VERSION 0.3.0.990 (devel)
+
 ## VERSION 0.3.0
 
 *  An even more major rewrite of the package.  All ACM code was
