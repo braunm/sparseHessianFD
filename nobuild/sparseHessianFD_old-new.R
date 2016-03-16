@@ -1,4 +1,4 @@
-## matrices.R -- Part of the sparseHessianFD package 
+## matrices.R -- Part of the sparseHessianFD package
 ## Copyright (C) 2013-2015 Michael Braun
 ## See LICENSE file for details.
 
@@ -12,7 +12,7 @@
 #' @param rows Integer vector of row indices of non-zero elements of
 #' the lower triangle of the Hessian
 #' @param cols Integer vector of column indices of non-zero elements
-#' of the lower triangle of the Hessian 
+#' of the lower triangle of the Hessian
 #' @param direct If TRUE, use direct method for computatation.  Otherwise, use
 #' indirect/substitution method.  See references.
 #' @param eps The perturbation amount for finite differencing of the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).
@@ -20,7 +20,7 @@
 #' @return An object of class sparseHessianFD
 #' @details  Indexing starts at 1, and must include the diagonal
 #' elements.  Any upper triangle coordinates will be removed, and
-#' replaced with their lower triangle counterparts. 
+#' replaced with their lower triangle counterparts.
 #' The algorithms used for estimating sparse Hessians using finite
 #' differencing are described in the reference below.
 #'
@@ -40,10 +40,10 @@
 #'   group have a non-zero element in row K only if column K is in an
 #'   earlier group. Using this partition, the subroutine then computes
 #'   a symmetric permutation of A consistent with the determination of
-#'   A by a lower triangular substitution method. 
-#' 
+#'   A by a lower triangular substitution method.
+#'
 #'   The indirect method first computes a symmetric permutation of A
-#'   which minimizes the maximum number of non-zero elements in any 
+#'   which minimizes the maximum number of non-zero elements in any
 #'   row of L, where L is the lower triangular part of the permuted
 #'   matrix. The subroutine then partitions the columns of L into
 #'   groups such that columns of L in a group do not have a non-zero
@@ -51,7 +51,7 @@
 #'
 #'
 #' The function new.sparse.hessian.obj has been deprecated.  Use
-#' sparseHessianFD.new instead. 
+#' sparseHessianFD.new instead.
 #' @seealso sparseHessianFD-class
 #' @references Coleman, Thomas F, Burton S Garbow, and Jorge J More
 #' 1985. Software for Estimating Sparse Hessian Matrices. ACM
@@ -59,14 +59,13 @@
 #' @export
 sparseHessianFD.new <- function(x, fn, gr, rows, cols, direct=FALSE,
                             eps=sqrt(.Machine$double.eps), ...) {
-    
-    
+
     stopifnot(is.function(fn))
     stopifnot(is.function(gr))
-    
+
     fn1 <- function(x) fn(x,...)  ## create closure
     gr1 <- if (!is.null(gr)) function(x) gr(x,...)
-    
+
     ## test fn and gr
 
     stopifnot(is.finite(fn1(x)))
@@ -75,7 +74,7 @@ sparseHessianFD.new <- function(x, fn, gr, rows, cols, direct=FALSE,
     stopifnot(length(gradient)==length(x))
     stopifnot(!is.null(rows))
     stopifnot(!is.null(cols))
-    
+
     obj <- new("sparseHessianFD", length(x), fn1, gr1)
     rows <- as.integer(rows)
     cols <- as.integer(cols)
@@ -89,8 +88,8 @@ sparseHessianFD.new <- function(x, fn, gr, rows, cols, direct=FALSE,
         cols <- cols[-ww]
     }
     obj$hessian.init(rows, cols, as.integer(direct), eps)
-    
+
     return(obj)
-    
+
 }
 

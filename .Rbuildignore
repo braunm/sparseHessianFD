@@ -1,5 +1,11 @@
 ^.*\\.so$
 ^.*\\.o$
+vignettes/.*\.bbl$
+vignettes/.*\.blg$
+vignettes/prv\_.*
+vignettes/missfont.log
+vignettes/.*\.aux
+vignettes/cache
 ^\\.git$
 ^\\.Rbuildignore$
 ^\\.Rhistory$
@@ -8,9 +14,12 @@
 README\.md
 inst/old/*
 data-raw/*
+^nobuild/*
+^cache/*
 ^README\.Rmd$
 ^README-.*\.png$
 ^README\.R
 ^README\.html
-^NEWS\.md
 ^cran-comments\.md$
+\_region\_.*
+^\.\.pdf

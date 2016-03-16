@@ -1,6 +1,2 @@
-
-
 PKG_CPPFLAGS =   -I../inst/include 
-##PKG_CXXFLAGS = -Wall -pedantic 
-##PKG_CFLAGS = -Wall -pedantic
 CXX_STD = CXX11
