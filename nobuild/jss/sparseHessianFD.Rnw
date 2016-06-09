@@ -1,4 +1,4 @@
-\documentclass[nojss]{jss}
+\documentclass[jss]{jss}
 
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{sparseHessianFD}
@@ -71,7 +71,7 @@
     linear substitution algorithms that were previously unavailable to
     R users, and is most useful when other numerical,
     symbolic or algorithmic methods are impractical, inefficient or
-    unavailable. }
+    unavailable.}
 
 
 \date{March 9, 2016}

@@ -1,4 +1,4 @@
-##library(sparseHessianFD)
+library(sparseHessianFD)
 library(Matrix)
 library(mvtnorm)
 library(plyr)
@@ -114,7 +114,6 @@ cases <- expand.grid(k=c(8, 6, 4, 2),
 res <- adply(cases, 1, run_test, reps=200, .parallel=run.par)
 
 
-##load("inst/examples/timings.Rdata")
 
 tab <- mutate(res, ms=bench.time/1000000) %>%
   dcast(N+k+T+bench.rep+ncolors~bench.expr, value.var="ms")  %>%
@@ -136,7 +135,7 @@ D2$stat <- factor(D2$stat, levels=c("Function","Gradient","Hessian",
                                     "Hessian/Gradient"))
 
 theme_set(theme_bw())
-P2 <- ggplot(D2, aes(x=N,y=mean, color=as.factor(k), linetype=as.factor(k))) %>%
+fig4 <- ggplot(D2, aes(x=N,y=mean, color=as.factor(k), linetype=as.factor(k))) %>%
   + geom_line(size=.4) %>%
   + scale_x_continuous("Number of heterogeneous units") %>%
   + scale_y_continuous("Computation time (milliseconds)") %>%
@@ -145,10 +144,7 @@ P2 <- ggplot(D2, aes(x=N,y=mean, color=as.factor(k), linetype=as.factor(k))) %>%
   + theme(text=element_text(size=8), legend.position="right")
 
 
-pdf(file="vignettes/fig_timings.pdf", width=6, height=4)
-print(P2)
-dev.off()
-
+print(fig4)
 
 
 

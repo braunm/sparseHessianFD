@@ -1,9 +1,15 @@
 library(sparseHessianFD)
+library(Matrix)
 library(mvtnorm)
 library(plyr)
+library(dplyr)
+library(tidyr)
+library(reshape2)
 library(microbenchmark)
 library(doParallel)
 library(numDeriv)
+
+
 
 run.par <- TRUE
 if (run.par) registerDoParallel(cores=12) else registerDoParallel(cores=1)
