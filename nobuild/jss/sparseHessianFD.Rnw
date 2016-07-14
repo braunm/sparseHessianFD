@@ -42,39 +42,39 @@
 
 
 
- \author{Michael Braun\\Edwin L. Cox School of Business\\Southern Methodist University}
- \Plainauthor{Michael Braun}
- \title{\pkg{sparseHessianFD}: An R Package for Estimating Sparse Hessian Matrices}
-  \Plaintitle{sparseHessianFD: An R Package for Estimating Sparse Hessian Matrices}
- \Shorttitle{sparseHessianFD:  Sparse Hessians}
-  \Keywords{sparse Hessians, sparsity, computation of Hessians,
-    graph coloring, finite differences, differentiation}
-  \Address{
-    Michael Braun\\
-    Edwin L. Cox School of Business\\
-    Southern Methodist University\\
-    6212 Bishop Blvd.\\
-    Dallas, TX 75275\\
-    E-mail:  \email{braunm@smu.edu}\\
-    URL:  \url{http://www.smu.edu/Cox/Departments/FacultyDirectory/BraunMichael}
-  }
+\author{Michael Braun\\Edwin L. Cox School of Business\\Southern Methodist University}
+\Plainauthor{Michael Braun}
+\title{\pkg{sparseHessianFD}: An R Package for Estimating Sparse Hessian Matrices}
+\Plaintitle{sparseHessianFD: An R Package for Estimating Sparse Hessian Matrices}
+\Shorttitle{sparseHessianFD:  Sparse Hessians}
+\Keywords{sparse Hessians, sparsity, computation of Hessians,
+  graph coloring, finite differences, differentiation}
+\Address{
+  Michael Braun\\
+  Edwin L. Cox School of Business\\
+  Southern Methodist University\\
+  6212 Bishop Blvd.\\
+  Dallas, TX 75275\\
+  E-mail:  \email{braunm@smu.edu}\\
+  URL:  \url{http://www.smu.edu/Cox/Departments/FacultyDirectory/BraunMichael}
+}
 
 
-  \Abstract{
-    Sparse Hessian matrices occur often
-    in statistics, and their fast and accurate estimation can
-    improve efficiency of numerical optimization and sampling
-    algorithms. By exploiting the known sparsity pattern of a Hessian, methods in the
-    sparseHessianFD package require many fewer function or gradient
-    evaluations than would be required if the Hessian were treated as
-    dense. The package implements established graph coloring and
-    linear substitution algorithms that were previously unavailable to
-    R users, and is most useful when other numerical,
-    symbolic or algorithmic methods are impractical, inefficient or
-    unavailable.}
+\Abstract{
+  Sparse Hessian matrices occur often
+  in statistics, and their fast and accurate estimation can
+  improve efficiency of numerical optimization and sampling
+  algorithms. By exploiting the known sparsity pattern of a Hessian, methods in the
+  sparseHessianFD package require many fewer function or gradient
+  evaluations than would be required if the Hessian were treated as
+  dense. The package implements established graph coloring and
+  linear substitution algorithms that were previously unavailable to
+  R users, and is most useful when other numerical,
+  symbolic or algorithmic methods are impractical, inefficient or
+  unavailable.}
 
 
-\date{March 9, 2016}
+\date{July 6, 2016}
 
 %% need no \usepackage{Sweave.sty}
 
@@ -89,13 +89,14 @@
 suppressPackageStartupMessages(require(Matrix))
 knitr::render_sweave()
 knitr::opts_chunk$set(prompt=TRUE, cache=FALSE)
-options(replace.assign=TRUE, width=90,prompt="R> ")
+options(replace.assign=TRUE, width=77, prompt="R> ")
 @
 
 The Hessian matrix of a log likelihood function or log posterior
 density function plays
 an important role in statistics.  From a frequentist point of view,
-the inverse of the negative Hessian is the asymptotic covariance of the sampling distribution of a maximum
+the inverse of the negative Hessian is the asymptotic covariance of
+the sampling distribution of a maximum
 likelihood estimator.  In Bayesian analysis, when evaluated at the
 posterior mode, it is the covariance of a Gaussian approximation to
 the posterior distribution.  More broadly, many numerical optimization
@@ -196,7 +197,8 @@ that deriving a vector of first
 derivatives, and writing \proglang{R} functions to compute them, is a
 lot easier than doing the same for a matrix of second derivatives, and
 more accurate than computing second-order approximations from the
-objective function. Even when we have derived the Hessian symbolically, in practice it may still be faster to estimate the Hessian
+objective function. Even when we have derived the Hessian
+symbolically, in practice it may still be faster to estimate the Hessian
 using \pkg{sparseHessianFD} than coding it directly.   These are the
 situations in which \pkg{sparseHessianFD} adds the most value to the
 statistician's toolbox.  If AD software is available to compute the gradient, then
@@ -519,15 +521,15 @@ posterior density will be sparse.
 <<setup2, echo=FALSE>>=
 N <- 5
 k <- 2
-nv1 <- (N+1)*k
+nv1 <- (N + 1) * k
 nels1 <- nv1^2
-nnz1 <- (N+1)*k^2 + 2*N*k^2
-nnz1LT <- (N+1)*k*(k+1)/2 + N*k^2
+nnz1 <- (N + 1) * k^2 + 2 * N * k^2
+nnz1LT <- (N + 1) * k * (k+1)/2 + N * k^2
 Q <- 1000
-nv2 <- (Q+1)*k
+nv2 <- (Q+1) * k
 nels2 <- nv2^2
-nnz2 <- (Q+1)*k^2 + 2*Q*k^2
-nnz2LT <- (Q+1)*k*(k+1)/2 + Q*k^2
+nnz2 <- (Q+1) * k^2 + 2 * Q * k^2
+nnz2LT <- (Q+1) * k * (k+1)/2 + Q * k^2
 options(scipen=999)
 @
 
@@ -550,18 +552,18 @@ Now the Hessian has an "banded" sparsity pattern, as in Figure~\ref{fig:banded}.
 \begin{figure}[tbp]
   \begin{subfigure}[b]{.5\textwidth}
 <<blockarrow, echo=FALSE>>=
-Mat <- as(kronecker(diag(N),matrix(1,k,k)),"sparseMatrix")
-Mat <- rBind(Mat, Matrix(1,k,N*k))
-Mat <- cBind(Mat, Matrix(1, k*(N+1), k))
+Mat <- as(kronecker(diag(N), matrix(1, k, k)),"sparseMatrix")
+Mat <- rBind(Mat, Matrix(1, k, N*k))
+Mat <- cBind(Mat, Matrix(1, k * (N+1), k))
 printSpMatrix(as(Mat,"nMatrix"))
 @
 \caption{A ``block-arrow'' sparsity pattern.}\label{fig:blockarrow}
 \end{subfigure}
 \begin{subfigure}[b]{.5\textwidth}
 <<banded, echo=FALSE>>=
-Mat <- kronecker(Matrix(1,k,k), diag(N))
-Mat <- rBind(Mat, Matrix(1,k,N*k))
-Mat <- cBind(Mat, Matrix(1, k*(N+1), k))
+Mat <- kronecker(Matrix(1, k, k), diag(N))
+Mat <- rBind(Mat, Matrix(1, k, N * k))
+Mat <- cBind(Mat, Matrix(1, k * (N + 1), k))
 printSpMatrix(as(Mat,"nMatrix"))
 @
 \caption{A ``banded'' sparsity pattern.}\label{fig:banded}
@@ -618,7 +620,7 @@ matrix, and prints the sparsity pattern of its lower triangle.
 \begin{minipage}{\columnwidth}
 <<>>=
 library("sparseHessianFD")
-bd <- kronecker(diag(3), matrix(TRUE,2,2))
+bd <- kronecker(diag(3), matrix(TRUE, 2, 2))
 Mat <- as(bd, "nMatrix")
 printSpMatrix(tril(Mat))
 mc <- Matrix.to.Coord(tril(Mat))
@@ -687,11 +689,11 @@ function, gradient and Hessian at a variable vector $x$.  The
 
 
 <<eval=FALSE>>=
-f <- obj$fn(x)          ## returns numeric
-df <- obj$gr(x)         ## returns numeric vector
-hess <- obj$hessian(x)  ## returns dgCMatrix
-fngr <- obj$fngr(x)     ## returns list
-fngrhs <- obj$fngrhs(x) ## returns list
+f <- obj$fn(x)
+df <- obj$gr(x)
+hess <- obj$hessian(x)
+fngr <- obj$fngr(x)
+fngrhs <- obj$fngrhs(x)
 @
 
 
@@ -719,9 +721,9 @@ str(binary)
 N <- length(binary[["Y"]])
 k <- NROW(binary[["X"]])
 T <- binary[["T"]]
-nvars <- as.integer(N*k + k)
-priors <- list(inv.Sigma = rWishart(1,k+5,diag(k))[,,1],
-               inv.Omega = diag(k))
+nvars <- as.integer(N * k + k)
+priors <- list(inv.Sigma = rWishart(1, k + 5, diag(k))[,,1],
+  inv.Omega = diag(k))
 @
 
 This dataset represents the simulated choices for $N= \Sexpr{N}$ customers
@@ -766,8 +768,8 @@ the true values.
 
 <<usingSparseHessianFD>>=
 obj <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
-       rows=pattern[["rows"]], cols=pattern[["cols"]],
-       data=binary, priors=priors, order.row=order.row)
+  rows=pattern[["rows"]], cols=pattern[["cols"]],
+  data=binary, priors=priors, order.row=order.row)
 f <- obj$fn(P)
 all.equal(f, true.f)
 gr <- obj$gr(P)
