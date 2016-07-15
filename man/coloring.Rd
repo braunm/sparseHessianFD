@@ -7,12 +7,18 @@
 coloring(L)
 }
 \arguments{
-\item{L}{sparsity pattern of the Hessian as a lower triangular pattern matrix}
+\item{L}{sparsity pattern of the Hessian as a lower triangular pattern
+matrix}
 }
 \value{
-Integer vector of length nvars with color assignments for each variable.
+Integer vector of length nvars with color assignments for each
+variable.
 }
 \description{
 cyclic coloring from a lower triangular pattern matrix
+}
+\details{
+For internal use.  Exported in order for replication files for
+JSS article to run.
 }
 

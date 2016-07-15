@@ -3,9 +3,14 @@
 
 #' @name coloring
 #' @title Triangular partitioning of variables
-#' @param L  sparsity pattern of the Hessian as a lower triangular pattern matrix
-#' @return Integer vector of length nvars with color assignments for each variable.
+#' @param L  sparsity pattern of the Hessian as a lower triangular pattern
+#' matrix
+#' @return Integer vector of length nvars with color assignments for each
+#' variable.
 #' @description cyclic coloring from a lower triangular pattern matrix
+#' @details For internal use.  Exported in order for replication files for
+#' JSS article to run.
+#' @export
 coloring <- function(L) {
 
     stopifnot(is(L,"nMatrix"),

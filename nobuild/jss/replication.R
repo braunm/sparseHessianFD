@@ -1,12 +1,11 @@
-
 library("sparseHessianFD")
 library("Matrix")
 library("mvtnorm")
-library("plyr")
 library("microbenchmark")
 library("doParallel")
 library("dplyr")
 library("tidyr")
+library("numDeriv")
 library("reshape2")
 library("ggplot2")
 
@@ -56,17 +55,15 @@ make_perm <- function(iRow, jCol) {
 
 get_id <- function(x) 1:length(x)
 
-run_test <- function(NkT, reps=50) {
-
+run_test_fig4 <- function(NkT, reps=50) {
+  ## Replication function for Figure 4
   N <- as.numeric(NkT["N"])
   k <- as.numeric(NkT["k"])
   T <- as.numeric(NkT["T"])
-
   data <- binary_sim(N, k, T)
   priors <- priors_sim(k)
   F <- make_funcs(D=data, priors=priors)
   nvars <- N*k+k
-
 
   M <- as(Matrix::kronecker(Matrix(1,k,k), Matrix::Diagonal(N)),"nMatrix") %>%
     rBind(Matrix(TRUE,k,N*k)) %>%
@@ -91,7 +88,7 @@ run_test <- function(NkT, reps=50) {
       hess = obj$hessian(X),
       times = reps)
 
-  vals <- ddply(data.frame(bench), "expr",
+  vals <- plyr::ddply(data.frame(bench), "expr",
                 function(x) return(data.frame(expr=x$expr,
                                               time=x$time,
                                               rep=1:length(x$expr))))
@@ -106,16 +103,47 @@ run_test <- function(NkT, reps=50) {
 
 }
 
-cases <- expand.grid(k=c(8, 6, 4, 2),
-                     N=c(25, 50, seq(75,2500, by=75)),
-                     T=20
-                     )
 
-res <- adply(cases, 1, run_test, reps=200, .parallel=run.par)
+run_test_tab4 <- function(Nk, reps=50) {
+    ## Replication function for Table 4
+    N <- as.numeric(Nk["N"])
+    k <- as.numeric(Nk["k"])
+    data <- binary_sim(N, k, T=20)
+    priors <- priors_sim(k)
+    F <- make_funcs(D=data, priors=priors)
+    nvars <- N*k+k
+    M <- as(Matrix::kronecker(Matrix::Diagonal(N),Matrix(1,k,k)),"nMatrix") %>%
+      rBind(Matrix(TRUE,k,N*k)) %>%
+      cBind(Matrix(TRUE, k*(N+1), k)) %>%
+      as("nMatrix")
+    pat <- Matrix.to.Coord(tril(M))
+    X <- rnorm(nvars)
+    obj <- sparseHessianFD(X, F$fn, F$gr, pat$rows, pat$cols)
 
+    bench <- microbenchmark(
+        numDeriv = numDeriv::hessian(obj$fn, X),
+        df = obj$gr(X),
+        sparse = obj$hessian(X))
+    vals <- plyr::ddply(data.frame(bench), "expr",
+                  function(x) return(data.frame(expr=x$expr,
+                                                time=x$time,
+                                                rep=1:length(x$expr))))
+    res <- data.frame(N=N, k=k,
+                      bench=vals)
+    cat("Completed N = ",N,"\tk = " , k ,"\n")
+    return(res)
+}
 
+## Replicate Figure 4
 
-tab <- mutate(res, ms=bench.time/1000000) %>%
+cases_fig4 <- expand.grid(k=c(8, 6, 4, 2),
+                          N=c(25, 50, seq(75,2500, by=75)),
+                          T=20
+                          )
+
+runs_fig4 <- plyr::adply(cases_fig4, 1, run_test_fig4, reps=200, .parallel=run.par)
+
+tab_fig4 <- mutate(runs_fig4, ms=bench.time/1000000) %>%
   dcast(N+k+T+bench.rep+ncolors~bench.expr, value.var="ms")  %>%
   mutate(nvars=N*k+k, hess_df=hess/df) %>%
   gather(stat, ms, c(f,df,hess,colors,setup,hess_df)) %>%
@@ -123,9 +151,9 @@ tab <- mutate(res, ms=bench.time/1000000) %>%
   summarize(mean=mean(ms))
 
 
-D2 <- filter(data.frame(tab), stat %in% c("f", "df", "hess",
-                                          "colors", "setup","hess_df"))
-D2$stat <- revalue(D2$stat, c("f"="Function", "df"="Gradient", "hess"="Hessian",
+D2 <- filter(data.frame(tab_fig4), stat %in% c("f", "df", "hess",
+                                               "colors", "setup","hess_df"))
+D2$stat <- plyr::revalue(D2$stat, c("f"="Function", "df"="Gradient", "hess"="Hessian",
                               "colors"="Partitioning",
                               "setup"="Initialization",
                               "hess_df"="Hessian/Gradient"))
@@ -144,9 +172,22 @@ fig4 <- ggplot(D2, aes(x=N,y=mean, color=as.factor(k), linetype=as.factor(k))) %
   + theme(text=element_text(size=8), legend.position="right")
 
 
-print(fig4)
+## Replicate Table 4
 
+cases_tab4 <- expand.grid(k=c(2,3,4),
+                     N=c(9, 12, 15))
+runs_tab4 <- plyr::adply(cases_tab4, 1, run_test_tab4, reps=20, .parallel=run.par)
 
-
+tab4 <-  mutate(runs_tab4, ms=bench.time/1000000) %>%
+  select(-bench.time) %>%
+  spread(bench.expr, ms) %>%
+  gather(method, hessian, c(numDeriv, sparse)) %>%
+  mutate(M=N*k+k, hessian.df=hessian/df) %>%
+  gather(stat, time, c(hessian, hessian.df)) %>%
+  group_by(N, k, method, M, stat)  %>%
+  summarize(mean=mean(time), sd=sd(time)) %>%
+  gather(stat2, value, mean:sd) %>%
+  dcast(N+k+M~stat+method+stat2,value.var="value") %>%
+  arrange(M)
 
 

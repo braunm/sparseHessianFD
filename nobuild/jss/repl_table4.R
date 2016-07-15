@@ -21,7 +21,6 @@ binary_sim <- function(N, k, T) {
     x.cov[k,k] <- x.cov[1,1]
     mu <- seq(-2,2,length=k)
     Omega <- diag(k)
-
     X <- t(rmvnorm(N, mean=x.mean, sigma=x.cov)) ## k x N
     B <- t(rmvnorm(N, mean=mu, sigma=Omega)) ## k x N
     XB <- colSums(X * B)
@@ -45,7 +44,7 @@ make_funcs <- function(D, priors) {
     return(res)
 }
 
-run_test <- function(Nk, reps=50) {
+run_test_tab4 <- function(Nk, reps=50) {
     N <- as.numeric(Nk["N"])
     k <- as.numeric(Nk["k"])
     data <- binary_sim(N, k, T=20)
