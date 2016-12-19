@@ -1,5 +1,6 @@
 \documentclass{article}
-
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{subcaption}
@@ -10,13 +11,6 @@
 \usepackage{booktabs}
 \usepackage{etoolbox}
 \usepackage{placeins}
-\newtoggle{tikz}
-\toggletrue{tikz}
-
-
-\iftoggle{tikz}{
-\usepackage{tikz}
-}{}
 
 \newcolumntype{d}[1]{D{.}{.}{#1}}
 \newcommand{\pkg}[1]{\emph{#1}}
@@ -35,6 +29,7 @@
 \newcommand{\hess}[2]{\mathsf{H}_{#1}#2}
 \newcommand{\hessLT}[2]{\mathsf{L}_{#1}#2}
 \newcommand{\Mat}[1]{\mathbf{#1}}
+\newcommand{\Real}[1]{\mathbb{R}^{#1}}
 
 \newenvironment{revQuote}{\itshape}{\vspace{\baselineskip}}
 \newenvironment{response}{\normalfont}{\vspace{\baselineskip}}
@@ -56,13 +51,22 @@
 }
 \vspace{\baselineskip}
 
+I would like to express my sincere appreciation for the time and effort that
+the reviewer invested in the review.  It is obvious to me that the
+reviewer went through the paper and code in great detail.  In
+particular, I want to thank the reviewer for bringing the complex step
+method to my attention.  I \emph{never} use complex numbers or
+functions in my own work, so I typically ignore anything with the word
+"complex" in it.  But this review prompted me to learn something new.
+That is always fun.
 
+I am happy to write that I was able to incorporate a large majority of
+the reviewer's suggestions in the revised paper and package. For the
+others, I hope that the editor and reviewer will accept my
+explanations and excuses.  Of course, if there are any strong
+objections to how I responded to the reviewer's concerns, I am happy
+to make further changes in advance of publication.
 
-I would like to express my appreciation for the time and effort that
-the reviewers invested in their reviews. The comments and suggestions
-are all well-taken, and I have addressed all of the items, point by
-point, in this note. The reviewers’ comments are in italics, and my
-responses follow.
 \vspace{\baselineskip}
 
 \begin{enumerate}
@@ -81,15 +85,16 @@ critical it might be better to omit it.
 
 \begin{response}
 I suspect that the error is a result of the \pkg{algorithm} package
-not being present in your LaTeX installation.  I would like to continue to use it,
+not being present in the reviewer's LaTeX installation.  I would like
+to continue to use this package,
 because it does allow for nicely formatted algorithms.  I believe that this is
 a relatively common package, and one that should be easily installed
-via your closest CTAN mirror.  However, if there is a strong
+through CTAN.  However, if there is a strong
 objection, I may be able to find another way to format the algorithms.
 \end{response}
 
 \item \begin{revQuote}
-    I am not familiar with reference classes, but for most users I think it
+I am not familiar with reference classes, but for most users I think it
 should not be important that the package uses them. However, as a user, I
 find it disconcerting that sparseHessianFD() is used as a (constructor)
 function (eg. p12, and in the example in ?sparseHessianFD) but is not
@@ -101,6 +106,11 @@ from the community on this point.
 
 
 \begin{response}
+
+  Note to me:  issue here is that there is no documentation for
+  \func{sparseHessianFD()} as a function.  Good idea to create a
+  documentation page for that.
+
   
 \end{response}
 
@@ -111,17 +121,26 @@ It is pointed out (p2) that requirements are burdensome and emphasized
 that the package is not appropriate for all uses. Also, the conditions 1-5
 are fairly stringent. The reader is left with the impression that there may
 be few applications. I think the value of the package could be promoted
-better. Perhaps  a small list of different types or applications of
+better. Perhaps a small list of different types or applications of
 hierarchical problems could be given, or an indication of other classes of
 problems where the conditions would apply.
-
-
-
     
   \end{revQuote}
 
 \begin{response}
-  
+
+Note to me:  reword last paragraph on p2 to make the requirements
+sound a lot less burdensome.  Spin these to show that these are
+easy,but acknowledge that supplying a gradient might be difficult.
+
+Then, follow reviewer's advice and explain situations in which the
+requirements might not be met.
+
+Note that there is really no disadvantage to defining the sparsity pattern as
+less sparse than it is (other than suboptimal computation). So, if the
+hierarchical structure is known, but there are potentially independent
+components in the margins, there is nothing wrong with assuming dense margins.
+
 \end{response}
 
 \item \begin{revQuote}
@@ -131,6 +150,29 @@ that would have any practical value.
   \end{revQuote}
 
 \begin{response}
+
+  In order to gain any kind of computational advantage, the sparsity
+  pattern has to be the same for the entire domain of the function. I
+  think that qualifies as a global condition in the reviewer's
+  terminology.
+
+  There is a distinction between a structural zero and a numerical
+  zero.  A structural zero is an element of the Hessian that is zero
+  for all possible variables.  Because that element is always zero, we
+  do not have to reserve memory for it in the sparse matrix object.
+  A Hessian element might be a numerical zero when evaluated at some
+  values, but not others.
+
+  Now, suppose we allowed the sparsity pattern to change when a zero
+  element became non-zero.  At the moment, not only would we need to
+  allocate memory for the new non-zero element, but we would need to
+  rearrange all of the other elements to put the new element in the
+  right place.  The efficiency of sparse matrix operations comes from
+  how the non-zero elements are ordered and indexed.
+
+  
+Note to me:  somewhere in the paper, clarify the difference between
+structural and numerical zeros, and explain why that matters.
   
 \end{response}
 
@@ -140,10 +182,10 @@ more hints about dimension, and more care about use of the term
 "coefficients vector", for example:
 
   - 'continuous covariates $x_i$,' -> 'continuous covariates $x_i \in
-\\R^k$,'
+\Real{k}$,'
 
   - 'heterogeneous coefficient vector $\beta_i$' -> 'heterogeneous
-coefficient vector $\beta_i \in \\R^k$'
+coefficient vector $\beta_i \in \Real{k}$'
 
   - 'The coefficients are distributed' -> 'The coefficient vectors
 $\beta_i$ are distributed'
@@ -239,7 +281,7 @@ order.row=order.row))),digits=20)
 
 \end{verbatim}
 
-It is not clear to me whether obj$fn() and obj$gr() use code as in the true
+It is not clear to me whether obj\$fn() and obj\$gr() use code as in the true
 functions or a modified version using sparse techniques. Some further
 clarification would be helpful.
 
@@ -656,79 +698,12 @@ which resulted in a big slow down.)
  - Assess the difference when multiple CPUs are used. (run.par == FALSE vs
 run.par == TRUE)
 
-
-
   \end{revQuote}
   
   \begin{response}
     
   \end{response}
 
-\item\begin{revQuote}
-
-
-
-
-  \end{revQuote}
-  
-  \begin{response}
-    
-  \end{response}
-
-\item\begin{revQuote}
-
-
-
-
-  \end{revQuote}
-  
-  \begin{response}
-    
-  \end{response}
-
-\item\begin{revQuote}
-
-
-
-
-  \end{revQuote}
-  
-  \begin{response}
-    
-  \end{response}
-
-\item\begin{revQuote}
-
-
-
-
-  \end{revQuote}
-  
-  \begin{response}
-    
-  \end{response}
-
-\item\begin{revQuote}
-
-
-
-
-  \end{revQuote}
-  
-  \begin{response}
-    
-  \end{response}
-
-\item\begin{revQuote}
-
-
-
-
-  \end{revQuote}
-  
-  \begin{response}
-    
-  \end{response}
 
 
   
