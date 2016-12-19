@@ -20,6 +20,6 @@ README.html
 *.synctex.gz
 _region_*
 cache
-jss_prescreened/*
+nobuild/jss_prescreened/*
 
 
