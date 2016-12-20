@@ -127,19 +127,13 @@ problems where the conditions would apply.
     
   \end{revQuote}
 
-\begin{response}
+  \begin{response}
 
-Note to me:  reword last paragraph on p2 to make the requirements
-sound a lot less burdensome.  Spin these to show that these are
-easy,but acknowledge that supplying a gradient might be difficult.
-
-Then, follow reviewer's advice and explain situations in which the
-requirements might not be met.
-
-Note that there is really no disadvantage to defining the sparsity pattern as
-less sparse than it is (other than suboptimal computation). So, if the
-hierarchical structure is known, but there are potentially independent
-components in the margins, there is nothing wrong with assuming dense margins.
+I included this section primarily as a way to avoid overselling the
+method, but the point that the reader might be scared away by this list of
+restrictions is well-taken.  In the revision, I removed the list of
+conditions, and wove them into the text.  The result takes a more
+positive tone that in the original submission.
 
 \end{response}
 
@@ -151,29 +145,16 @@ that would have any practical value.
 
 \begin{response}
 
-  In order to gain any kind of computational advantage, the sparsity
-  pattern has to be the same for the entire domain of the function. I
-  think that qualifies as a global condition in the reviewer's
-  terminology.
+  The list of conditions is no longer in the paper, but to this point,
+  I added a defintion of a ``structural zero'' in the third
+  paragraph. The sparsity pattern represents the structure of the
+  Hessian, not its value, so any element that \emph{could} be zero,
+  but does not have to be zero, is not a structural zero.  Thus, the
+  condition is global and not local.
 
-  There is a distinction between a structural zero and a numerical
-  zero.  A structural zero is an element of the Hessian that is zero
-  for all possible variables.  Because that element is always zero, we
-  do not have to reserve memory for it in the sparse matrix object.
-  A Hessian element might be a numerical zero when evaluated at some
-  values, but not others.
-
-  Now, suppose we allowed the sparsity pattern to change when a zero
-  element became non-zero.  At the moment, not only would we need to
-  allocate memory for the new non-zero element, but we would need to
-  rearrange all of the other elements to put the new element in the
-  right place.  The efficiency of sparse matrix operations comes from
-  how the non-zero elements are ordered and indexed.
-
-  
-Note to me:  somewhere in the paper, clarify the difference between
-structural and numerical zeros, and explain why that matters.
-  
+  Note that other than
+  a potential loss of efficiency, there is no disadvantage to erring
+  on the side of an element being non-zero.  
 \end{response}
 
 \item \begin{revQuote}
