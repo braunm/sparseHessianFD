@@ -38,6 +38,7 @@
 \newcommand{\hess}[2]{\mathsf{H}_{#1}#2}
 \newcommand{\hessLT}[2]{\mathsf{L}_{#1}#2}
 \newcommand{\Mat}[1]{\mathbf{#1}}
+\newcommand{\Real}[1]{\mathbb{R}^{#1}}
 
 
 \author{Michael Braun\\Edwin L. Cox School of Business\\Southern Methodist University}
@@ -72,11 +73,11 @@
   unavailable.}
 
 
-\date{July 6, 2016}
+\date{December 20, 2016}
 
 %% need no \usepackage{Sweave.sty}
 
-\newenvironment{knitrout}{\begin{figure}}{\end{figure}}
+%%\newenvironment{knitrout}{\begin{figure}}{\end{figure}}
 
 \begin{document}
 
@@ -86,7 +87,7 @@
 <<setup1, echo=FALSE, cache=FALSE>>=
 suppressPackageStartupMessages(require(Matrix))
 knitr::render_sweave()
-knitr::opts_chunk$set(prompt=TRUE, cache=FALSE) %$
+knitr::opts_chunk$set(prompt=TRUE, cache=FALSE) #$
 options(replace.assign=TRUE, width=77, prompt="R> ")
 @
 
@@ -297,11 +298,10 @@ Jacobian matrices by perturbing groups of variables together.
 \Citet{PowellToint1979} extend this idea to the
 general case of sparse Hessians.  This method partitions
 the decision variables into $C$ mutually exclusive groups so that the number of gradient
-evaluations is reduced.  Let $\Mat{G}$ be a $M\times C$
-matrix, where $\Mat{G}_{mc}=\delta$ if variable $m$ belongs to group $c$, and zero
-otherwise.  Define $\Mat{G}_c$ as the $c$th column of $\Mat{G}$.
+evaluations is reduced.  Define $\Mat{G}\in\Real{M\times C}$ where $\Mat{G}_{mc}=\delta$ if variable $m$ belongs to group $c$, and zero
+otherwise.  Define $\Mat{G}_c\in\Real{M}$ as the $c$th column of $\Mat{G}$.
 
-Next, let $\Mat{Y}$ be a $M\times C$ matrix, where each column is a
+Next, define $\Mat{Y}\in\Real{M\times C}$ such that each column is a
 difference in gradients.
 \begin{align}
   \label{eq:Yg}
@@ -460,17 +460,18 @@ Suppose we have a dataset of $N$ households, each with $T$
  number of times household $i$ purchases the product, out of the $T$
  purchase opportunities, and let $p_i$ be the probability of
  purchase.  The heterogeneous parameter $p_i$ is the same for all $T$
- opportunities, so $y_i$ is a binomial random variable.  Define each $p_i$ such that it depends on both $k$ continuous covariates
- $x_i$, and a heterogeneous coefficient vector $\beta_i$.
+ opportunities, so $y_i$ is a binomial random variable.  Define each
+ $p_i$ such that it depends on a covariate vector
+ $x_i\in\Real{k}$, and a heterogeneous coefficient vector $\beta_i\in\Real{k}$.
 \begin{align}
   p_i=\frac{\exp(x_i'\beta_i)}{1+\exp(x_i'\beta_i)},~i=1 ... N
 \end{align}
 
-The coefficients are distributed across the population of households
-following a multivariate normal distribution with mean $\mu$ and
-covariance $\Mat{\Sigma}$.   Assume that we know $\Mat{\Sigma}$, but not $\mu$.
+The coefficient vectors $\beta_i$ are distributed across the population of households
+following a multivariate normal distribution with mean $\mu\in\Real{k}$ and
+covariance $\Mat{\Sigma}\in\Real{k\times k}$.   Assume that we know $\Mat{\Sigma}$, but not $\mu$.
 Instead, place a multivariate normal prior on $\mu$, with mean $0$ and
-covariance $\Mat{\Omega}$.  Thus, each $\beta_i$, and $\mu$ are
+covariance $\Mat{\Omega}\in\Real{k\times k}$.  Thus, each $\beta_i$, and $\mu$ are
 $k-$dimensional vectors, and the total number of unknown variables in the model is $(N+1)k$.
 
 The log posterior density, ignoring any normalization constants, is
@@ -508,7 +509,7 @@ options(scipen=999)
 
 The sparsity pattern depends on how the variables are
 ordered within the vector. One such ordering is to group all of the
-coefficients for each unit together.
+coefficients in the $\beta_i$ for each unit together.
 \begin{align}
 \beta_{11},\dotsc,\beta_{1k},\beta_{21},\dotsc,\beta_{2k},~\dotsc~,\beta_{N1},\dotsc,\beta_{Nk},\mu_1,\dotsc,\mu_k
 \end{align}
