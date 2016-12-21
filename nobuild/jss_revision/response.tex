@@ -191,7 +191,15 @@ double subscript just above in "Thus, $\hess{\beta_{ik},\mu_k}{}\neq 0$".
   \end{revQuote}
 
 \begin{response}
-  
+  Based on this comment, I rewrote Section 2.2 to distinguish the
+  cross-partial derivatives $\parD{2}{}$ from the corresponding
+  elements of the Hessian $\hess{}{}$.  I did this by defining $x_i$ as
+  a subset of the elements of $x$, and Ind$(x_i)$ as an 
+  ``indexing'' function.  The revised version is slightly more formal
+  and precise, and I hope that this is the kind of change you had in
+  mind.  That said, I do not think it makes the paper easier to read,
+  and, with your permission, I would prefer to revert to the simpler
+  language in the original manuscript.
 \end{response}
 
 
@@ -201,6 +209,13 @@ reverse which is indicated.
   \end{revQuote}
 
 \begin{response}
+No, the descriptions of the two sparsity patterns are correct. The
+first index in the subscript of $\beta$ refers to a household, and the
+second index refers to a covariate. Thus,
+$\parD{2}{\beta_{11},\beta_{12}}\neq 0$, but
+$\parD{2}{\beta_{11},\beta_{21}}=0$.  When the second index changes
+before the first, the pattern is ``block-arrow.''  When the first
+index changes before the second, the pattern is ``banded.''
   
 \end{response}
 
@@ -228,7 +243,8 @@ syntax.
   \end{revQuote}
 
 \begin{response}
-  
+  I removed the \func{R>} prompt and now refer to that code as a usage
+  syntax.  
 \end{response}
 
 
@@ -239,7 +255,7 @@ the "named" ones, so it is probably better to just say "other arguments".
   \end{revQuote}
 
 \begin{response}
-  
+  Done.
 \end{response}
 
 
@@ -275,13 +291,18 @@ max(abs(  obj$hessian(P)
 
 which might also be mentioned in the text. (Really just for exposition
 purposes, after all, it is almost the main purpose of the package.)
-p10. "where ... represents all other named arguments"
-   I think the usual usage is the ... represents the arguments other than
-the "named" ones, so it is probably better to just say "other arguments".
   \end{revQuote}
 
 \begin{response}
-  
+  Good point.  I revised that section to explain that evaluations of
+  the function and gradient have to be identical to the true values,
+  and I even replaced \func{all.equal} with \func{identical} to
+  highlight that fact. I then explained that the
+  \class{sparseHessianFD} calculation of the Hessian will not be
+  identical to the true value, and report the mean relative
+  difference.  I chose the mean relative difference over maximum
+  absolute difference because the former is what the \func{all.equal}
+  function uses to test if two matrices are equal within numeric tolerance.
 \end{response}
 
 
@@ -373,8 +394,6 @@ method in the sparse code. The function numDeriv:::jacobian.default
 implements both simple and complex, so provides a good comparison of the
 necessary (non-sparse) computation. 
 
-
-    
   \end{revQuote}
 
 \begin{response}
@@ -387,7 +406,7 @@ necessary (non-sparse) computation.
   \end{revQuote}
 
 \begin{response}
-  
+  Fixed.  Thanks.
 \end{response}
 
 
@@ -653,7 +672,7 @@ accurate result.
   \end{revQuote}
   
   \begin{response}
-    
+    Fixed.  Thanks.
   \end{response}
 
 \item\begin{revQuote}

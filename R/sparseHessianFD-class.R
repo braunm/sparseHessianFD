@@ -166,12 +166,27 @@ sparseHessianFD <-
                         gr1(x+d) - grad.x
                     },
 
+                    fd_complex = function(d, x) {
+                        Im(gr1(x + 1i * d))
+                    },
+
                     hessian = function(x) {
                         "Return sparse Hessian, evaluated at x, as a dgCMatrix object."
                         usingMethods(fd)
                         stopifnot(ready)
                         grad.x <- gr1(x)
                         Y2 <- apply(D, 2, fd, x = x, grad.x = grad.x)
+                        Y <- Y2[perm,]
+                        res <- subst(Y, colors,
+                                     idx-index1, pntr-index1, delta, nvars, nnz)
+                        return(res[invperm,invperm])
+                    },
+
+                    hessian_complex = function(x) {
+                        "Return sparse Hessian, evaluated at x, as a dgCMatrix object, using complex step method"
+                        usingMethods(fd_complex)
+                        stopifnot(ready)             
+                        Y2 <- apply(D, 2, fd_complex, x = x)
                         Y <- Y2[perm,]
                         res <- subst(Y, colors,
                                      idx-index1, pntr-index1, delta, nvars, nnz)

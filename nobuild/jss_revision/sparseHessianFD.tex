@@ -470,42 +470,68 @@ Suppose we have a dataset of $N$ households, each with $T$
  number of times household $i$ purchases the product, out of the $T$
  purchase opportunities, and let $p_i$ be the probability of
  purchase.  The heterogeneous parameter $p_i$ is the same for all $T$
- opportunities, so $y_i$ is a binomial random variable.  Define each
- $p_i$ such that it depends on a covariate vector
- $x_i\in\Real{k}$, and a heterogeneous coefficient vector $\beta_i\in\Real{k}$.
+ opportunities, so $y_i$ is a binomial random variable.
+ 
+ Let $\beta_i\in\Real{k}$ be a heterogeneous coefficient vector that
+ is specific to household $i$, such that
+ $\beta_i=(\beta_{i1},\dotsc,\beta_{ik})$. Similarly,
+ $z_i\in\Real{k}$ is a vector of household-specific covariates. Define each
+ $p_i$ such that the log odds of $p_i$ is a linear function of
+ $\beta_i$ and $z_i$, but does not depend directly on $\beta_j$ and $z_j$ for
+ another household $j\neq i$.
 \begin{align}
-  p_i=\frac{\exp(x_i'\beta_i)}{1+\exp(x_i'\beta_i)},~i=1 ... N
+  p_i=\frac{\exp(z_i'\beta_i)}{1+\exp(z_i'\beta_i)},~i=1 ... N
 \end{align}
 
 The coefficient vectors $\beta_i$ are distributed across the population of households
 following a multivariate normal distribution with mean $\mu\in\Real{k}$ and
-covariance $\Mat{\Sigma}\in\Real{k\times k}$.   Assume that we know $\Mat{\Sigma}$, but not $\mu$.
-Instead, place a multivariate normal prior on $\mu$, with mean $0$ and
-covariance $\Mat{\Omega}\in\Real{k\times k}$.  Thus, each $\beta_i$, and $\mu$ are
-$k-$dimensional vectors, and the total number of unknown variables in the model is $(N+1)k$.
+covariance $\Mat{\Sigma}\in\Real{k\times k}$.   Assume that we know
+$\Mat{\Sigma}$, but not $\mu$, so we place a multivariate normal prior
+on $\mu$, with mean $0$ and
+covariance $\Mat{\Omega}\in\Real{k\times k}$.  Thus, the parameter
+vector $x\in\Real{(N+1)k}$ consists of the $Nk$ elements in the $N$ $\beta_i$ vectors,
+and the $k$ elements in $\mu$.
 
 The log posterior density, ignoring any normalization constants, is
 \begin{align}
   \label{eq:LPD}
-  \log \pi(\beta_{1:N},\mu|\Mat{Y}, \Mat{X}, \Mat{\Sigma},\Mat{\Omega})=\sum_{i=1}^N\left(p_i^{y_i}(1-p_i)^{T-y_i}
+  \log \pi(\beta_{1:N},\mu|\Mat{Y}, \Mat{Z}, \Mat{\Sigma},\Mat{\Omega})=\sum_{i=1}^N\left(p_i^{y_i}(1-p_i)^{T-y_i}
   -\frac{1}{2}\left(\beta_i-\mu\right)^\top\Mat{\Sigma}^{-1}\left(\beta_i-\mu\right)\right)
 -\frac{1}{2}\mu^\top\Mat{\Omega}^{-1}\mu
 \end{align}
 
-All of the $\beta_i$ are correlated with
-$\mu$.  Thus, $\hess{\beta_{ik},\mu_k}{}\neq 0$ for all $i$. Since the $\beta_i$ are independently distributed, and the $y_i$ are
-conditionally independent, the cross-partial derivatives
-$\hess{\beta_i,\beta_j}{}=\parD{2}{\beta_i, \beta_j}{}=0$ for all $i\neq
-j$.  When $N$ is much greater than $k$, the Hessian of the log
-posterior density will be sparse.
 
 
 \subsection[Sparsity patterns]{Sparsity patterns}\label{sec:sparsity}
 
 
 
-The sparsity pattern depends on how the variables are
-ordered within the vector. One such ordering is to group all of the
+
+
+Let $x_1$ and $x_2$ be two subsets of elements of $x$.  
+Define $\parD{2}{x_1,x_2}$ as the product set of cross-partial
+derivatives between all elements in $x_1$ and all elements in $x_2$.
+Furthermore, define an indexing function Ind$(x_i)$ that returns the
+indices in the parameter vector
+$x$ that correspond to the elements in $x_i$, and $\hess{x_1,x_2}{}$
+as the Hessian elements in rows Ind$(x_1)$ and columns Ind$(x_2)$, and
+in rows Ind$(x_2)$ and columns Ind$(x_1)$ (from the symmetry of the
+Hessian).
+
+From the log posterior density in Equation \ref{eq:LPD}, we can see
+that $\parD{2}{\beta_i, \beta_i}\neq 0$ (one element of $\beta_i$ could be
+correlated with another element of $\beta_i$), and that, for all $i$,
+$\parD{2}{\beta_i, \mu}=0$ (because $\mu$ is the prior mean of each
+$\beta_i$).  However, since the $\beta_i$ and $\beta_j$ are independently distributed, and the $y_i$ are
+conditionally independent, the cross-partial derivatives
+$\parD{2}{\beta_i, \beta_j}=0$ for all $i\neq j$. When $N$ is much
+greater than $k$, there will be many more zero cross-partial
+derivatives than non-zero.  Regardless of how each $\parD{2}{}$ is
+mapped to $\hess{}{}$ through the indexing function, the Hessian of the log
+posterior density will be sparse.
+
+The sparsity pattern depends on the indexing function; that is, on how the variables are
+ordered in $x$. One such ordering is to group all of the
 coefficients in the $\beta_i$ for each unit together.
 \begin{align}
 \beta_{11},\dotsc,\beta_{1k},\beta_{21},\dotsc,\beta_{2k},~\dotsc~,\beta_{N1},\dotsc,\beta_{Nk},\mu_1,\dotsc,\mu_k
@@ -698,13 +724,13 @@ index1& If \variable{TRUE} (the default), \funcarg{row} and \funcarg{col} use on
 
 To create a \class{sparseHessianFD} object, just call
 \func{sparseHessianFD}.  Applying the default values for the optional
-arguments,
+arguments, the usage syntax to create a \class{sparseHessianFD} object is
 \begin{Schunk}
 \begin{Sinput}
-R> obj <- sparseHessianFD(x, fn, gr, rows, cols, ...)
+obj <- sparseHessianFD(x, fn, gr, rows, cols, ...)
 \end{Sinput}
 \end{Schunk}
-where \funcarg{...} represents all other named arguments that are
+where \funcarg{...} represents all other arguments that are
 passed to \funcarg{fn} and \funcarg{gr}.
 
 
@@ -809,9 +835,9 @@ List of 2
 \end{Soutput}
 \end{Schunk}
 
-Finally, we create an instance of a \class{sparseHessianFD} object,
-evaluate the function, gradient and Hessian, and compare the output to
-the true values.
+Finally, we create an instance of a \class{sparseHessianFD} object.
+Evaluations of the function and gradient will generate the same
+results as the true values because they are computed using the same function.
 
 \begin{Schunk}
 \begin{Sinput}
@@ -819,27 +845,46 @@ R> obj <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
 +   rows=pattern[["rows"]], cols=pattern[["cols"]],
 +   data=binary, priors=priors, order.row=order.row)
 R> f <- obj$fn(P)
-R> all.equal(f, true.f)
+R> identical(f, true.f)
 \end{Sinput}
 \begin{Soutput}
 [1] TRUE
 \end{Soutput}
 \begin{Sinput}
 R> gr <- obj$gr(P)
-R> all.equal(gr, true.grad)
-\end{Sinput}
-\begin{Soutput}
-[1] TRUE
-\end{Soutput}
-\begin{Sinput}
-R> hs <- obj$hessian(P)
-R> all.equal(hs, true.hess)
+R> identical(gr, true.grad)
 \end{Sinput}
 \begin{Soutput}
 [1] TRUE
 \end{Soutput}
 \end{Schunk}
 
+The evaluation of the Hessian is a finite differenced approximation,
+so it is very close to, but not identical to, the true value, in terms
+of mean relative difference.
+
+
+
+\begin{Schunk}
+\begin{Sinput}
+R> hs <- obj$hessian(P)
+R> mean(abs(hs-true.hess))/mean(abs(hs))
+\end{Sinput}
+\begin{Soutput}
+[1] 1.1217e-08
+\end{Soutput}
+\end{Schunk}
+
+
+
+
+Note that variables \variable{f} and \variable{true.f} were computed
+using the same exact calculation, as were variables
+\variable{gr} and \variable{true.grad}.In contrast,
+\variable{true.hess} was computed using an exact calculation, while
+\variable{hs} is the sparse finite difference approximation.
+
+were computed by the same functions
 
 \section[Algorithms]{Algorithms}\label{sec:algorithms}
 
@@ -982,7 +1027,7 @@ Now suppose we were to rearrange $\hess{}{}$ so the last row and
 and column were moved to the front.  In Figure~\ref{fig:graph2adj}, all columns share at least one non-zero row with
 the column for variable 7, but variable groups $\{2,4,6\}$ and
 $\{1,3,5\}$ have empty intersection sets.  The intersection graph in
-Figure~\ref{fig:graph2pic} has fewer edges, and can be colored
+Figure~\ref{fig:graph2int} has fewer edges than Figure~\ref{fig:graph1int}, and can be colored
 with only three colors.
 \begin{figure}[ptb]
   \begin{subfigure}[m]{.32\textwidth}\centering
@@ -1186,8 +1231,8 @@ estimated Hessians of the log posterior density in Equation~\ref{eq:LPD} with di
 units ($N$) and within-unit parameters ($k$).  As in the previous
 section, the total number of
 variables is $M=(N+1)k$.  Table~\ref{tab:numDeriv} shows the mean
-and standard deviations (across 20 replications) for the time (in milliseconds) to
-to compute a Hessian using each package.  The difference in run times is dramatic,
+and standard deviations (across 20 replications) for the time (in
+milliseconds) to compute a Hessian using each package.  The difference in run times is dramatic,
 especially because the computation time for \pkg{numDeriv} grows
 quadratically in the number of variables.  The setup time for
 \pkg{sparseHessianFD} was about 7 milliseconds for all cases.  Times
