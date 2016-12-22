@@ -39,6 +39,7 @@
 \newcommand{\hessLT}[2]{\mathsf{L}_{#1}#2}
 \newcommand{\Mat}[1]{\mathbf{#1}}
 \newcommand{\Real}[1]{\mathbb{R}^{#1}}
+\DeclareMathOperator{\Imag}{Im}
 
 
 \author{Michael Braun\\Edwin L. Cox School of Business\\Southern Methodist University}
@@ -87,7 +88,7 @@
 <<setup1, echo=FALSE, cache=FALSE>>=
 suppressPackageStartupMessages(require(Matrix))
 knitr::render_sweave()
-knitr::opts_chunk$set(prompt=TRUE, cache=FALSE) #$
+knitr::opts_chunk$set(prompt=TRUE, cache=FALSE,error=FALSE) #$
 options(replace.assign=TRUE, width=77, prompt="R> ")
 @
 
@@ -665,6 +666,9 @@ delta& The perturbation amount for finite differencing of the
   \code{sqrt(.Machine\$double.eps)}.\\
 index1& If \variable{TRUE} (the default), \funcarg{row} and \funcarg{col} use one-based
   indexing.  If \variable{FALSE}, zero-based indexing is used.\\
+  complex&If \variable{TRUE}, the complex step method is used.
+                If \variable{FALSE} (the default), a simple finite
+                differencing of gradients is used.\\
 ...& Additional arguments to be passed to \func{fn} and \func{gr}.\\
  \bottomrule
 \end{tabularx}
@@ -768,7 +772,7 @@ results as the true values because they are computed using the same function.
 
 <<usingSparseHessianFD1>>=
 obj <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
-  rows=pattern[["rows"]], cols=pattern[["cols"]],
+  rows=pattern[["rows"]], cols=pattern[["cols"]], 
   data=binary, priors=priors, order.row=order.row)
 f <- obj$fn(P)
 identical(f, true.f)
@@ -1115,6 +1119,46 @@ values to the corresponding column in the upper triangle, and advances upwards.
   \end{algorithmic}
   \caption{Triangular substitution method.}\label{alg:subst}
 \end{algorithm}
+
+
+\subsection[Complex step method]{Complex step method}
+
+The \pkg{sparseHessianFD} package also allows for
+estimation of the Hessian using the complex step method
+\citep{SquireTrapp1998} as an alternative to finite differencing. In
+this method, the definition of $\Mat{Y}_c$ in Equation \ref{eq:Yg} is replaced with
+\begin{align}
+  \label{eq:complexYg}
+  \Mat{Y}_c&=\Imag(\nabla f(x+iG_c))
+\end{align}
+where $i=\sqrt{-1}$ and $\Imag$ returns the imaginary part of a complex
+number. The advantage of this method is that there is no longer a
+subtraction operation to generate truncation error. Thus, $\delta$ can
+be made arbitrarily small, and the resulting estimate of the Hessian
+is more accurate. 
+
+To use the complex step method, include the argument
+\funcarg{complex=TRUE} in the call to the initializer of the \class{sparseHessianFD}
+object. The functions passed as \funcarg{fn} and \funcarg{gr} must both
+accept a complex argument, and return a complex
+result, even though we are differentiating a real-valued function. Although \pkg{base} \proglang{R} supports complex arguments
+for basic arithmetic, trigonometric, logarithmic and exponential
+functions, many other common functions (e.g.,  \func{gamma}, \func{log1p},
+\func{expm1}, and the probability distribution functions) do not have
+complex implementations. Furthermore, the complex step method is valid
+only if the function is holomorphic
+(complex differentiable). The methods in \class{sparseHessianFD} do
+\emph{not} check that this is the case for the function at hand. We convey the
+following warning from the documentation of the \pkg{numDeriv} package
+\citep{R_numDeriv}, which also implements the complex step method:
+``Avoid this method if you do not know that your function is
+suitable. Your mistake may not be caught and the results will be
+spurious.'' 
+
+In short, the complex step method is available to users who want
+improved accuracy and speed, and know what they are doing.
+
+
 
 \subsection[Software libraries]{Software libraries}
 The coloring and substitution algorithms use the \pkg{Eigen} numerical

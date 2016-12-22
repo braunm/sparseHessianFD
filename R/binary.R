@@ -1,5 +1,5 @@
 ## Part of the sparseHessianFD package
-## Copyright (C) 2013-2016 Michael Braun
+## Copyright (C) 2013-2017 Michael Braun
 
 ## Functions to compute objective function, gradient, and Hessian for
 ## binary choice example, and some unit tests.
@@ -29,9 +29,10 @@ binary.f <- function(P, data, priors, order.row=FALSE) {
 
     bx <- colSums(data$X * beta)
 
-    log.p <- bx - log1p(exp(bx))
-    log.p1 <- -log1p(exp(bx))
-
+    ## can't use log1p if P is complex
+    log.p <- bx - log(1+exp(bx))
+    log.p1 <- -log(1+exp(bx))
+   
     data.LL <- sum(data$Y*log.p + (data$T-data$Y)*log.p1)
 
     Bmu <- apply(beta, 2, "-", mu)
@@ -39,8 +40,8 @@ binary.f <- function(P, data, priors, order.row=FALSE) {
     prior <- -0.5 * sum(diag(tcrossprod(Bmu) %*% priors$inv.Sigma))
     hyp <- -0.5 * t(mu) %*% priors$inv.Omega %*% mu
     res <- data.LL + prior + hyp
-    return(as.numeric(res))
-
+    if(is.complex(P)) return(as.complex(res)) else return(as.numeric(res))  
+   
 }
 
 #' @rdname binary

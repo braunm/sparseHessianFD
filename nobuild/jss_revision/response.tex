@@ -243,7 +243,7 @@ syntax.
   \end{revQuote}
 
 \begin{response}
-  I removed the \func{R>} prompt and now refer to that code as a usage
+  I removed the \func{R>} prompt, and now refer to that code as a usage
   syntax.  
 \end{response}
 
@@ -397,7 +397,15 @@ necessary (non-sparse) computation.
   \end{revQuote}
 
 \begin{response}
-  
+  The complex step function is now implemented.  It appears to work on
+  the example function, which I had to modify because \proglang{R}
+  does not have a complex implementation of the \func{log1p}.  I added
+  a couple of paragraphs about this method in the Algorithms section,
+  but I did not want to oversell it for a few reasons.  First, I am
+  still generally unfamiliar with this method, so I do not want to
+  push it too hard.  Second, I think that the requirements of
+  holomorphism, and of being able to accept and return complex values,
+  does significantly limit the utility of the method.
 \end{response}
 
 
