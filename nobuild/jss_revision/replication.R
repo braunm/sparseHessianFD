@@ -11,7 +11,7 @@ library("ggplot2")
 
 set.seed(1234)
 
-registerDoParallel(cores=10)
+registerDoParallel(cores=11)
 
 binary_sim <- function(N, k, T) {
   x.mean <- rep(0,k)
@@ -160,42 +160,45 @@ run_test_tab4 <- function(Nk, reps=50, order.row=TRUE) {
 
 ## Replicate Figure 4
 
-cases_fig4 <- expand.grid(k=c(8, 6, 4, 2),
-                          N=c(25, 50, 75, seq(100,2000, by=100)),
+cases_fig4 <- expand.grid(k=c(8, 5, 2),
+                          N=c(25, 50, 75, seq(100,2500, by=200)),
                           T=20
 )
-reps_fig4 <- 100
+reps_fig4 <- 200
 
 runs_fig4 <- plyr::adply(cases_fig4, 1, run_test_fig4, reps=reps_fig4,
                          order.row=TRUE, .parallel=TRUE)
 
 tab_fig4 <- mutate(runs_fig4, ms=bench.time/1000000) %>%
   dcast(N+k+T+bench.rep+ncolors~bench.expr, value.var="ms")  %>%
-  mutate(nvars=N*k+k, hess_df=hess/df) %>%
-  gather(stat, ms, c(f,df,hess,colors,setup,hess_df)) %>%
+  mutate(nvars=N*k+k) %>%
+  gather(stat, ms, c(f,df,hess,colors,setup)) %>%
   group_by(N, k, T, stat, nvars) %>%
-  summarize(mean=mean(ms))
-
-
+  summarize(median=median(ms))
 D2 <- filter(data.frame(tab_fig4), stat %in% c("f", "df", "hess",
-                                               "colors", "setup","hess_df"))
+                                               "colors", "setup"))
 D2$stat <- plyr::revalue(D2$stat, c("f"="Function", "df"="Gradient", "hess"="Hessian",
                               "colors"="Partitioning",
-                              "setup"="Initialization",
-                              "hess_df"="Hessian/Gradient"))
-
+                              "setup"="Initialization"))
 D2$stat <- factor(D2$stat, levels=c("Function","Gradient","Hessian",
-                                    "Partitioning","Initialization",
-                                    "Hessian/Gradient"))
-
+                                    "Partitioning","Initialization"))
 theme_set(theme_bw())
-fig4 <- ggplot(D2, aes(x=N,y=mean, color=as.factor(k), linetype=as.factor(k))) %>%
+fig4 <- ggplot(D2, aes(x=N,y=median, color=as.factor(k), linetype=as.factor(k))) %>%
     + geom_line(size=.4) %>%
     + scale_x_continuous("Number of heterogeneous units") %>%
     + scale_y_continuous("Computation time (milliseconds)") %>%
     + guides(color=guide_legend("k"), linetype=guide_legend("k")) %>%
-    + facet_wrap(~stat, scales="free") %>%
-    + theme(text=element_text(size=10), legend.position="right")
+    + facet_wrap(~stat, scales="free",ncol=1) %>%
+    + theme(text=element_text(size=10), legend.position="bottom")
+
+ save(runs_fig4, tab_fig4, D2, file="nobuild/jss_revision/repl_fig.Rdata")
+ pdf(height=9,width=6,file="nobuild/jss_revision/fig_timings.pdf")
+ print(fig4)
+dev.off()
+ pdf(height=9,width=6,file="vignettes/fig_timings.pdf")
+ print(fig4)
+dev.off()
+
 
 
 ## Replicate Table 4
@@ -203,23 +206,21 @@ fig4 <- ggplot(D2, aes(x=N,y=mean, color=as.factor(k), linetype=as.factor(k))) %
 cases_tab4 <- expand.grid(k=c(2,4,8),
                           N=c(15, 50, 100, 500))
 
-runs_tab4 <- plyr::adply(cases_tab4, 1, run_test_tab4, reps=100,
+runs_tab4 <- plyr::adply(cases_tab4, 1, run_test_tab4, reps=200,
                          order.row=TRUE, .parallel=FALSE)
 
 tab4 <-  mutate(runs_tab4, ms=bench.time/1000000) %>%
   select(-bench.time) %>%
   spread(bench.expr, ms) %>%
-  gather(method, hessian, c(cplx, jac, sp, sp_cplx)) %>%
-  mutate(M=N*k+k, hessian.df=hessian/df) %>%
-  gather(stat, time, c(hessian, hessian.df)) %>%
-    group_by(N, k, method, M, stat)  %>%
+  gather(method, time, c(cplx, jac, sp, cplx, sp_cplx)) %>%
+    mutate(M=N*k+k) %>%
+    group_by(N, k, method, M)  %>%
     summarize(mean=mean(time), sd=sd(time)) %>%
     gather(stat2, value, c(mean,sd)) %>%
-    ##  summarize(mean=mean(time)) %>%
-  ##  gather(stat2, value, mean) %>%
-  dcast(N+k+M~stat+method+stat2,value.var="value") %>%
-    arrange(k,N)
+  dcast(N+k+M~method+stat2,value.var="value") %>%
+    arrange(k,N) %>%
+    select(N, k, M, jac_mean, jac_sd, sp_mean, sp_sd, cplx_mean, cplx_sd, sp_cplx_mean, sp_cplx_sd)
 
-save(runs_tab4, tab4, D2, file="repl.Rdata")
-
+save(runs_tab4, tab4, D2, file="nobuild/jss_revision/repl_tab4.Rdata")
+save(tab4, file="inst/extdata/vignette_tab4.Rdata")
 

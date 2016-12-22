@@ -1209,31 +1209,35 @@ variables is $M=(N+1)k$.  Table~\ref{tab:numDeriv} shows the mean
 and standard deviations (across 20 replications) for the time (in
 milliseconds) to compute a Hessian using each package.  The difference in run times is dramatic,
 especially because the computation time for \pkg{numDeriv} grows
-quadratically in the number of variables.  The setup time for
-\pkg{sparseHessianFD} was about 7 milliseconds for all cases.  Times
-were collected using the \pkg{microbenchmark} package \citep{R_microbenchmark}.
+quadratically in the number of variables. Times
+were collected using the \pkg{microbenchmark} package
+\citep{R_microbenchmark}. Code to replicate Table~\ref{tab:numDeriv}
+is in the file \filename{replication.R}, which is available as an
+online supplement to this paper.
+
+<<>>=
+library(xtable)
+library(dplyr)
+load("vignette_tab4.Rdata")
+@
 
 \begin{table}[ptb]\centering
-  \begin{tabularx}{1\linewidth}{@{\extracolsep{\fill} }cccp{2pt}rrrrp{2pt}rrrr}
+  \begin{tabularx}{1\linewidth}{@{\extracolsep{\fill} }rrr|rrrr|rrrr}
   \toprule
-&&&&\multicolumn{4}{c}{\bfseries{Hessian
-    time}}&&\multicolumn{4}{c}{\bfseries{Hessian/Gradient ratio}}\\
-&&&&\multicolumn{2}{c}{\pkg{numDeriv}}&\multicolumn{2}{c}{\pkg{sparseHessianFD}}&&\multicolumn{2}{c}{\pkg{numDeriv}}&\multicolumn{2}{c}{\pkg{sparseHessianFD}}\\
-$N$&$k$&$M$&&mean&sd&mean&sd&&mean&sd&mean&sd\\
-  \cmidrule{1-3}\cmidrule{5-8}\cmidrule{10-13}
-   9 &    2 &   20 &&  363 & 6.4 &  2.8 & 2.2 &&  871 & 63 & 6.5 & 4.2 \\
-    12 &    2 &   26 &&  629 &  8.9 &  2.9 & 2.1 && 1469 &  124 & 6.5 & 3.3 \\
-     9 &    3 &   30 &&  819 & 27.7 &  3.6 & 2.2 && 1974 &  161 & 8.4 & 3.7 \\
-    15 &    2 &   32 &&  973 & 25.8 &    3.0 & 2.2 && 2191 &  209 &  6.5 & 3.4 \\
-    12 &    3 &   39 && 1407 & 39.3 & 3.5 & 2.0 && 3291 &  285 &    8.0 & 3.5 \\
-     9 &    4 &   40 && 1445 & 28.8 & 4.3 & 2.1 && 3453 &  292 & 9.9 & 3.1 \\
-    15 &    3 &   48 && 2138 & 92.7 & 3.5 & 2.0 && 4861 &  341 & 7.8 & 3.4 \\
-    12 &    4 &   52 && 2400 & 98.6 & 4.3 & 2.1 && 5679 &  503 & 10.1 & 3.7 \\
-    15 &    4 &   64 && 3643 &  209.0 & 4.2 & 2.2 && 8945 &  828 & 10.0 &  2.8 \\
-   \bottomrule
+&&&\multicolumn{4}{c|}{\bfseries{Finite differencing}}&\multicolumn{4}{c}{\bfseries{Complex step}}\\
+&&&\multicolumn{2}{c}{\pkg{numDeriv}}&\multicolumn{2}{c|}{\pkg{sparseHessianFD}}&\multicolumn{2}{c}{\pkg{numDeriv}}&\multicolumn{2}{c}{\pkg{sparseHessianFD}}\\
+$N$&$k$&$M$&mean&sd&mean&sd&mean&sd&mean&sd\\
+%%\midrule
+<<results='asis',echo=FALSE>>=
+arrange(tab4, M) %>%
+xtable(digits=c(rep(0,4),rep(1,8))) %>%
+    print(only.contents=TRUE, comment=FALSE, booktabs=TRUE,
+      include.rownames=FALSE, include.colnames=FALSE)
+@
 \end{tabularx}
 \caption{Computation times (milliseconds) for computing Hessians using the
-  \pkg{numDeriv} and \pkg{sparseHessianFD} packages, across 200 replications. Rows are ordered by the
+  \pkg{numDeriv} and \pkg{sparseHessianFD} packages, and the finite
+ difference and complex step methods, across 200 replications. Rows are ordered by the
   number of variables.}\label{tab:numDeriv}
 \end{table}
 
@@ -1255,15 +1259,13 @@ Hessian&computing the Hessian (not including initialization or
 Partitioning&finding a consistent partitioning of the
   variables (the vertex coloring problem)\\
 Initialization&total setup time (including the partitioning time)\\
-Hessian/Gradient&ratio of the Hessian time to the
-    gradient time\\
     \bottomrule
   \end{tabularx}
   \caption{Summary of timing tests (see Figure~\ref{fig:timing}).}\label{tab:timeMeasures}
 \end{table}
 
 In the plots in Figure~\ref{fig:timing}, the number of heterogeneous units ($N$) is
-on the x-axis, and mean run time, in milliseconds, is on the y-axis.  Each panel shows the
+on the x-axis, and median run time, in milliseconds, is on the y-axis.  Each panel shows the
 relationship between $N$ and run time for a different measure of time,
 and each curve in a panel represents a different number of within-unit
 parameters ($k$).
@@ -1285,9 +1287,8 @@ additional heterogeneous units in a hierarchical model does not
 increase the number of required gradient evaluations.  So we might
 think that the time
 to compute a Hessian should not increase with $N$ \emph{at all}.  The
-reason it does is that each gradient evaluation takes longer.  The
-plot of the ratio of Hessian-to-gradient run times is relatively flat as the size
-of the dataset increases.  We can conclude that the
+reason it does is that each gradient evaluation takes longer.
+Nevertheless, we can conclude that the
 \pkg{sparseHessianFD} algorithms are quite efficient and scalable for
 hierarchical models.
 

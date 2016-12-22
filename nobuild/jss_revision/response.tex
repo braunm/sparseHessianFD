@@ -232,7 +232,21 @@ vinettes/sparseHessianFD.Rnw file. For those trying to reproduce results it
 would be nice if this where mentioned in the file replication.R.
   \end{revQuote}
 
-\begin{response}
+  \begin{response}
+Assuming that the R package builder works the way I think it does,
+the \filename{replication.R} file, and the data for Table 4 (\filename{vignette\_tab4.Rdata}), will be
+copied to the \filename{doc\textbackslash} directory of the package
+once it is installed.  It will also be available as an online supplement to
+this paper.
+\begin{itemize}
+\item 
+\end{itemize}
+
+
+Meeting the documentation and replication needs for both the journal,
+and CRAN, can be tricky, but I think I have a good solution
+
+    
   Note to me:  I think what this means is that results for Table 4 and
   Figure 4 are "hard coded.''  For the jss article, the replication
   file is provided, but this file is not part of the package.  It
@@ -381,20 +395,17 @@ Here I am combining my responses to items \ref{it:complex1} and
  
 In terms of accuracy, the paper now includes comparisons between the true
 Hessian and the two \class{sparseHessianFD} methods (finite differences
-and complex step). I am not comparing accuracy with \pkg{numDeriv},
-because that really is not the point of this paper.  However, for the
+and complex step). To maintain the focus of the paper on
+\pkg{sparseHessianFD}, I am not including an assessment of the accuracy of
+\pkg{numDeriv}.  However, for the
 timing comparisons in Table 4, I did
 change the baseline \pkg{numDeriv} method from \func{hessian} with the
-\method{Richardson} method, to \func{jacobian} with the
-\method{complex} method. Removing the second-order approximation saves
+\method{Richardson} method, to \func{jacobian} with both the
+\method{simple} and 
+\method{complex} methods. Removing the second-order approximation saves
 a lot of time, and lets me compute Table 4 without resorting to
 parallel computation. That will simplify attempts at replication, and
 removes another variable that might influence results.
-
-I did collect timings using the \pkg{numDeriv} \method{simple} method,
-but did not include those in Table 4 to save space.  There was not an
-appreciable difference in computation time between the \method{simple}
-and \method{complex} methods.
 
 Footnote 1 was expanded to acknowledge the complex step method.
 
@@ -451,15 +462,14 @@ swap, running Mint variant of Ubuntu 14.04.2 LTS.)
   \end{revQuote}
   
   \begin{response}
-    I agree.  See my response to Item \ref{it:complex2}.  I include the
-    times from the \pkg{numDeriv}
-    \method{complex} method instead of \method{simple} because of the
-    improved accuracy.  I considered including results from both methods,
-    but that would have cluttered the table, there was very
-    little difference in the times between them, and the comparison
-    between two \pkg{numDeriv} methods is not the point of this
-    paper. But I completely agree that either \func{jacobian} method
-    is a more valid comparison than using \func{hessian}.
+    I agree.  See my response to Item \ref{it:complex2}.  Table 4
+    includes times from the \pkg{numDeriv}
+    \method{complex} and \method{simple} methods.
+
+    To reduce clutter in Table 4, I removed comparisons of the
+    hessian-to-gradient computation time ratio.  That was not a
+    particularly interesting metric.
+    
   \end{response}
 
 \item\begin{revQuote}

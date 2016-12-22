@@ -22,7 +22,9 @@ Suggests:
     testthat,
     numDeriv,
     scales,
-    knitr
+    knitr,
+    xtable,
+    dplyr
 LinkingTo: Rcpp, RcppEigen (>= 0.3.2.9.0)
 VignetteBuilder: knitr
 SystemRequirements: C++11
