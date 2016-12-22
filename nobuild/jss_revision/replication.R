@@ -9,9 +9,11 @@ library("numDeriv")
 library("reshape2")
 library("ggplot2")
 
+set.seed(1234)
+
 
 run.par <- TRUE
-if (run.par) registerDoParallel(cores=12) else registerDoParallel(cores=1)
+if (run.par) registerDoParallel(cores=2) else registerDoParallel(cores=1)
 
 binary_sim <- function(N, k, T) {
   x.mean <- rep(0,k)
@@ -34,12 +36,12 @@ priors_sim <- function(k) {
 }
 
 
-make_funcs <- function(D, priors) {
+make_funcs <- function(D, priors, order.row=FALSE) {
   res <- vector("list", length=3)
   names(res) <- c("fn", "gr", "hessian")
-  res$fn <-  function(pars) binary.f(pars, data=D, priors=priors, order.row=TRUE)
-  res$gr <-  function(pars) binary.grad(pars, data=D, priors=priors, order.row=TRUE)
-  res$hessian <-  function(pars) binary.hess(pars, data=D, priors=priors, order.row=TRUE)
+  res$fn <-  function(pars) binary.f(pars, data=D, priors=priors, order.row=order.row)
+  res$gr <-  function(pars) binary.grad(pars, data=D, priors=priors, order.row=order.row)
+  res$hessian <-  function(pars) binary.hess(pars, data=D, priors=priors, order.row=order.row)
   return(res)
 }
 
@@ -55,25 +57,30 @@ make_perm <- function(iRow, jCol) {
 
 get_id <- function(x) 1:length(x)
 
-run_test_fig4 <- function(NkT, reps=50) {
+run_test_fig4 <- function(NkT, reps=50, order.row=FALSE) {
   ## Replication function for Figure 4
   N <- as.numeric(NkT["N"])
   k <- as.numeric(NkT["k"])
   T <- as.numeric(NkT["T"])
   data <- binary_sim(N, k, T)
   priors <- priors_sim(k)
-  F <- make_funcs(D=data, priors=priors)
+  F <- make_funcs(D=data, priors=priors, order.row=order.row)
   nvars <- N*k+k
 
-  M <- as(Matrix::kronecker(Matrix(1,k,k), Matrix::Diagonal(N)),"nMatrix") %>%
-    rBind(Matrix(TRUE,k,N*k)) %>%
-    cBind(Matrix(TRUE, k*(N+1), k)) %>%
-    as("nMatrix")
-
+  if (order.row) {
+      mm <- Matrix::kronecker(Matrix(1,k,k),Matrix::Diagonal(N))
+  } else {
+      mm <- Matrix::kronecker(Matrix::Diagonal(N),Matrix(1,k,k))    
+  }   
+  M <- rBind(mm,Matrix(TRUE,k,N*k)) %>%
+       cBind(Matrix(TRUE, k*(N+1), k)) %>%
+       as("sparseMatrix") %>%
+       as("nMatrix")
+  
   pat <- Matrix.to.Coord(tril(M))
   X <- rnorm(nvars)
 
-  obj <- sparseHessianFD(X, F$fn, F$gr, pat$rows, pat$cols)
+  obj <- sparseHessianFD(X, F$fn, F$gr, pat$rows, pat$cols, complex=TRUE)
   colors <- obj$partition()
   perm <- obj$get_perm()
   ncolors <- length(unique(colors))
@@ -104,26 +111,44 @@ run_test_fig4 <- function(NkT, reps=50) {
 }
 
 
-run_test_tab4 <- function(Nk, reps=50) {
+run_test_tab4 <- function(Nk, reps=50, order.row=TRUE) {
     ## Replication function for Table 4
     N <- as.numeric(Nk["N"])
-    k <- as.numeric(Nk["k"])
+    k <- as.numeric(Nk["k"])  
     data <- binary_sim(N, k, T=20)
     priors <- priors_sim(k)
-    F <- make_funcs(D=data, priors=priors)
+    F <- make_funcs(D=data, priors=priors, order.row=order.row)
     nvars <- N*k+k
-    M <- as(Matrix::kronecker(Matrix::Diagonal(N),Matrix(1,k,k)),"nMatrix") %>%
-      rBind(Matrix(TRUE,k,N*k)) %>%
-      cBind(Matrix(TRUE, k*(N+1), k)) %>%
-      as("nMatrix")
+
+    if (order.row) {
+        mm <- Matrix::kronecker(Matrix(1,k,k),Matrix::Diagonal(N))
+    } else {
+        mm <- Matrix::kronecker(Matrix::Diagonal(N),Matrix(1,k,k))    
+    }   
+    M <- rBind(mm,Matrix(TRUE,k,N*k)) %>%
+        cBind(Matrix(TRUE, k*(N+1), k)) %>%
+        as("sparseMatrix") %>%
+        as("nMatrix")
+    
     pat <- Matrix.to.Coord(tril(M))
     X <- rnorm(nvars)
-    obj <- sparseHessianFD(X, F$fn, F$gr, pat$rows, pat$cols)
+    obj <- sparseHessianFD(X, F$fn, F$gr, pat$rows, pat$cols, complex=FALSE)
+    obj2 <- sparseHessianFD(X, F$fn, F$gr, pat$rows, pat$cols, complex=TRUE)
 
-    bench <- microbenchmark(
-        numDeriv = numDeriv::hessian(obj$fn, X),
+    h1 <- obj$hessian(X)
+    h2 <- obj2$hessian(X)
+    h3 <- drop0(numDeriv::jacobian(obj$gr, X, method="complex"),tol=1e-7)
+
+    stopifnot(all.equal(h1,h2, tolerance=1e-7))
+    stopifnot(all.equal(h1,h3,tolerance=1e-7))
+    
+    bench <- microbenchmark(        
+        jac = numDeriv::jacobian(obj$gr, X, method="simple"),
+        cplx = numDeriv::jacobian(obj$gr, X, method="complex"),
         df = obj$gr(X),
-        sparse = obj$hessian(X))
+        sp = obj$hessian(X),
+        sp_cplx = obj2$hessian(X)
+        )
     vals <- plyr::ddply(data.frame(bench), "expr",
                   function(x) return(data.frame(expr=x$expr,
                                                 time=x$time,
@@ -131,17 +156,22 @@ run_test_tab4 <- function(Nk, reps=50) {
     res <- data.frame(N=N, k=k,
                       bench=vals)
     cat("Completed N = ",N,"\tk = " , k ,"\n")
+ 
     return(res)
 }
 
 ## Replicate Figure 4
 
-cases_fig4 <- expand.grid(k=c(8, 6, 4, 2),
-                          N=c(25, 50, seq(75,2500, by=75)),
-                          T=20
-                          )
+cases_fig4 <- expand.grid(##k=c(8, 6, 4, 2),
+    ##       N=c(25, 50, seq(75,2500, by=75)),
+    k=c(6, 4, 2),
+    N=c(25, 50, seq(75,2075, by=100)),
+    T=20
+)
+reps_fig4 <- 50
 
-runs_fig4 <- plyr::adply(cases_fig4, 1, run_test_fig4, reps=200, .parallel=run.par)
+runs_fig4 <- plyr::adply(cases_fig4, 1, run_test_fig4, reps=reps_fig4,
+                         order.row=TRUE, .parallel=run.par)
 
 tab_fig4 <- mutate(runs_fig4, ms=bench.time/1000000) %>%
   dcast(N+k+T+bench.rep+ncolors~bench.expr, value.var="ms")  %>%
@@ -164,30 +194,34 @@ D2$stat <- factor(D2$stat, levels=c("Function","Gradient","Hessian",
 
 theme_set(theme_bw())
 fig4 <- ggplot(D2, aes(x=N,y=mean, color=as.factor(k), linetype=as.factor(k))) %>%
-  + geom_line(size=.4) %>%
-  + scale_x_continuous("Number of heterogeneous units") %>%
-  + scale_y_continuous("Computation time (milliseconds)") %>%
-  + guides(color=guide_legend("k"), linetype=guide_legend("k")) %>%
-  + facet_wrap(~stat, scales="free") %>%
-  + theme(text=element_text(size=8), legend.position="right")
+    + geom_line(size=.4) %>%
+    + scale_x_continuous("Number of heterogeneous units") %>%
+    + scale_y_continuous("Computation time (milliseconds)") %>%
+    + guides(color=guide_legend("k"), linetype=guide_legend("k")) %>%
+    + facet_wrap(~stat, scales="free") %>%    
+    + theme(text=element_text(size=10), legend.position="right")
 
 
 ## Replicate Table 4
 
-cases_tab4 <- expand.grid(k=c(2,3,4),
-                     N=c(9, 12, 15))
-runs_tab4 <- plyr::adply(cases_tab4, 1, run_test_tab4, reps=20, .parallel=run.par)
+cases_tab4 <- expand.grid(k=c(2,4,6),
+                          N=c(9, 15, 21))
+
+runs_tab4 <- plyr::adply(cases_tab4, 1, run_test_tab4, reps=100,
+                         order.row=TRUE, .parallel=run.par)
 
 tab4 <-  mutate(runs_tab4, ms=bench.time/1000000) %>%
   select(-bench.time) %>%
   spread(bench.expr, ms) %>%
-  gather(method, hessian, c(numDeriv, sparse)) %>%
+  gather(method, hessian, c(cplx, jac, sp, sp_cplx)) %>%
   mutate(M=N*k+k, hessian.df=hessian/df) %>%
   gather(stat, time, c(hessian, hessian.df)) %>%
-  group_by(N, k, method, M, stat)  %>%
-  summarize(mean=mean(time), sd=sd(time)) %>%
-  gather(stat2, value, mean:sd) %>%
+    group_by(N, k, method, M, stat)  %>%
+    summarize(mean=mean(time), sd=sd(time)) %>%
+    gather(stat2, value, c(mean,sd)) %>%
+    ##  summarize(mean=mean(time)) %>%
+  ##  gather(stat2, value, mean) %>%
   dcast(N+k+M~stat+method+stat2,value.var="value") %>%
-  arrange(M)
+  arrange(k,N)
 
 

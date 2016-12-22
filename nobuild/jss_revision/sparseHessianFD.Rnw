@@ -701,7 +701,7 @@ fngrhs <- obj$fngrhs(x)
 @
 
 
-\subsection[An example]{An example}
+\subsection[An example]{An example}\label{sec:exHess}
 
 Now we can estimate the Hessian for the
 log posterior density of the model from Section \ref{sec:example}.
@@ -793,18 +793,68 @@ hs <- obj$hessian(P)
 mean(abs(hs-true.hess))/mean(abs(hs))
 @ 
 
-<<echo=FALSE>>=
-options(scipen=999)
-@ 
-
-
 Note that variables \variable{f} and \variable{true.f} were computed
 using the same exact calculation, as were variables
 \variable{gr} and \variable{true.grad}.In contrast,
 \variable{true.hess} was computed using an exact calculation, while
 \variable{hs} is the sparse finite difference approximation.
 
-were computed by the same functions
+\subsection[Complex step method]{Complex step method}
+
+The \pkg{sparseHessianFD} package also allows for
+estimation of the Hessian using the complex step method
+\citep{SquireTrapp1998} as an alternative to finite differencing. In
+this method, the definition of $\Mat{Y}_c$ in Equation \ref{eq:Yg} is replaced with
+\begin{align}
+  \label{eq:complexYg}
+  \Mat{Y}_c&=\Imag(\nabla f(x+iG_c))
+\end{align}
+where $i=\sqrt{-1}$ and $\Imag$ returns the imaginary part of a complex
+number. The advantage of this method is that there is no longer a
+subtraction operation to generate truncation error. Thus, $\delta$ can
+be made arbitrarily small, and the resulting estimate of the Hessian
+is more accurate. 
+
+To use the complex step method, include the argument
+\funcarg{complex=TRUE} in the call to the initializer of the \class{sparseHessianFD}
+object. The functions passed as \funcarg{fn} and \funcarg{gr} must both
+accept a complex argument, and return a complex
+result, even though we are differentiating a real-valued function. Although \pkg{base} \proglang{R} supports complex arguments
+for basic arithmetic, trigonometric, logarithmic and exponential
+functions, many other common functions (e.g.,  \func{gamma}, \func{log1p},
+\func{expm1}, and the probability distribution functions) do not have
+complex implementations. Furthermore, the complex step method is valid
+only if the function is holomorphic
+(complex differentiable). The methods in \class{sparseHessianFD} do
+\emph{not} check that this is the case for the function at hand. We convey the
+following warning from the documentation of the \pkg{numDeriv} package
+\citep{R_numDeriv}, which also implements the complex step method:
+``Avoid this method if you do not know that your function is
+suitable. Your mistake may not be caught and the results will be
+spurious.'' 
+
+The log posterior density in Equation \ref{eq:LPD} is holomorphic, so we
+can estimate its Hessian using the complex step method, and compute
+the mean relative difference from the true Hessian.
+
+<<>>=
+obj2 <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
+  rows=pattern[["rows"]], cols=pattern[["cols"]],
+  complex=TRUE,
+  data=binary, priors=priors, order.row=order.row)
+hs2 <- obj2$hessian(P)
+mean(abs(hs2-true.hess))/mean(abs(hs2))
+@ 
+
+<<echo=FALSE>>=
+options(scipen=999)
+@ 
+
+In short, the complex step method can be much more accurate than
+finite differencing, but it comes with theoretical and implementation
+restrictions that may limit its universality.
+
+
 
 \section[Algorithms]{Algorithms}\label{sec:algorithms}
 
@@ -1120,43 +1170,6 @@ values to the corresponding column in the upper triangle, and advances upwards.
   \caption{Triangular substitution method.}\label{alg:subst}
 \end{algorithm}
 
-
-\subsection[Complex step method]{Complex step method}
-
-The \pkg{sparseHessianFD} package also allows for
-estimation of the Hessian using the complex step method
-\citep{SquireTrapp1998} as an alternative to finite differencing. In
-this method, the definition of $\Mat{Y}_c$ in Equation \ref{eq:Yg} is replaced with
-\begin{align}
-  \label{eq:complexYg}
-  \Mat{Y}_c&=\Imag(\nabla f(x+iG_c))
-\end{align}
-where $i=\sqrt{-1}$ and $\Imag$ returns the imaginary part of a complex
-number. The advantage of this method is that there is no longer a
-subtraction operation to generate truncation error. Thus, $\delta$ can
-be made arbitrarily small, and the resulting estimate of the Hessian
-is more accurate. 
-
-To use the complex step method, include the argument
-\funcarg{complex=TRUE} in the call to the initializer of the \class{sparseHessianFD}
-object. The functions passed as \funcarg{fn} and \funcarg{gr} must both
-accept a complex argument, and return a complex
-result, even though we are differentiating a real-valued function. Although \pkg{base} \proglang{R} supports complex arguments
-for basic arithmetic, trigonometric, logarithmic and exponential
-functions, many other common functions (e.g.,  \func{gamma}, \func{log1p},
-\func{expm1}, and the probability distribution functions) do not have
-complex implementations. Furthermore, the complex step method is valid
-only if the function is holomorphic
-(complex differentiable). The methods in \class{sparseHessianFD} do
-\emph{not} check that this is the case for the function at hand. We convey the
-following warning from the documentation of the \pkg{numDeriv} package
-\citep{R_numDeriv}, which also implements the complex step method:
-``Avoid this method if you do not know that your function is
-suitable. Your mistake may not be caught and the results will be
-spurious.'' 
-
-In short, the complex step method is available to users who want
-improved accuracy and speed, and know what they are doing.
 
 
 

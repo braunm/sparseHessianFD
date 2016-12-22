@@ -36,7 +36,7 @@
 
 
 \usepackage{geometry}
-\geometry{margin=1.5in}
+\geometry{margin=1.2in}
 
 \begin{document}
 
@@ -265,15 +265,7 @@ true.grad) are comparing f and gr calculated with the exact calculation, so
 the difference is zero:
 
 \begin{verbatim}
-print(obj$fn(P) - binary.f(P, 
-      data=binary, priors=priors, order.row=order.row), digits=20)
-[1] 0
-
-print(max(abs(obj$gr(P) - binary.grad(P, 
-         data=binary, priors=priors,
-order.row=order.row))),digits=20)
-[1] 0
-
+Code removed
 \end{verbatim}
 
 It is not clear to me whether obj\$fn() and obj\$gr() use code as in the true
@@ -306,7 +298,7 @@ purposes, after all, it is almost the main purpose of the package.)
 \end{response}
 
 
-\item \begin{revQuote}
+\item \label{it:complex1}\begin{revQuote}
 I think it would be instructive to add some of the following comparisons
 with the above on p12.  The package numDeriv function hessian by default
 does a second order Richardson approximation using the true function value
@@ -314,12 +306,7 @@ approximation. This involves a very large number of function evaluations in
 an attempt to obtain some accuracy, but the accuracy is limited by being an
 approximation of a second difference:
 \begin{verbatim}
-max(abs(
-     numDeriv::hessian( binary.f, P, method="Richardson", 
-                    data=binary, priors=priors,
-order.row=order.row) 
-   - binary.hess(P, data=binary, priors=priors, order.row=order.row)))
-[1] 0.0001610595
+Hessian Richardson
 
 \end{verbatim}
 
@@ -328,12 +315,7 @@ calculation used by obj\$hessian() in sparseHessianFD, one could also use the
 function numDeriv::jacobian:
 
 \begin{verbatim}
-max(abs( 
-    numDeriv::jacobian( binary.grad, P, method="Richardson", 
-                   data=binary, priors=priors,
-order.row=order.row)
-  - binary.hess(P, data=binary, priors=priors, order.row=order.row)))
-[1] 3.268224e-07
+Jacobian Richardson
 \end{verbatim}
 
 This is still doing the calculation intensive Richardson approximation. The
@@ -341,13 +323,7 @@ calculation which would seem to most closely resemble what is done by
 obj\$hessian() is
 
 \begin{verbatim}
-max(abs( 
-    numDeriv::jacobian( binary.grad, P, method="simple", 
-                   data=binary, priors=priors,
-order.row=order.row)
-  - binary.hess(P, data=binary, priors=priors, order.row=order.row)))
-
-[1] 0.0008255852
+Jacobian simple
 
 \end{verbatim}
 
@@ -355,13 +331,7 @@ order.row=order.row)
 Another very interesting comparison is
 
 \begin{verbatim}
-max(abs( 
-  numDeriv::jacobian( binary.grad, P, method="complex", 
-                  data=binary, priors=priors,
-order.row=order.row)
- - binary.hess(P, data=binary, priors=priors, order.row=order.row)))
-
-[1] 7.105427e-15
+Jacobian complex
 \end{verbatim}
 
 The complex step derivative provides extremely accurate approximations with
@@ -383,12 +353,12 @@ too, but I have not analyzed that. However, based on the result being very
 good, it seems highly likely.
   \end{revQuote}
 
-\begin{response}
-  
-\end{response}
+  \begin{response}
+    See response to Item \ref{it:complex2}
+  \end{response}
 
 
-\item \begin{revQuote}
+\item\label{it:complex2} \begin{revQuote}
 A possible extension to the package would be to implement the complex
 method in the sparse code. The function numDeriv:::jacobian.default
 implements both simple and complex, so provides a good comparison of the
@@ -397,15 +367,35 @@ necessary (non-sparse) computation.
   \end{revQuote}
 
 \begin{response}
-  The complex step function is now implemented.  It appears to work on
-  the example function, which I had to modify because \proglang{R}
-  does not have a complex implementation of the \func{log1p}.  I added
-  a couple of paragraphs about this method in the Algorithms section,
-  but I did not want to oversell it for a few reasons.  First, I am
-  still generally unfamiliar with this method, so I do not want to
-  push it too hard.  Second, I think that the requirements of
-  holomorphism, and of being able to accept and return complex values,
-  does significantly limit the utility of the method.
+
+Here I am combining my responses to items \ref{it:complex1} and
+\ref{it:complex2} together.
+
+  The complex step function is now implemented in the package, and is
+  introduced in Section 2.5 of the paper.  You
+  are correct that ``most R primitives work with complex numbers,''
+  but there are many commonly used functions that do not, including 
+  \func{log1p}, \func{gamma}, and the probability distribution
+  functions. This limitation on the kinds of functions that can be
+  implemented easily in R, combined with the requirement that the function be
+  holomorphic, and my own general unfamiliarity with the method, make
+  me hesitant to promote it too much in the paper. But it is a nifty
+  trick, and including it in the package was a good idea (thanks!).
+ 
+In terms of accuracy, the paper includes comparisons between the true
+Hessian and the two \class{sparseHessianFD} methods (finite differences
+and complex step). I am not comparing accuracy with \pkg{numDeriv},
+because that really is not the point of this paper.  However, for the
+timing comparisons in Table 4, I did
+change the baseline \pkg{numDeriv} method from \func{hessian} with the
+\method{Richardson} method, to \func{jacobian} with the
+\method{complex} method. Removing the second-order approximation saves
+a lot of time, and lets me compute Table 4 without resorting to
+parallel computation. That will simplify attempts at replication, and
+removes another variable that might influence results.  
+
+
+
 \end{response}
 
 
@@ -426,7 +416,7 @@ included.
   \end{revQuote}
 
 \begin{response}
-  
+  I added a \func{set.seed} statement near the top of \filename{replication.R}.
 \end{response}
 
 
@@ -454,120 +444,22 @@ they are still important:
 swap, running Mint variant of Ubuntu 14.04.2 LTS.)
 
 \begin{verbatim}
-run.par <- FALSE
-
-(Note this is using obj$gr() rather than binary.grad(). I am not sure if
-that makes a difference.)
-
-run_test_tab4b <- function(Nk, reps=50) {
-    ## Replication function like Table 4  with jacobian of grad and
-"simple"
-    N <- as.numeric(Nk["N"])
-    k <- as.numeric(Nk["k"])
-    data <- binary_sim(N, k, T=20)
-    priors <- priors_sim(k)
-    F <- make_funcs(D=data, priors=priors)
-    nvars <- N*k+k
-    M <-
-as(Matrix::kronecker(Matrix::Diagonal(N),Matrix(1,k,k)),"nMatrix") %>%
-      rBind(Matrix(TRUE,k,N*k)) %>%
-      cBind(Matrix(TRUE, k*(N+1), k)) %>%
-      as("nMatrix")
-    pat <- Matrix.to.Coord(tril(M))
-    X <- rnorm(nvars)
-    obj <- sparseHessianFD(X, F$fn, F$gr, pat$rows, pat$cols)
-
-    bench <- microbenchmark(
-        numDeriv = numDeriv::jacobian(obj$gr, X, method="simple"), 
-        df = obj$gr(X),
-        sparse = obj$hessian(X))
-    vals <- plyr::ddply(data.frame(bench), "expr",
-                  function(x)
-return(data.frame(expr=x$expr,
-                                               
-time=x$time,
-                                               
-rep=1:length(x$expr))))
-    res <- data.frame(N=N, k=k,
-                      bench=vals)
-    cat("Completed N = ",N,"\tk = " , k ,"\n")
-    return(res)
-}
-
-cases_tab4b <- expand.grid(k=c(2,3,4),
-                     N=c(9, 12, 15))
-runs_tab4b <- plyr::adply(cases_tab4b, 1, run_test_tab4b, reps=20,
-.parallel=run.par)
-
-tab4b <-  mutate(runs_tab4b, ms=bench.time/1000000) %>%
-  select(-bench.time) %>%
-  spread(bench.expr, ms) %>%
-  gather(method, hessian, c(numDeriv, sparse)) %>%
-  mutate(M=N*k+k, hessian.df=hessian/df) %>%
-  gather(stat, time, c(hessian, hessian.df)) %>%
-  group_by(N, k, method, M, stat)  %>%
-  summarize(mean=mean(time), sd=sd(time)) %>%
-  gather(stat2, value, mean:sd) %>%
-  dcast(N+k+M~stat+method+stat2,value.var="value") %>%
-  arrange(M)
-
-tab4b 
-   N k  M hessian_numDeriv_mean hessian_numDeriv_sd hessian_sparse_mean
-1  9 2 20              5.731754          
-0.6759421            1.713736
-2 12 2 26              7.577777          
-0.9481714            1.756165
-3  9 3 30              8.763990          
-1.0358481            2.348153
-4 15 2 32              9.553452          
-1.1875816            1.844192
-5 12 3 39             11.583360          
-1.3371329            2.402663
-6  9 4 40             11.584188          
-1.2045539            2.978028
-7 15 3 48             14.638763          
-1.5469615            2.547145
-8 12 4 52             15.612216          
-2.5401431            3.086010
-9 15 4 64             19.672496          
-2.7303771            3.055931
-  hessian_sparse_sd hessian.df_numDeriv_mean hessian.df_numDeriv_sd
-1        0.07532715                
-19.02359               3.353629
-2        0.07522725                
-24.31841               4.715941
-3        0.15790507                
-28.47628               4.366788
-4        0.30441636                
-30.52029               4.533416
-5        0.08570303                
-35.98930               6.033750
-6        0.55389180                
-36.30998               6.007112
-7        0.61666543                
-44.46145               6.206399
-8        0.69277761                
-48.73135               9.180011
-9        0.12617835                
-60.27624               9.530503
-  hessian.df_sparse_mean hessian.df_sparse_sd
-1               5.687322            0.7812959
-2               5.619639            0.7445722
-3               7.615163            0.7901088
-4               5.884283            1.0339672
-5               7.455115            0.8976474
-6               9.329878            2.0531265
-7               7.734390            2.0592415
-8               9.637077            2.4535258
-9               9.356261            0.6168655
-
+Code and output removed
 \end{verbatim}
 
 
   \end{revQuote}
   
   \begin{response}
-    
+    I agree.  See my response to Item \ref{it:complex2}.  I include the
+    times from the 
+    \method{complex} method instead of \method{simple} because of the
+    improved accuracy.  I considered including both times in the
+    table, but that would have cluttered the table, there was very
+    little difference in the times between them, and the comparison
+    between two \pkg{numDeriv} methods is not the point of this
+    paper. But I completely agree that either \func{jacobian} method
+    is a more valid comparison than using \func{hessian}.
   \end{response}
 
 \item\begin{revQuote}
@@ -593,73 +485,7 @@ tab4b5 <-  mutate(runs_tab4b5, ms=bench.time/1000000) %>%
   dcast(N+k+M~stat+method+stat2,value.var="value") %>%
   arrange(M)
 
-tab4b5
-tab4b5
-      N k     M hessian_numDeriv_mean hessian_numDeriv_sd
-hessian_sparse_mean
-1    10 2    22          6.363689e+00       
-6.585771e-01            1.795344
-2    10 4    44          1.273715e+01       
-1.254662e+00            2.934588
-3    10 8    88          2.608751e+01       
-1.803375e+00            5.659668
-4   100 2   202          1.021658e+02       
-3.439251e+00            2.938642
-5   100 4   404          2.162431e+02       
-1.289940e+01            5.622877
-6   100 8   808          4.846450e+02       
-1.946854e+01           12.922397
-7  1000 2  2002          5.511146e+03       
-1.918534e+02           14.694924
-8  1000 4  4004          1.194815e+04       
-1.499518e+02           29.332463
-9  2500 2  5002          3.132878e+04       
-4.934896e+02           33.393927
-10 1000 8  8008          2.835954e+04       
-6.959400e+02           76.881070
-11 2500 4 10004          6.874300e+04       
-2.197321e+02           68.318820
-12 2500 8 20008          8.615465e+05       
-9.316236e+04         1806.766254
-   hessian_sparse_sd hessian.df_numDeriv_mean hessian.df_numDeriv_sd
-1       6.056685e-01                
-21.19760               2.433792
-2       5.508396e-01                
-41.16514               5.648203
-3       1.265859e+00                
-79.97503               8.748075
-4       7.409767e-02               
-193.27447              11.790089
-5       1.210575e+00               
-388.74262              31.184602
-6       1.168307e+01               
-758.39623             121.225037
-7       9.293258e-01              
-2042.30264             168.538055
-8       1.343366e+00              
-4099.05785             221.910206
-9       1.377541e+00              
-5081.52982             473.962083
-10      2.408524e+01              
-8323.91140             516.709041
-11      2.646135e+00             
-10315.16422             832.305746
-12      2.272944e+03             
-77200.22397           42790.360882
-   hessian.df_sparse_mean hessian.df_sparse_sd
-1                5.984750            2.1093324
-2                9.479244            1.9844323
-3               17.337516            4.1347369
-4                5.556561            0.2851630
-5               10.115250            2.3189536
-6               20.160163           17.8116929
-7                5.448765            0.5700265
-8               10.061368            0.6629470
-9                5.416287            0.5421972
-10              22.563990            7.1995778
-11              10.249990            0.8971753
-12             151.538778          217.2031623
-
+Output removed
 
 I think the complex step takes a similar amount of time, but produces a more
 accurate result.
@@ -707,6 +533,46 @@ run.par == TRUE)
   \end{revQuote}
   
   \begin{response}
+These are all good suggestions.  Let me address them point by point.
+    \begin{itemize}
+    \item It really is all about the sparsity pattern, and
+      specifically, the how few partitions are needed to group the
+      variables.  Of course, it will be hard to keep the number of
+      partitions small if there are too many non-zero elements, so the
+      sparsity itself has some effect.  The arrangement of the non-zeros is
+      related to the ordering of the variables, but the permutation
+      handles that during the initialization of the
+      \class{sparseHessianFD} argument.  For example, variables
+      arranged in a way that the Hessian has a block-arrow pattern are
+      permuted to get a Hessian with a banded pattern instead.  This
+      is all discussed in the ``Partitioning the
+      variables'' section of the paper.
+\item I have no idea how to do this in a generalizable way.  I think
+  it has a lot to do with the architecture of the computer
+  itself. Figure 4 does break down the components of the computation
+  into the time it takes to reserve memory (initialization), partition
+  the variables, and compute gradients themselves.
+
+I do not want to ignore this suggestion, but I am simply not clear on
+what is being asked.  I am open to more specific suggestions.
+
+\item The complex step method is now supported, and comparisons of
+  accuracy and computation time are now included in the paper.
+
+\item Parallel computing on a shared memory architecture really
+  muddles up timing comparisons.  The \emph{only} reason I generated
+  Table 4 in parallel was because of the \pkg{numDeriv} \func{hessian}
+  function. Now that \func{hessian} was replaced with \func{jacobian},
+  the baseline measures from \pkg{numDeriv} run fast enough that I can
+  generate Table 4 in serial.
+
+Your point is well taken that timing comparisons can be affected by
+whether computation is being run on multiple processors, but the
+``serialization'' of Table 4 makes the issue moot.
+
+
+    \end{itemize}
+
     
   \end{response}
 
