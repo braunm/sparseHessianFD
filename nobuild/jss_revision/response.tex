@@ -16,7 +16,7 @@
 \newcolumntype{d}[1]{D{.}{.}{#1}}
 \newcommand{\pkg}[1]{\emph{#1}}
 \newcommand{\proglang}[1]{\textsf{#1}}
-\newcommand{\filename}[1]{\textit{#1}}
+\newcommand{\filename}[1]{\texttt{#1}}
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\func}[1]{\code{#1}}
 \newcommand{\class}[1]{\textsl{#1}}
@@ -93,7 +93,8 @@ critical it might be better to omit it.
 \end{revQuote}
 
 \begin{response}
-I suspect that the error is a result of the \pkg{algorithm} package
+Because \pkg{sparseHessianFD} passed CRAN check, I suspect that the
+error is a result of the \pkg{algorithm} package
 not being present in your LaTeX installation.  It is a standard
 package in the MacTeX distribution, but I cannot speak with authority about other
 platforms. It should be easily installed through CTAN.
@@ -236,21 +237,11 @@ would be nice if this where mentioned in the file replication.R.
 Assuming that the R package builder works the way I think it does,
 the \filename{replication.R} file, and the data for Table 4 (\filename{vignette\_tab4.Rdata}), will be
 copied to the \filename{doc\textbackslash} directory of the package
-once it is installed.  It will also be available as an online supplement to
-this paper.
-\begin{itemize}
-\item 
-\end{itemize}
-
-
-Meeting the documentation and replication needs for both the journal,
-and CRAN, can be tricky, but I think I have a good solution
-
-    
-  Note to me:  I think what this means is that results for Table 4 and
-  Figure 4 are "hard coded.''  For the jss article, the replication
-  file is provided, but this file is not part of the package.  It
-  should be, so non-jss vignette readers know how to replicate the results. 
+once it is installed.  At the end of the second paragraph of Section
+4, I now write that ``code to replicate Table 4 is available as an
+online supplement to this paper.''  I cannot be more specific about
+the name of the replication file, because I believe it depends on the
+volume and issue number of the published version.
 \end{response}
 
 
@@ -431,7 +422,9 @@ included.
   \end{revQuote}
 
 \begin{response}
-  I added a \func{set.seed} statement near the top of \filename{replication.R}.
+  I added a \func{set.seed} statement near the top of
+  \filename{replication.R}, but you are correct that because only
+  times are reported, this does not matter much.
 \end{response}
 
 
@@ -485,11 +478,11 @@ N=2500, k=8 comparison.)
   \begin{response}
 Because the \func{numDeriv::jacobian} function runs so much faster
 than  \func{numDeriv::hessian}, I was able to increase the size of the
-examples in Table 4. Please forgive me for not going as high as
-$N=2500$, $k=8$. One objective of Table 4 is to compare the relative
+examples in Table 4. One objective of Table 4 is to compare the relative
 increases in computation time for different $N$ and $k$ between
 \pkg{numDeriv} and \pkg{sparseHessianFD}, and I think that objective
-is met with $N=(15, 50, 100, 500)$.  For the reader who wants to
+is met with $N=(15, 50, 100, 500)$.  Please forgive me for not going as high as
+$N=2500$, $k=8$. For the reader who wants to
 replicate the results, a run time of more than a day is a lot to ask.
   \end{response}
 
@@ -552,15 +545,16 @@ These are all reasonable suggestions.  Let me address them point by point.
   the variables, and compute gradients themselves.  Perhaps that is
   the kind of comparison you had in mind.
 
-  I do not want to ignore this suggestion, but I am simply not clear on
-  what is being asked.  I am open to more specific suggestions.
+  I do not want to ignore or dismiss this suggestion, but I am simply not clear on
+  what is being asked.  I am open to more specific recommendations.
 
 \item The package now implements the complex step method, and comparisons of
-  accuracy and computation time are included in the paper.
+  accuracy and computation time are included in the paper.  Thank you
+  for this suggestion.
 
 \item Parallel computing on a shared memory architecture really
   muddles up timing comparisons.  The \emph{only} reason I generated
-  Table 4 in parallel was because of the \pkg{numDeriv} \func{hessian}
+  Table 4 in parallel was because of the run time of the \pkg{numDeriv} \func{hessian}
   function. Now that \func{hessian} was replaced with \func{jacobian},
   the baseline measures from \pkg{numDeriv} run fast enough that I can
   generate Table 4 in serial.
@@ -571,9 +565,6 @@ whether computation is being run on multiple processors is well taken, but the
 
   Data for Figure 4 were generated in parallel because of the large
   number of required simulations.
-
-
-
     \end{itemize}
 
     
