@@ -62,7 +62,7 @@
 \Plaintitle{sparseHessianFD: An R Package for Estimating Sparse Hessian Matrices}
 \Shorttitle{sparseHessianFD:  Sparse Hessians}
 \Keywords{sparse Hessians, sparsity, computation of Hessians,
-  graph coloring, finite differences, differentiation}
+  graph coloring, finite differences, differentiation, complex step}
 \Address{
   Michael Braun\\
   Edwin L. Cox School of Business\\
@@ -155,12 +155,7 @@ element, and let $\delta$ be a sufficiently small scalar
 constant. A linear approximation to the $m$th column of the Hessian is ${\hess{m}{}\approx\left(\nabla f(x+\delta
   e_m)- \nabla f(x)\right)/\delta}$.  Estimating a dense Hessian in this way involves at least $M+1$ calculations of the
 gradient: one for the gradient at $x$, and one after perturbing each
-of the $M$ elements of $x$, one at a time.\footnote{More accurate
-  approximations using finite differences require more gradient evaluations.  We will consider
-  only forward finite differences. In Section~\ref{sec:complex} we
-  introduce the complex step method that, under certain conditions,
-  can generate more accurate estimates with the same number of
-  gradient evaluations using forward finite differences.} In a sparse matrix, most of the
+of the $M$ elements of $x$, one at a time. In a sparse matrix, most of the
 elements are constrained to zero.  Depending
 on the sparsity pattern of the Hessian, those constraints may let us recover
 the Hessian with fewer gradient evaluations by perturbing multiple
@@ -720,8 +715,6 @@ fn,gr& \proglang{R} Functions that return the value of the
   and {gr} as well (see the \funcarg{...} argument below).\\
 rows, cols& Sparsity pattern: integer vectors of the row and column indices of
   the non-zero elements in the \emph{lower triangle} of the Hessian.\\
-direct& This argument is deprecated, and is included only for
-  backwards compatibility with earlier versions.\\
 delta& The perturbation amount for finite differencing of the
   gradient to compute the Hessian (the $\delta$ in Section~\ref{sec:numdiff}).  Defaults to
   \code{sqrt(.Machine\$double.eps)}.\\
@@ -887,7 +880,7 @@ R> hs <- obj$hessian(P)
 R> mean(abs(hs-true.hess))/mean(abs(hs))
 \end{Sinput}
 \begin{Soutput}
-[1] 1.1217e-08
+[1] 2.3357e-09
 \end{Soutput}
 \end{Schunk}
 
@@ -939,7 +932,7 @@ R> hs2 <- obj2$hessian(P)
 R> mean(abs(hs2-true.hess))/mean(abs(hs2))
 \end{Sinput}
 \begin{Soutput}
-[1] 6.7543e-18
+[1] 8.0555e-17
 \end{Soutput}
 \end{Schunk}
 
@@ -1286,24 +1279,22 @@ user-supplied gradients (through the \func{jacobian} function), and
 implements both the finite differencing and complex step methods.  Its
 most important distinction from \pkg{sparseHessianFD} is that it treats all Hessians as dense.  Thus, we
 will use  \pkg{numDeriv} as the baseline against which we can compare the performance of
-\pkg{sparseHessianFD}.  All of the subsequent speed and scalability
-results were generated on an Apple Mac Pro with a 2.7 GHz
-12-core Intel Xeon E5 processor and 64 GB of RAM, running MacOS
-version 10.12.2, and \proglang{R} version 3.3.2.
+\pkg{sparseHessianFD}.
 
 To prepare Table~\ref{tab:numDeriv}, we
 estimated Hessians of the log posterior density in Equation~\ref{eq:LPD} with different numbers of heterogeneous
-units ($N$) and within-unit parameters ($k$).  As in the previous
-section, the total number of
+units ($N$) and within-unit parameters ($k$).  The total number of
 variables is $M=(N+1)k$.  Table~\ref{tab:numDeriv} shows the mean
-and standard deviations (across 20 replications) for the time (in
-milliseconds) to compute a Hessian using each package.  The difference in run times is dramatic,
-especially because the computation time for \pkg{numDeriv} grows
-quadratically in the number of variables. Times
-were collected using the \pkg{microbenchmark} package
+and standard deviations (across 500 replications) for the time (in
+milliseconds) to compute a Hessian using functions for both the finite
+difference and complex step methods from each package. Times were generated on a
+compute node running Scientific Linux 6 (64-bit) with an 8-core Intel
+Xeon X5560 processor (2.80 GHz) with 24 GB of RAM, and collected using the \pkg{microbenchmark} package
 \citep{R_microbenchmark}. Code to replicate Table~\ref{tab:numDeriv}
 is available as an online supplement to this paper, and in the
-\func{doc/} directory of the installed package.
+\func{doc/} directory of the installed package. In
+Table~\ref{tab:numDeriv} we see that computation times using
+\pkg{sparseHessianFD} and considerably shorter than those using \pkg{numDeriv}.
 
 
 
@@ -1340,7 +1331,10 @@ To help us understand just how scalable
 \pkg{sparseHessianFD} is, we ran another set of simulations, for the
 same hierarchical model, for different values of $N$ and $k$.  We then
 recorded the run times for different steps in the sparse Hessian
-estimation, across 200 replications.  The steps are summarized in Table~\ref{tab:timeMeasures}.
+estimation, across 200 replications.  The steps are summarized in
+Table~\ref{tab:timeMeasures}.  The times were generated on an
+Apple Mac Pro with a 12-core Intel Xeon E5-2697 processor (2.7 GHz)
+with 64 GB of RAM.
 
 \begin{table}[ptb]\centering
   \begin{tabularx}{1.0\linewidth}{>{\bfseries}l X}
@@ -1361,7 +1355,7 @@ Initialization&total setup time (including the partitioning time)\\
 
 In the plots in Figure~\ref{fig:timing}, the number of heterogeneous units ($N$) is
 on the x-axis, and median run time, in milliseconds, is on the y-axis.  Each panel shows the
-relationship between $N$ and run time for a different measure of time,
+relationship between $N$ and run time for a different step in the algorithm,
 and each curve in a panel represents a different number of within-unit
 parameters ($k$).
 
@@ -1386,10 +1380,6 @@ reason it does is that each gradient evaluation takes longer.
 Nevertheless, we can conclude that the
 \pkg{sparseHessianFD} algorithms are quite efficient and scalable for
 hierarchical models.
-
-
-
-
 
 \FloatBarrier
 \bibliography{sparseHessianFD}

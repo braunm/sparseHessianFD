@@ -1190,24 +1190,22 @@ user-supplied gradients (through the \func{jacobian} function), and
 implements both the finite differencing and complex step methods.  Its
 most important distinction from \pkg{sparseHessianFD} is that it treats all Hessians as dense.  Thus, we
 will use  \pkg{numDeriv} as the baseline against which we can compare the performance of
-\pkg{sparseHessianFD}.  All of the subsequent speed and scalability
-results were generated on an Apple Mac Pro with a 2.7 GHz
-12-core Intel Xeon E5 processor and 64 GB of RAM, running MacOS
-version 10.12.2, and \proglang{R} version 3.3.2.
+\pkg{sparseHessianFD}.
 
 To prepare Table~\ref{tab:numDeriv}, we
 estimated Hessians of the log posterior density in Equation~\ref{eq:LPD} with different numbers of heterogeneous
-units ($N$) and within-unit parameters ($k$).  As in the previous
-section, the total number of
+units ($N$) and within-unit parameters ($k$).  The total number of
 variables is $M=(N+1)k$.  Table~\ref{tab:numDeriv} shows the mean
-and standard deviations (across 20 replications) for the time (in
-milliseconds) to compute a Hessian using each package.  The difference in run times is dramatic,
-especially because the computation time for \pkg{numDeriv} grows
-quadratically in the number of variables. Times
-were collected using the \pkg{microbenchmark} package
+and standard deviations (across 500 replications) for the time (in
+milliseconds) to compute a Hessian using functions for both the finite
+difference and complex step methods from each package. Times were generated on a
+compute node running Scientific Linux 6 (64-bit) with an 8-core Intel
+Xeon X5560 processor (2.80 GHz) with 24 GB of RAM, and collected using the \pkg{microbenchmark} package
 \citep{R_microbenchmark}. Code to replicate Table~\ref{tab:numDeriv}
 is available as an online supplement to this paper, and in the
-\func{doc/} directory of the installed package.
+\func{doc/} directory of the installed package. In
+Table~\ref{tab:numDeriv} we see that computation times using
+\pkg{sparseHessianFD} and considerably shorter than those using \pkg{numDeriv}.
 
 <<echo=FALSE>>=
 suppressMessages(library(xtable))
@@ -1239,7 +1237,10 @@ To help us understand just how scalable
 \pkg{sparseHessianFD} is, we ran another set of simulations, for the
 same hierarchical model, for different values of $N$ and $k$.  We then
 recorded the run times for different steps in the sparse Hessian
-estimation, across 200 replications.  The steps are summarized in Table~\ref{tab:timeMeasures}.
+estimation, across 200 replications.  The steps are summarized in
+Table~\ref{tab:timeMeasures}.  The times were generated on an
+Apple Mac Pro with a 12-core Intel Xeon E5-2697 processor (2.7 GHz)
+with 64 GB of RAM.
 
 \begin{table}[ptb]\centering
   \begin{tabularx}{1.0\linewidth}{>{\bfseries}l X}
@@ -1260,7 +1261,7 @@ Initialization&total setup time (including the partitioning time)\\
 
 In the plots in Figure~\ref{fig:timing}, the number of heterogeneous units ($N$) is
 on the x-axis, and median run time, in milliseconds, is on the y-axis.  Each panel shows the
-relationship between $N$ and run time for a different measure of time,
+relationship between $N$ and run time for a different step in the algorithm,
 and each curve in a panel represents a different number of within-unit
 parameters ($k$).
 
@@ -1285,10 +1286,6 @@ reason it does is that each gradient evaluation takes longer.
 Nevertheless, we can conclude that the
 \pkg{sparseHessianFD} algorithms are quite efficient and scalable for
 hierarchical models.
-
-
-
-
 
 \FloatBarrier
 \bibliography{sparseHessianFD}
