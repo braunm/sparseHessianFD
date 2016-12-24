@@ -158,46 +158,46 @@ run_test_tab4 <- function(Nk, reps=50, order.row=TRUE) {
     return(res)
 }
 
-## Replicate Figure 4
+## ## Replicate Figure 4
 
-cases_fig4 <- expand.grid(k=c(8, 5, 2),
-                          N=c(25, 50, 75, seq(100,2500, by=200)),
-                          T=20
-)
-reps_fig4 <- 200
+## cases_fig4 <- expand.grid(k=c(8, 5, 2),
+##                           N=c(25, 50, 75, seq(100,2500, by=200)),
+##                           T=20
+## )
+## reps_fig4 <- 200
 
-runs_fig4 <- plyr::adply(cases_fig4, 1, run_test_fig4, reps=reps_fig4,
-                         order.row=TRUE, .parallel=TRUE)
+## runs_fig4 <- plyr::adply(cases_fig4, 1, run_test_fig4, reps=reps_fig4,
+##                          order.row=TRUE, .parallel=TRUE)
 
-tab_fig4 <- mutate(runs_fig4, ms=bench.time/1000000) %>%
-  dcast(N+k+T+bench.rep+ncolors~bench.expr, value.var="ms")  %>%
-  mutate(nvars=N*k+k) %>%
-  gather(stat, ms, c(f,df,hess,colors,setup)) %>%
-  group_by(N, k, T, stat, nvars) %>%
-  summarize(median=median(ms))
-D2 <- filter(data.frame(tab_fig4), stat %in% c("f", "df", "hess",
-                                               "colors", "setup"))
-D2$stat <- plyr::revalue(D2$stat, c("f"="Function", "df"="Gradient", "hess"="Hessian",
-                              "colors"="Partitioning",
-                              "setup"="Initialization"))
-D2$stat <- factor(D2$stat, levels=c("Function","Gradient","Hessian",
-                                    "Partitioning","Initialization"))
-theme_set(theme_bw())
-fig4 <- ggplot(D2, aes(x=N,y=median, color=as.factor(k), linetype=as.factor(k))) %>%
-    + geom_line(size=.4) %>%
-    + scale_x_continuous("Number of heterogeneous units") %>%
-    + scale_y_continuous("Computation time (milliseconds)") %>%
-    + guides(color=guide_legend("k"), linetype=guide_legend("k")) %>%
-    + facet_wrap(~stat, scales="free",ncol=1) %>%
-    + theme(text=element_text(size=10), legend.position="bottom")
+## tab_fig4 <- mutate(runs_fig4, ms=bench.time/1000000) %>%
+##   dcast(N+k+T+bench.rep+ncolors~bench.expr, value.var="ms")  %>%
+##   mutate(nvars=N*k+k) %>%
+##   gather(stat, ms, c(f,df,hess,colors,setup)) %>%
+##   group_by(N, k, T, stat, nvars) %>%
+##   summarize(median=median(ms))
+## D2 <- filter(data.frame(tab_fig4), stat %in% c("f", "df", "hess",
+##                                                "colors", "setup"))
+## D2$stat <- plyr::revalue(D2$stat, c("f"="Function", "df"="Gradient", "hess"="Hessian",
+##                               "colors"="Partitioning",
+##                               "setup"="Initialization"))
+## D2$stat <- factor(D2$stat, levels=c("Function","Gradient","Hessian",
+##                                     "Partitioning","Initialization"))
+## theme_set(theme_bw())
+## fig4 <- ggplot(D2, aes(x=N,y=median, color=as.factor(k), linetype=as.factor(k))) %>%
+##     + geom_line(size=.4) %>%
+##     + scale_x_continuous("Number of heterogeneous units") %>%
+##     + scale_y_continuous("Computation time (milliseconds)") %>%
+##     + guides(color=guide_legend("k"), linetype=guide_legend("k")) %>%
+##     + facet_wrap(~stat, scales="free",ncol=1) %>%
+##     + theme(text=element_text(size=10), legend.position="bottom")
 
- save(runs_fig4, tab_fig4, D2, file="nobuild/jss_revision/repl_fig.Rdata")
- pdf(height=9,width=6,file="nobuild/jss_revision/fig_timings.pdf")
- print(fig4)
-dev.off()
- pdf(height=9,width=6,file="vignettes/fig_timings.pdf")
- print(fig4)
-dev.off()
+##  save(runs_fig4, tab_fig4, D2, file="nobuild/jss_revision/repl_fig.Rdata")
+##  pdf(height=9,width=6,file="nobuild/jss_revision/fig_timings.pdf")
+##  print(fig4)
+## dev.off()
+##  pdf(height=9,width=6,file="vignettes/fig_timings.pdf")
+##  print(fig4)
+## dev.off()
 
 
 

@@ -47,7 +47,7 @@
 \Plaintitle{sparseHessianFD: An R Package for Estimating Sparse Hessian Matrices}
 \Shorttitle{sparseHessianFD:  Sparse Hessians}
 \Keywords{sparse Hessians, sparsity, computation of Hessians,
-  graph coloring, finite differences, differentiation}
+  graph coloring, finite differences, differentiation, complex step}
 \Address{
   Michael Braun\\
   Edwin L. Cox School of Business\\
@@ -145,12 +145,7 @@ element, and let $\delta$ be a sufficiently small scalar
 constant. A linear approximation to the $m$th column of the Hessian is ${\hess{m}{}\approx\left(\nabla f(x+\delta
   e_m)- \nabla f(x)\right)/\delta}$.  Estimating a dense Hessian in this way involves at least $M+1$ calculations of the
 gradient: one for the gradient at $x$, and one after perturbing each
-of the $M$ elements of $x$, one at a time.\footnote{More accurate
-  approximations using finite differences require more gradient evaluations.  We will consider
-  only forward finite differences. In Section~\ref{sec:complex} we
-  introduce the complex step method that, under certain conditions,
-  can generate more accurate estimates with the same number of
-  gradient evaluations using forward finite differences.} In a sparse matrix, most of the
+of the $M$ elements of $x$, one at a time. In a sparse matrix, most of the
 elements are constrained to zero.  Depending
 on the sparsity pattern of the Hessian, those constraints may let us recover
 the Hessian with fewer gradient evaluations by perturbing multiple
