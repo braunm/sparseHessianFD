@@ -2,70 +2,33 @@
 ## Copyright (C) 2015-2017 Michael Braun
 ##
 ##' @title sparseHessianFD
-##' @name sparseHessianFD
+##' @name sparseHessianFD-class
 ##' @description A reference class for computing sparse Hessians
 ##' @docType class
 ##' @field fn1 A closure for calling fn(x, ...).
 ##' @field gr1 A closure for calling gr(x, ...).
 ##' @field iRow,jCol Numeric vectors with row and column indices of
-##' the non-zero elements in the lower triangle (including diagonal) of
-##' the Hessian.
+##the non-zero elements in the lower triangle (including diagonal) of
+##the Hessian.
 ##' @field delta The perturbation amount for finite differencing of
-##' the gradient to compute the Hessian. Defaults to 1e-07.
+##the gradient to compute the Hessian. Defaults to sqrt(.Machine$double.eps).
 ##' @field index1 TRUE if rows and cols use 1-based (R format)
-##' indexing (FALSE for 0-based (C format) indexing.
-##' @field complex TRUE if Hessian will be computed using the complex
-##' step method, and FALSE (default) if using finite differences.
+##indexing (FALSE for 0-based (C format) indexing.
+##' @field complex TRUE if Hessian will be computed using the complex step method, and FALSE (default) if using finite differences.
 ##' @field D raw finite differences (internal use only)
 ##' @field nvars Number of variables (length of x)
 ##' @field nnz Number of non-zero elements in the lower triangle of the Hessian.
 ##' @field ready TRUE if object has been initialized, and Hessian has
-##' been partitioned.
+##been partitioned.
 ##' @field idx,pntr Column indices and row pointers for non-zero
-##' elements in lower triangle of the permuted Hessian.  Row-oriented
-##' compressed storage.
+##elements in lower triangle of the permuted Hessian.  Row-oriented
+##compressed storage.
 ##' @field colors A vector representation of the partitioning of the columns.
 ##' There are nvars elements, one for each column of the permuted
-##' Hessian.  The value corresponds to the "color" for that column.
-##' @field perm,invperm Permutation vector and its inverse
-##' @details The sparseHessianFD function calls the initializer for the
-##' sparseHessianFD class, and returns a sparseHessianFD object.
-##' \preformatted{sparseHessianFD(x, fn, gr, rows, cols, delta, index1, complex, ...)}
-##' The function, gradient and sparsity pattern are
-##' declared as part of the initialization.
-##' 
-##' Once initialized, the $hessian method will evaluate the Hessian at x.
-##' \preformatted{
-##' obj <- sparseHessian(x, fn, gr, rows, cols, ...)
-##' obj$hessian(x)
-##' }
-##' For convenience, the class provides wrapper methods to the \code{fn} and \code{gr} functions that were specified in the initializer.
-##' \preformatted{
-##' obj$fn(P) ## wrapper to objective function
-##' obj$gr(P) ## wrapper to gradient
-##' obj$fngr(P) ## list of obj function and gradient
-##' obj$fngrhs(P) ## list of obj function, gradient and Hessian.
-##' }
-##' \subsection{Arguments to initializer}{
-##' \describe{
-##' \item{x}{an vector at which the function, gradient and Hessian are initialized and tested.}
-##' \item{fn, gr}{R functions that return the function value and
-##' gradient, evaluated at x.}
-##' \item{rows, cols}{Numeric vectors with row and column indices of
-##' the non-zero elements in the lower triangle (including diagonal) of
-##' the Hessian.}
-##' \item{delta}{The perturbation amount for finite difference (or
-##' complex step) of the gradient to compute the Hessian.  Defaults to 1e-07.}
-##' \item{index1}{TRUE if rows and cols use 1-based (R format)
-##' indexing (FALSE for 0-based (C format) indexing.}
-##' \item{complex}{TRUE if Hessian will be computed using the complex
-##' step method, and FALSE (default) if using finite differences. If
-##' TRUE, both fn and gr must accept complex arguments and return complex values.}
-##' \item{...}{other arguments to be passed to fn and gr.}
-##' }
-##' }
-##' Other methods are described below.  Do not access any of the
-##'     fields directly.  The internal structure is subject to change in future versions.
+##Hessian.  The value corresponds to the "color" for that column.
+##'@field perm,invperm Permutation vector and its inverse
+##' @details Do not access any of the fields directly.  Use the initializer
+##'instead. The internal structure is subject to change in future versions.
 ##' @examples
 ##' ## Log posterior density of hierarchical binary choice model. See vignette.
 ##' set.seed(123)
@@ -110,10 +73,14 @@ sparseHessianFD <-
                     perm = "integer",
                     invperm = "integer"),
                 methods = list(
-                    initialize = function(x, fn, gr, rows, cols,
-                                          delta=1e-7,
-                                          index1 = TRUE, complex=FALSE, ...) {
-                        "Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter delta, flags for 0 or 1-based indexing (index1), whether the complex step method will be used, and other arguments (...) to be passed to fn and gr."                     
+                    initialize = function(x, fn, gr, rows, cols, direct=NULL,
+                                          delta=sqrt(.Machine$double.eps),
+                                          index1 = TRUE, eps=NULL, complex=FALSE, ...) {
+                        "Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter delta, flags for 0 or 1-based indexing (index1), whether the complex step method will be used, and other arguments (...) to be passed to fn and gr."
+
+                        if (!is.null(direct)) {
+                            warning(" 'direct' argument is ignored. Only indirect method is, and will be, supported.")
+                        }                     
 
 
                         validate(fn, gr, rows, cols, x, delta, index1, complex, ...)

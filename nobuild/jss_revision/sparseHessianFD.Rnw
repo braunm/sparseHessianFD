@@ -707,6 +707,8 @@ fn,gr& \proglang{R} Functions that return the value of the
   and {gr} as well (see the \funcarg{...} argument below).\\
 rows, cols& Sparsity pattern: integer vectors of the row and column indices of
   the non-zero elements in the \emph{lower triangle} of the Hessian.\\
+direct& This argument is deprecated, and is included only for
+  backwards compatibility with earlier versions.\\
 delta& The perturbation amount for finite differencing of the
   gradient to compute the Hessian (the $\delta$ in Section~\ref{sec:numdiff}).  Defaults to
   \code{sqrt(.Machine\$double.eps)}.\\

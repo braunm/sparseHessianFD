@@ -68,8 +68,8 @@ I am happy to write that I was able to incorporate a large majority of
 your suggestions into the the revised paper and package. For the
 others, I hope that you, and the editor, will accept my
 explanations and excuses.  Of course, if there are any strong
-objections to any of my responses, I am happy
-to consider further changes in advance of publication.
+objections to how I responded to any of the comments, I am happy
+to make further changes in advance of publication.
 
 Below are my responses to each item, in the same order as in the
 review.  The original comment is in italics, and is followed by my
@@ -84,7 +84,7 @@ that were included in the review.
 \item \begin{revQuote}
 I had a minor problem checking the package tarball:
 
-(error messages related to algorithm.sty removed).
+{\normalfont (error messages related to algorithm.sty removed).}
 
 I don't remember if there is an easy way to distribute ``special'' sty files,
 or if you must force the user to install them. If the sty is not really
@@ -93,7 +93,7 @@ critical it might be better to omit it.
 \end{revQuote}
 
 \begin{response}
-Because \pkg{sparseHessianFD} passes CRAN check, I suspect that the
+Because \pkg{sparseHessianFD} passed CRAN check, I suspect that the
 error is a result of the \pkg{algorithm} package
 not being present in your LaTeX installation.  It is a standard
 package in the MacTeX distribution, but I cannot speak with authority about other
@@ -117,15 +117,12 @@ from the community on this point.
 
 
 \begin{response}
-The help page for \pkg{sparseHessianFD} now includes explicit
-instructions for the initializer.  You are correct that there is
-little guidance in how to document reference classes, and I agree that
-there should be a way for the
-existing mechanism to include documentation for the initializer to
-an RC.  But it's hard to do it using Roxygen2 in way that also passes
-CRAN checks. So I just ``hard coded'' a description of the initializer
-into the details section of the sparseHessianFD-class documentation. I
-could not find a more elegant way of doing it.  
+
+  Note to me:  issue here is that there is no documentation for
+  \func{sparseHessianFD()} as a function.  Good idea to create a
+  documentation page for that.
+
+  
 \end{response}
 
 

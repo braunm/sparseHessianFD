@@ -3,11 +3,7 @@
 NEWS FILE FOR SPARSEHESSIANFD PACKAGE
 
 
-VERSION 0.3.3
-
--   Added implementation of the complex step method.
-
--   Revised vignette.
+VERSION 0.3.0.990 (devel)
 
 
 VERSION 0.3.0
