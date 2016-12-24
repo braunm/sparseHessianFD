@@ -11,44 +11,8 @@
 }
 \makeatother
 
-\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
-\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
-\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
-\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
-\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
-\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
-\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
-\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
-\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
-\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
-\let\hlipl\hlkwb
+\usepackage{Sweave}
 
-\usepackage{framed}
-\makeatletter
-\newenvironment{kframe}{%
- \def\at@end@of@kframe{}%
- \ifinner\ifhmode%
-  \def\at@end@of@kframe{\end{minipage}}%
-  \begin{minipage}{\columnwidth}%
- \fi\fi%
- \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
- \colorbox{shadecolor}{##1}\hskip-\fboxsep
-     % There is no \\@totalrightmargin, so:
-     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
- \MakeFramed {\advance\hsize-\width
-   \@totalleftmargin\z@ \linewidth\hsize
-   \@setminipage}}%
- {\par\unskip\endMakeFramed%
- \at@end@of@kframe}
-\makeatother
-
-\definecolor{shadecolor}{rgb}{.97, .97, .97}
-\definecolor{messagecolor}{rgb}{0, 0, 0}
-\definecolor{warningcolor}{rgb}{1, 0, 1}
-\definecolor{errorcolor}{rgb}{1, 0, 0}
-\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
-
-\usepackage{alltt}
 
 
 %\VignetteEngine{knitr::knitr}
@@ -98,7 +62,7 @@
 \Plaintitle{sparseHessianFD: An R Package for Estimating Sparse Hessian Matrices}
 \Shorttitle{sparseHessianFD:  Sparse Hessians}
 \Keywords{sparse Hessians, sparsity, computation of Hessians,
-  graph coloring, finite differences, differentiation, complex step}
+  graph coloring, finite differences, differentiation}
 \Address{
   Michael Braun\\
   Edwin L. Cox School of Business\\
@@ -129,7 +93,6 @@
 %% need no \usepackage{Sweave.sty}
 
 %%\newenvironment{knitrout}{\begin{figure}}{\end{figure}}
-\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \begin{document}
 
@@ -193,8 +156,7 @@ constant. A linear approximation to the $m$th column of the Hessian is ${\hess{m
   e_m)- \nabla f(x)\right)/\delta}$.  Estimating a dense Hessian in this way involves at least $M+1$ calculations of the
 gradient: one for the gradient at $x$, and one after perturbing each
 of the $M$ elements of $x$, one at a time.\footnote{More accurate
-  approximations using finite differences require more gradient
-  evaluations.  In this section, we will consider
+  approximations using finite differences require more gradient evaluations.  We will consider
   only forward finite differences. In Section~\ref{sec:complex} we
   introduce the complex step method that, under certain conditions,
   can generate more accurate estimates with the same number of
@@ -758,6 +720,8 @@ fn,gr& \proglang{R} Functions that return the value of the
   and {gr} as well (see the \funcarg{...} argument below).\\
 rows, cols& Sparsity pattern: integer vectors of the row and column indices of
   the non-zero elements in the \emph{lower triangle} of the Hessian.\\
+direct& This argument is deprecated, and is included only for
+  backwards compatibility with earlier versions.\\
 delta& The perturbation amount for finite differencing of the
   gradient to compute the Hessian (the $\delta$ in Section~\ref{sec:numdiff}).  Defaults to
   \code{sqrt(.Machine\$double.eps)}.\\
@@ -923,7 +887,7 @@ R> hs <- obj$hessian(P)
 R> mean(abs(hs-true.hess))/mean(abs(hs))
 \end{Sinput}
 \begin{Soutput}
-[1] 2.3357e-09
+[1] 1.1217e-08
 \end{Soutput}
 \end{Schunk}
 
@@ -975,7 +939,7 @@ R> hs2 <- obj2$hessian(P)
 R> mean(abs(hs2-true.hess))/mean(abs(hs2))
 \end{Sinput}
 \begin{Soutput}
-[1] 8.0555e-17
+[1] 6.7543e-18
 \end{Soutput}
 \end{Schunk}
 
