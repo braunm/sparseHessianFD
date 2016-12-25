@@ -6,4 +6,4 @@ bibentry(bibtype = "Manual",
          author = person(given="Michael", family="Braun"),
          year = year,
          note = note,
-         url = "http://CRAN.R-project.org/package=sparseHessianFD")
+         url = "https://CRAN.R-project.org/package=sparseHessianFD")

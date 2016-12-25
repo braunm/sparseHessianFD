@@ -1,8 +1,8 @@
 \documentclass[nojss]{jss}
 
 %\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{sparseHessianFD}
-%\VignettePackage{sparseHessianFD}
+%\VignetteIndexEntry{Using the sparseHessianFD package}
+%\VignetteKeyword{sparseHessianFD}
 
 \usepackage{amsmath}
 \usepackage{amsfonts}
