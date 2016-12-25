@@ -1390,7 +1390,7 @@ $N$&$k$&$M$&mean&sd&mean&sd&mean&sd&mean&sd\\
 \end{tabularx}
 \caption{Computation times (milliseconds) for computing Hessians using the
   \pkg{numDeriv} and \pkg{sparseHessianFD} packages, and the finite
- difference and complex step methods, across 200 replications. Rows are ordered by the
+ difference and complex step methods, across 500 replications. Rows are ordered by the
   number of variables.}\label{tab:numDeriv}
 \end{table}
 
@@ -1398,7 +1398,7 @@ To help us understand just how scalable
 \pkg{sparseHessianFD} is, we ran another set of simulations, for the
 same hierarchical model, for different values of $N$ and $k$.  We then
 recorded the run times for different steps in the sparse Hessian
-estimation, across 500 replications.  The steps are summarized in
+estimation, across 200 replications.  The steps are summarized in
 Table~\ref{tab:timeMeasures}.  The times were generated on an
 Apple Mac Pro with a 12-core Intel Xeon E5-2697 processor (2.7 GHz)
 with 64 GB of RAM.

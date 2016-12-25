@@ -13,6 +13,5 @@
 
 ### R CMD check results
 
-There were no ERRORs or WARNINGs.  The only note is related to the
-change to the license.
+There were no NOTESs, ERRORs or WARNINGs.
 
