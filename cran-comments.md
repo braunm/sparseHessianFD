@@ -13,5 +13,6 @@
 
 ### R CMD check results
 
-There were no NOTESs, ERRORs or WARNINGs.
+There were no ERRORs or WARNINGs. The only NOTE flagged the word
+"Hessians" in the DESCRIPTION file as a possible mis-spelling. It is not.
 
