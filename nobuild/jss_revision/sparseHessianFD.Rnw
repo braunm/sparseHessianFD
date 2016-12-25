@@ -311,14 +311,13 @@ the cross-partial derivatives are zero.
 
 \subsubsection[Approximation using complex steps]{Approximation using complex steps}
 
-When $f(x)$ is complex analytic, we can approximate $\parD{}{}{f(x)}$
-and $\hess{}{f(x)}$ using the complex step
-method. To do this, we extend our defintion of a real $x\in\Real{M}$
-to be a complex $x\in\Complex{M}$ for which the imaginary part is
-zero. We then take a Taylor
+We are interested in estimating the Hessian only for real
+$x\in\Real{M}$. However, when $f(x)$ is complex-valued over a complex domain $x\in\Complex{M}$, we can approximate $\parD{}{}{f(x)}$
+and $\hess{}{f(x)}$ for real $x$ using the complex step
+method.  This method comes from a Taylor
 series expansion of $f(x)$ in the imaginary direction of the complex
-plane \citep{SquireTrapp1998}, rearrange terms, and take the imaginary
-parts of both sides.
+plane \citep{SquireTrapp1998}.  After rearranging terms, and taking the imaginary
+parts of both sides,
 \begin{align}
   \label{eq:complexTaylor}
   f(x+i\delta)&=f(x) + i\delta\parD{}{}{f(x)}+\mathcal{O}(\delta^2)\\
@@ -326,10 +325,14 @@ parts of both sides.
 \end{align}
 
 Estimating a first derivative using the complex step method does not
-require a differencing operation, but a second-order approximation of
-the Hessian does \citep{AbreuStich2013}.  However, when the gradient
-is provided, we can estimate the Hessian as if it were a Jacobian of
-the vector-valued gradient function \citep{LaiCrassidis2008}.
+require a differencing operation, so there is no loss of precision
+from rounding error, and the approximation of the derivative can be
+made arbitrarily precise as $\delta\rightarrow 0$.  This is not the
+case for second-order approximations of
+the Hessian \citep{AbreuStich2013}.  However, when the gradient can be
+computed exactly, we can compute a first-order approximation to
+Hessian by treating it as the Jacobian of
+a vector-valued function \citep{LaiCrassidis2008}.
 
 \begin{align}
   \label{eq:CShess2}
@@ -342,13 +345,13 @@ the vector-valued gradient function \citep{LaiCrassidis2008}.
 
 If this matrix were dense, we would need two evaluations of the
 complex $\parD{}{}f(x)$ to estimate it.  But what if it had the same sparsity
-pattern as the Hessian in Equation~\ref{eq:FDhess2sp}? First, we need
-to make an assumption that structural zeros remain zero for all
+pattern as the Hessian in Equation~\ref{eq:FDhess2sp}? First, we
+assume that structural zeros remain zero for all
 complex $x\in\Complex{M}$.  Next, subtract
 $\Imag(\parD{}{}{f(x_1,x_2)})$ from each column of
 $\hess{}{f(x)}$. When $x$ is real, the imaginary part of the gradient
 is zero, so this operation has no effect on the value of the
-Hessian. But for all complex $x$, the sparsity constraints ensure that
+Hessian. But the sparsity constraints ensure that
 the following identities hold:
 
 \begin{align}
@@ -357,8 +360,8 @@ the following identities hold:
 \end{align}
 
 As with the finite difference method, because Equation~\ref{eq:I1c} holds
-for $x_1$, it must also hold for $x_1+i\delta$, because Equation~\ref{eq:I1d} holds
-for $x_2$, it must also hold for $x_2+i\delta$. Thus, for real $x$,
+for $x_1$, it must also hold for $x_1+i\delta$, and because Equation~\ref{eq:I2c} holds
+for $x_2$, it must also hold for $x_2+i\delta$. Thus,
 
 \begin{align}
   \label{eq:CShess2sp}
@@ -381,17 +384,22 @@ the decision variables into $C$ mutually exclusive groups so that the number of 
 evaluations is reduced.  Define $\Mat{G}\in\Real{M\times C}$ where $\Mat{G}_{mc}=\delta$ if variable $m$ belongs to group $c$, and zero
 otherwise.  Define $\Mat{G}_c\in\Real{M}$ as the $c$th column of $\Mat{G}$.
 
-Next, define $\Mat{Y}\in\Real{M\times C}$ such that each column is a
-difference in gradients.
+Next, define $\Mat{Y}\in\Real{M\times C}$ such that each column is
+either a difference in gradients, or the imaginary part of a
+complex-valued gradient, depending on the chosen method.
 \begin{align}
   \label{eq:Yg}
-  \Mat{Y}_c&=\nabla f(x+G_c)-\nabla f(x)
+  \Mat{Y}_c&=
+           \begin{cases}  
+             \nabla f(x+G_c)-\nabla f(x)&\text{finite difference method}\\
+             \Imag(\nabla f(x+iG_c))&\text{complex step method}
+             \end{cases}
 \end{align}
 
 If $C=M$, then $\Mat{G}$ is a diagonal matrix with $\delta$ in each
 diagonal element.  The matrix equation $\hess{}{}\Mat{G}=\Mat{Y}$ represents the linear approximation
 $\hess{im}{}\delta\approx y_{im}$, and we can solve for all elements of $\hess{}{}$
-just by computing $Y$. But if $C<M$,
+just by computing $\Mat{Y}$. But if $C<M$,
 there must be at least one $\Mat{G}_c$ with $\delta$ in at least two
 rows. The corresponding column $\Mat{Y}_c$ is computed by perturbing multiple variables at
 once, so we cannot solve for any $\hess{im}{}$
@@ -880,20 +888,7 @@ hs <- obj$hessian(P)
 mean(abs(hs-true.hess))/mean(abs(hs))
 @
 
-\subsection[Complex step method]{Complex step method}\label{sec:complex}
 
-The \pkg{sparseHessianFD} package also allows for
-estimation of the Hessian using the complex step method
-\citep{SquireTrapp1998} as an alternative to finite differencing. In
-this method, the definition of $\Mat{Y}_c$ in Equation~\ref{eq:Yg} is replaced with
-\begin{align}
-  \label{eq:complexYg}
-  \Mat{Y}_c&=\Imag(\nabla f(x+iG_c))
-\end{align}
-The advantage of this method is that there is no longer a
-subtraction operation to generate truncation error. Thus, $\delta$ can
-be made arbitrarily small, and the resulting estimate of the Hessian
-is more accurate.
 
 A call to the \class{sparseHessianFD} \method{hessian} method will
 apply the complex step method if the 
