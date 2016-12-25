@@ -15,6 +15,7 @@ README\.md
 inst/old/*
 data-raw/*
 ^nobuild/*
+^revdep/*
 ^cache/*
 ^README\.Rmd$
 ^README-.*\.png$
