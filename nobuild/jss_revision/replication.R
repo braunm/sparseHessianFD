@@ -11,7 +11,7 @@ library("ggplot2")
 
 set.seed(1234)
 
-registerDoParallel(cores=7)
+registerDoParallel(cores=6)
 
 binary_sim <- function(N, k, T) {
   x.mean <- rep(0,k)
@@ -203,7 +203,7 @@ run_test_tab4 <- function(Nk, reps=50, order.row=TRUE) {
 
 ## Replicate Table 4
 
-cases_tab4 <- expand.grid(k=c(2,5,8),
+cases_tab4 <- expand.grid(k=c(8,5,2),
                           N=c(15, 50, 100, 500))
 
 runs_tab4 <- plyr::adply(cases_tab4, 1, run_test_tab4, reps=500,
@@ -221,6 +221,5 @@ tab4 <-  mutate(runs_tab4, ms=bench.time/1000000) %>%
     arrange(k,N) %>%
     select(N, k, M, jac_mean, jac_sd, sp_mean, sp_sd, cplx_mean, cplx_sd, sp_cplx_mean, sp_cplx_sd)
 
-save(runs_tab4, tab4, D2, file="nobuild/jss_revision/repl_tab4.Rdata")
-save(tab4, file="inst/extdata/vignette_tab4.Rdata")
+save(runs_tab4, tab4, file="nobuild/jss_revision/repl_tab4.Rdata")
 

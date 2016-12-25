@@ -4,4 +4,4 @@
 #SBATCH -e repl.Rout
 #SBATCH -p parallel-short
 
-R --vanilla <./nobuild/jss_revision/replication.R
+R --save  <./nobuild/jss_revision/replication.R
