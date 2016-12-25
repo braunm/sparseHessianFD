@@ -1296,7 +1296,7 @@ xtable(digits=c(rep(0,4),rep(1,8))) %>%
 \end{tabularx}
 \caption{Computation times (milliseconds) for computing Hessians using the
   \pkg{numDeriv} and \pkg{sparseHessianFD} packages, and the finite
- difference and complex step methods, across 200 replications. Rows are ordered by the
+ difference and complex step methods, across 500 replications. Rows are ordered by the
   number of variables.}\label{tab:numDeriv}
 \end{table}
 

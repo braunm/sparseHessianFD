@@ -159,19 +159,11 @@ element, and let $\delta$ be a sufficiently small scalar
 constant. A ``finite difference'' linear approximation to the $m$th column of the Hessian is ${\hess{m}{}\approx\left(\nabla f(x+\delta
   e_m)- \nabla f(x)\right)/\delta}$.  Estimating a dense Hessian in this way involves at least $M+1$ calculations of the
 gradient: one for the gradient at $x$, and one after perturbing each
-of the $M$ elements of $x$, one at a time. If the function is complex
-analytic, an alternative approximation that requires $M$ gradient
-evaulations is $\hess{m}{}\approx\Imag\left(\nabla f(x+i\delta
-  e_m)\right)/\delta$, where $i=\sqrt{-1}$ and $\Imag$ returns the imaginary part of a complex
-number \citep{SquireTrapp1998}. This ``complex step'' method can be more accurate than the
-finite difference method because there is no subtraction operation
-that might generate roundoff errors, and thus $\delta$ can be made
-arbitrarily small to avoid truncaton errors \citep{LaiCrassidis2008}. However, it does require that the
-implementation of $f(x)$ accept a complex argument, and return a
-complex result, even though we are interested in differentiating $f(x)$ only along
-the real line.
-
-Regardless of the approximation method used, if the Hessian is sparse, most of the
+of the $M$ elements of $x$, one at a time. Under certain conditions, a
+more accurate approximation is the ``complex step'' method:  $\hess{m}{}\approx\Imag\left(\nabla f(x+i\delta
+  e_m)\right)/\delta$, where $i=\sqrt{-1}$ and $\Imag$ returns the
+imaginary part of a complex
+number \citep{SquireTrapp1998}.  Regardless of the approximation method used, if the Hessian is sparse, most of the
 elements are constrained to zero.  Depending
 on the sparsity pattern of the Hessian, those constraints may let us recover
 the Hessian with fewer gradient evaluations by perturbing multiple
@@ -239,8 +231,9 @@ extensively in \pkg{sparseHessianFD}.
 \subsection[Numerical differentiation of sparse Hessians]{Numerical
   differentiation of sparse Hessians}\label{sec:numdiff}
 
-The partial derivative of a real scalar-valued function $f(x)$ with respect to $x_j$ (the $j$th
-component of $x$) is defined as
+The partial derivative of a real scalar-valued function $f(x)$ with
+respect to $x_j$ (the $j$th
+component of $x\in\Real{M}$) is defined as
 \begin{align}
   \label{eq:defParD}
 \parD{}{j}{f(x)}=\lim\limits_{\delta\to 0}\frac{f(x+\delta e_j)-f(x)}{\delta}
@@ -321,10 +314,10 @@ the cross-partial derivatives are zero.
 
 \subsubsection[Approximation using complex steps]{Approximation using complex steps}
 
-We are interested in estimating the Hessian only for real
-$x\in\Real{M}$. However, when $f(x)$ is complex-valued over a complex domain $x\in\Complex{M}$, we can approximate $\parD{}{}{f(x)}$
-and $\hess{}{f(x)}$ for real $x$ using the complex step
-method.  This method comes from a Taylor
+If $f(x)$ is defined over a complex domain and is holomorphic, then we
+can we can approximate $\parD{}{}{f(x)}$
+and $\hess{}{f(x)}$ at real values of $x$ using the complex step
+method. This method comes from a Taylor
 series expansion of $f(x)$ in the imaginary direction of the complex
 plane \citep{SquireTrapp1998}.  After rearranging terms, and taking the imaginary
 parts of both sides,
@@ -335,9 +328,9 @@ parts of both sides,
 \end{align}
 
 Estimating a first derivative using the complex step method does not
-require a differencing operation, so there is no loss of precision
-from rounding error, and the approximation of the derivative can be
-made arbitrarily precise as $\delta\rightarrow 0$.  This is not the
+require a differencing operation, so there is no subtraction operation
+that might generate roundoff errors.  Thus, the approximation can be
+made arbitrarily precise as $\delta\rightarrow 0$ \citep{LaiCrassidis2008}.  This is not the
 case for second-order approximations of
 the Hessian \citep{AbreuStich2013}.  However, when the gradient can be
 computed exactly, we can compute a first-order approximation to
@@ -354,15 +347,15 @@ a vector-valued function \citep{LaiCrassidis2008}.
 \end{align}
 
 If this matrix were dense, we would need two evaluations of the
-complex $\parD{}{}f(x)$ to estimate it.  But what if it had the same sparsity
-pattern as the Hessian in Equation~\ref{eq:FDhess2sp}? First, we
+$\parD{}{}f(x)$ to estimate it.  If the matrix were sparse, with the same sparsity
+pattern as the Hessian in Equation~\ref{eq:FDhess2sp}, and we
 assume that structural zeros remain zero for all
-complex $x\in\Complex{M}$.  Next, subtract
-$\Imag(\parD{}{}{f(x_1,x_2)})$ from each column of
+complex $x\in\Complex{M}$, then we need only one evaluation.  Suppose
+we were to subtract $\Imag(\parD{}{}{f(x_1,x_2)})$ from each column of
 $\hess{}{f(x)}$. When $x$ is real, the imaginary part of the gradient
 is zero, so this operation has no effect on the value of the
 Hessian. But the sparsity constraints ensure that
-the following identities hold:
+the following identities hold all complex $x$.
 
 \begin{align}
   \Imag(\parD{}{1}{f(x_1,x_2+i\delta)}) -\Imag(\parD{}{1}{f(x_1,x_2)})&=0\label{eq:I1c}\\
@@ -382,7 +375,7 @@ for $x_2$, it must also hold for $x_2+i\delta$. Thus,
     \end{pmatrix}/\delta
 \end{align}
 
-Only one evaluation of the gradient is required.
+for real $x$.  Only one evaluation of the gradient is required.
 
 \subsubsection[Perturbing groups of variables]{Perturbing groups of variables}
 
@@ -958,7 +951,8 @@ R> identical(gr, true.grad)
 \end{Soutput}
 \end{Schunk}
 
-The evaluation of the Hessian is a finite differenced approximation,
+The default choice of method is \funcarg{complex=FALSE}, so the
+evaluation of the Hessian is a finite differenced approximation,
 so it is very close to, but not identical to, the true value, in terms
 of mean relative difference.
 
@@ -976,25 +970,24 @@ R> mean(abs(hs-true.hess))/mean(abs(hs))
 
 
 
-A call to the \class{sparseHessianFD} \method{hessian} method will
-apply the complex step method if the 
-\funcarg{complex=TRUE} was set in the initializer. The functions
+If \funcarg{complex=TRUE} in the initializer, the call to the \method{hessian} method will
+apply the complex step method. To use this method, the functions
 passed as \funcarg{fn} and \funcarg{gr} must both
 accept a complex argument, and return a complex
 result, even though we are differentiating a real-valued function. Although \pkg{base} \proglang{R} supports complex arguments
 for most basic mathematical functions, many common functions (e.g.,  \func{gamma}, \func{log1p},
 \func{expm1}, and the probability distribution functions) do not have
 complex implementations. Furthermore, the complex step method is valid
-only if the function is holomorphic
-(complex differentiable). The methods in \class{sparseHessianFD} do
+only if the function is holomorphic. The methods in \class{sparseHessianFD} do
 \emph{not} check that this is the case for the function at hand. We convey the
 following warning from the documentation of the \pkg{numDeriv} package
 \citep{R_numDeriv}, which also implements the complex step method:
-``Avoid this method if you do not know that your function is
+``avoid this method if you do not know that your function is
 suitable. Your mistake may not be caught and the results will be
 spurious.''
 
-Fortunately for demonstration purposes, the log posterior density in Equation~\ref{eq:LPD} is holomorphic, so we
+Fortunately for demonstration purposes, the log posterior density in
+Equation~\ref{eq:LPD} is holomorphic, so we
 can estimate its Hessian using the complex step method, and compute
 the mean relative difference from the true Hessian.
 
@@ -1014,11 +1007,9 @@ R> mean(abs(hs2-true.hess))/mean(abs(hs2))
 
 
 
-In short, the complex step method can be much more accurate than
+In short, the complex step method can be more accurate than
 finite differencing, but it comes with theoretical and implementation
 restrictions that may limit its universality.
-
-
 
 \section[Algorithms]{Algorithms}\label{sec:algorithms}
 
@@ -1382,18 +1373,18 @@ Table~\ref{tab:numDeriv} we see that computation times using
 $N$&$k$&$M$&mean&sd&mean&sd&mean&sd&mean&sd\\
 %%\midrule
   \midrule
-15 & 2 & 32 & 12.4 & 1.2 & 2.3 & 0.5 & 12.8 & 1.2 & 2.1 & 0.5 \\ 
-  15 & 4 & 64 & 26.2 & 12.4 & 4.0 & 0.9 & 26.1 & 2.0 & 3.8 & 1.1 \\ 
-  50 & 2 & 102 & 50.5 & 2.4 & 3.0 & 0.9 & 54.8 & 3.5 & 2.9 & 2.1 \\ 
-  15 & 8 & 128 & 50.4 & 2.2 & 8.5 & 12.0 & 55.0 & 2.7 & 7.7 & 1.5 \\ 
-  100 & 2 & 202 & 134.1 & 15.7 & 3.7 & 0.5 & 144.0 & 11.6 & 3.3 & 0.6 \\ 
-  50 & 4 & 204 & 104.0 & 2.1 & 6.3 & 11.6 & 117.2 & 17.6 & 5.1 & 1.0 \\ 
-  100 & 4 & 404 & 284.3 & 34.3 & 8.0 & 10.9 & 322.5 & 40.8 & 8.2 & 11.1 \\ 
-  50 & 8 & 408 & 248.5 & 48.7 & 10.9 & 1.4 & 271.7 & 43.7 & 11.5 & 1.4 \\ 
-  100 & 8 & 808 & 624.5 & 54.0 & 14.4 & 1.8 & 762.6 & 76.9 & 15.7 & 1.7 \\ 
-  500 & 2 & 1002 & 1758.6 & 86.7 & 10.1 & 10.0 & 1990.0 & 90.6 & 9.3 & 9.8 \\ 
-  500 & 4 & 2004 & 3832.5 & 84.9 & 18.4 & 2.3 & 4460.7 & 82.8 & 19.4 & 2.5 \\ 
-  500 & 8 & 4008 & 8846.5 & 82.1 & 45.2 & 6.2 & 11058.4 & 101.3 & 52.5 & 6.3 \\ 
+15 & 2 & 32 & 12.7 & 0.9 & 2.4 & 0.1 & 13.2 & 0.7 & 2.0 & 0.1 \\ 
+  15 & 5 & 80 & 32.2 & 0.9 & 5.0 & 0.5 & 36.1 & 10.1 & 5.2 & 0.8 \\ 
+  50 & 2 & 102 & 51.3 & 9.8 & 3.0 & 0.4 & 54.5 & 1.0 & 2.7 & 0.6 \\ 
+  15 & 8 & 128 & 53.6 & 0.9 & 7.8 & 0.6 & 62.5 & 16.7 & 8.2 & 0.8 \\ 
+  100 & 2 & 202 & 131.7 & 16.9 & 3.7 & 0.3 & 147.6 & 24.1 & 3.4 & 0.5 \\ 
+  50 & 5 & 255 & 144.0 & 27.1 & 6.6 & 0.6 & 162.8 & 29.2 & 6.7 & 0.7 \\ 
+  50 & 8 & 408 & 256.2 & 43.5 & 12.5 & 12.9 & 291.1 & 39.0 & 11.7 & 0.7 \\ 
+  100 & 5 & 505 & 495.7 & 129.5 & 9.8 & 3.1 & 559.8 & 125.9 & 11.8 & 10.4 \\ 
+  100 & 8 & 808 & 850.0 & 171.4 & 20.9 & 20.4 & 999.2 & 217.5 & 23.6 & 17.3 \\ 
+  500 & 2 & 1002 & 1953.4 & 321.7 & 10.8 & 3.7 & 2156.2 & 339.7 & 9.5 & 3.4 \\ 
+  500 & 5 & 2505 & 5444.0 & 951.0 & 27.1 & 10.6 & 6159.3 & 1009.2 & 26.5 & 4.6 \\ 
+  500 & 8 & 4008 & 9533.1 & 190.9 & 54.5 & 12.8 & 14059.4 & 3797.9 & 62.5 & 21.8 \\ 
    \bottomrule
 
 \end{tabularx}
@@ -1407,7 +1398,7 @@ To help us understand just how scalable
 \pkg{sparseHessianFD} is, we ran another set of simulations, for the
 same hierarchical model, for different values of $N$ and $k$.  We then
 recorded the run times for different steps in the sparse Hessian
-estimation, across 200 replications.  The steps are summarized in
+estimation, across 500 replications.  The steps are summarized in
 Table~\ref{tab:timeMeasures}.  The times were generated on an
 Apple Mac Pro with a 12-core Intel Xeon E5-2697 processor (2.7 GHz)
 with 64 GB of RAM.

@@ -50,17 +50,16 @@
  ``sparseHessianFD: An R Package for Estimating Sparse
  Hessian Matrices''\\
  \vspace{\baselineskip}
- Response to editor and reviewer
+ Response to reviewer
 \end{center}
 }
 \vspace{\baselineskip}
 
 I would like to express my sincere appreciation for the time and effort that
-was invested in the review.  It is obvious to me that the reviewer went through
-the paper and code in great detail.  I am happy to write that I was
-able to incorporate a large majority of
-the suggestions into the the revised paper and package. For the
-others, I hope that you will accept my
+was invested in the review.  I am happy to write that I was
+able to incorporate a large majority of the suggestions into the the
+revised paper and package. For the
+others, I hope that you and the editor will accept my
 explanations and excuses.  Of course, if there are any strong
 objections to any of my responses, I am happy
 to consider further changes in advance of publication.
@@ -89,7 +88,7 @@ critical it might be better to omit it.
 \begin{response}
 Because \pkg{sparseHessianFD} passes CRAN check, I suspect that the
 error is a result of the \pkg{algorithm} package
-not being present in the reviewer's LaTeX installation.  It is a standard
+not being present in the LaTeX installation.  It is a standard
 package in the MacTeX distribution, but I cannot speak with authority about other
 platforms. It should be easily installed through CTAN.
 
@@ -116,10 +115,10 @@ instructions for the initializer.  It is correct that there is
 little guidance in how to document reference classes, and I agree that
 there should be a way for the
 existing mechanism to include documentation for the initializer to
-an RC.  But it's hard to do it using Roxygen2 in way that also passes
-CRAN checks. So I just ``hard coded'' a description of the initializer
+an RC.  But it's hard to do it using \pkg{roxygen2} in way that also passes
+CRAN checks. Therefore, I just ``hard coded'' a description of the initializer
 into the details section of the sparseHessianFD-class documentation. I
-could not find a more elegant way of doing it.  
+could not think of a more elegant way of doing it.  
 \end{response}
 
 
@@ -136,10 +135,10 @@ problems where the conditions would apply.
   \end{revQuote}
 
   \begin{response}
-I included this section primarily as a way to avoid overselling the
-method, but the point that the reader might be scared away by this list of
+In this original submission I included this section primarily as a way to avoid overselling the
+method, but your point that the reader might be scared away by this list of
 restrictions is well-taken.  In the revision, I removed the list, and
-wove the restrictions into the text.  The revision projects a more
+wove the most important restrictions into the text.  The revision projects a more
 positive tone that in the original submission.
 \end{response}
 
@@ -231,14 +230,13 @@ would be nice if this where mentioned in the file replication.R.
   \end{revQuote}
 
   \begin{response}
-Assuming that the R package builder works the way I think it does,
+Assuming that the \proglang{R} package builder works the way I think it does,
 the \filename{replication.R} file, and the data for Table 4 (\filename{vignette\_tab4.Rdata}), will be
 copied to the \filename{doc\textbackslash} directory of the package
 once it is installed.  At the end of the second paragraph of Section
 4, I now write that ``code to replicate Table 4 is available as an
-online supplement to this paper.''  I cannot be more specific about
-the name of the replication file, because I believe it depends on the
-volume and issue number of the published version.
+online supplement to this paper.'' In the non-JSS vignette that will be part
+of the package (and posted on CRAN), this sentence will be changed appropriately.
 \end{response}
 
 
@@ -255,7 +253,7 @@ syntax.
 
 \begin{response}
   I removed the \func{R>} prompt, and now refer to that code as a usage
-  syntax.  Thank you for the suggestion.
+  syntax.
 \end{response}
 
 
@@ -275,9 +273,7 @@ On p12, the function calls all.equal(f, true.f) and all.equal(gr,
 true.grad) are comparing f and gr calculated with the exact calculation, so
 the difference is zero:
 
-
 (Code removed)
-
 
 It is not clear to me whether obj\$fn() and obj\$gr() use code as in the true
 functions or a modified version using sparse techniques. Some further
@@ -372,14 +368,14 @@ Here I am combining my responses to items \ref{it:complex1} and
 \ref{it:complex2} together.
 
   The complex step function is now implemented in the package, and is
-  discussed briefly in Section 2.5 of the paper.  It is 
+  described as one of two methods of numerical approximation (the
+  other being finite differences).  It is 
   correct that ``most R primitives work with complex numbers,''
   but there are many commonly used functions that do not, including 
   \func{log1p}, \func{gamma}, and the probability distribution
-  functions. This limitation, combined with the requirement that the function be
-  holomorphic, and my own inexperience with the complex step method, make
-  me hesitant to promote it too heavily in the paper. But it is a nifty
-  trick, and I am happy that it is now included in the package.
+  functions.  This limitation, along
+  with the requirement that the function be
+  holomorphic, are discussed in Section 2.4
  
 In terms of accuracy, the paper now includes comparisons between the true
 Hessian and the two \class{sparseHessianFD} methods (finite differences
@@ -392,10 +388,17 @@ change the baseline \pkg{numDeriv} method from \func{hessian} with the
 \method{simple} and 
 \method{complex} methods.
 
-
+I must admit that I was not familiar with the complex step method
+beforehand.  Incorporating it into the package, and writing about it
+in the paper, was a valuable learning experience for me. That said,
+until now I have \emph{never} come across complex analysis in my own work, and I
+may not have done anything with complex numbers at all since my
+Algebra II class in 10th grade. Thus, it is highly probable that the parts
+of the paper on the complex step method are not precisely correct.
+Any constructive criticism or suggestions in that regard would be
+warmly welcomed.
 
 \end{response}
-
 
 \item \begin{revQuote}
  p.13  l. -7  Figure 3b  should be Figure 3c
@@ -404,7 +407,6 @@ change the baseline \pkg{numDeriv} method from \func{hessian} with the
 \begin{response}
   Fixed.  Thanks.
 \end{response}
-
 
 \item \begin{revQuote}
  The file replication.R does not set the RNG seed. This may not be too
@@ -426,7 +428,7 @@ timing results in context.
   \end{revQuote}
 
 \begin{response}
-  This information is now included in the first paragraph of Section 4.
+  This information is now included in Section 4.
 \end{response}
 
 
@@ -470,19 +472,14 @@ N=2500, k=8 comparison.)
   \begin{response}
 Because the \func{numDeriv::jacobian} function runs so much faster
 than  \func{numDeriv::hessian}, I was able to increase the size of the
-examples in Table 4. One objective of Table 4 is to compare the relative
-increases in computation time for different $N$ and $k$ between
-\pkg{numDeriv} and \pkg{sparseHessianFD}, and I think that objective
-is met with $N=(15, 50, 100, 500)$.  Please forgive me for not going as high as
-$N=2500$, $k=8$. For the reader who wants to
-replicate the results, a run time of more than a day is a lot to ask.
+examples in Table 4: $N=(15, 50, 100, 500)$ and $k=(2,5,8)$. Please
+excuse me for not going as high as $N=2500$, $k=8$. For the reader
+who wants to replicate the results, a run time of more than a day is a
+lot to ask.
   \end{response}
 
 \item\begin{revQuote}
-
  p.16  l. -7 "to to compute" -> "to compute"
-
-
   \end{revQuote}
   
   \begin{response}
@@ -490,7 +487,6 @@ replicate the results, a run time of more than a day is a lot to ask.
   \end{response}
 
 \item\begin{revQuote}
-
 While that package is useful, and reasonably demonstrated in the paper,
 I think it would be nice to expand the paper in some ways that might be
 deemed more "original research". Some possibilities are:
@@ -513,7 +509,7 @@ run.par == TRUE)
   \end{revQuote}
   
   \begin{response}
-I appreciate the editor's comment that these suggestions might be
+I appreciate the editor's comment in the decision letter that these suggestions might be
 better left for a future paper.  But they are reasonable points that I
 would like to address in turn.
     \begin{itemize}
@@ -555,8 +551,4 @@ would like to address in turn.
   \end{response}
 
 \end{enumerate}
-
-Again, thank you for the helpful comments.  The paper is greatly
-improved by them.
-
 \end{document}
