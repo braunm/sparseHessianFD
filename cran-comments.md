@@ -1,17 +1,9 @@
-##Submission notes for sparseHessianFD, version 0.3.2
+##Submission notes for sparseHessianFD, version 0.3.3
 
-- This is a minor update that coincides with an invited revision of a Journal of Statistical
-Software submission.
+- This is a minor update that corresponds to the final version
+submitted to the Journal of Statistical Software.
 
-### Resubmission notes
 
-- Confirmed that URL in the CITATION file is of canonical form
-(https://)
-
-- Confirmed that after building the vignettes, the files in inst/doc
-are newer than those in vignettes/.
-
-- In vignette, updated \VignetteIndexEntry to be more descriptive.
 
 ### Test environments
 
