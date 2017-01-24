@@ -1,11 +1,12 @@
-\documentclass[jss]{jss}
+ \documentclass[jss]{jss}
 
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{sparseHessianFD}
-%\VignettePackage{sparseHessianFD}
+%\VignetteKeyword{sparseHessianFD}
 
 \usepackage{amsmath}
 \usepackage{amsfonts}
+\usepackage{amsthm}
 \usepackage{subcaption}
 \usepackage{algorithm}
 \usepackage{algorithmic}
@@ -33,14 +34,14 @@
 \newcommand{\variable}[1]{\code{#1}}
 \newcommand{\method}[1]{\func{#1}}
 
-
  \newcommand{\df}[3]{\mathsf{d}^{#1}f(#2;#3)}
  \newcommand{\parD}[3]{\mathsf{D}^{#1}_{#2}#3}
 \newcommand{\hess}[2]{\mathsf{H}_{#1}#2}
 \newcommand{\hessLT}[2]{\mathsf{L}_{#1}#2}
 \newcommand{\Mat}[1]{\mathbf{#1}}
-
-
+\newcommand{\Real}[1]{\mathbb{R}^{#1}}
+\newcommand{\Complex}[1]{\mathbb{Z}^{#1}}
+\DeclareMathOperator{\Imag}{Im}
 
 \author{Michael Braun\\Edwin L. Cox School of Business\\Southern Methodist University}
 \Plainauthor{Michael Braun}
@@ -48,7 +49,7 @@
 \Plaintitle{sparseHessianFD: An R Package for Estimating Sparse Hessian Matrices}
 \Shorttitle{sparseHessianFD:  Sparse Hessians}
 \Keywords{sparse Hessians, sparsity, computation of Hessians,
-  graph coloring, finite differences, differentiation}
+  graph coloring, finite differences, differentiation, complex step}
 \Address{
   Michael Braun\\
   Edwin L. Cox School of Business\\
@@ -74,11 +75,11 @@
   unavailable.}
 
 
-\date{July 6, 2016}
+\date{January 25, 2017}
 
 %% need no \usepackage{Sweave.sty}
 
-\newenvironment{knitrout}{\begin{figure}}{\end{figure}}
+%%\newenvironment{knitrout}{\begin{figure}}{\end{figure}}
 
 \begin{document}
 
@@ -88,7 +89,7 @@
 <<setup1, echo=FALSE, cache=FALSE>>=
 suppressPackageStartupMessages(require(Matrix))
 knitr::render_sweave()
-knitr::opts_chunk$set(prompt=TRUE, cache=FALSE)
+knitr::opts_chunk$set(prompt=TRUE, cache=FALSE,error=FALSE) #$
 options(replace.assign=TRUE, width=77, prompt="R> ")
 @
 
@@ -109,13 +110,15 @@ requirements of the Hessian, and computational cost of many linear
 algebra operations on it, grow quadratically with the number of
 decision variables.   For
 applications with hundreds of thousands of variables, computing the
-Hessian even once might not be practical under time, storage or processor constraints.  Hierarchical models, in
+Hessian even once might not be practical under time, storage or
+processor constraints.  Hierarchical models, in
 which each additional heterogeneous unit is associated with its own subset of
 variables, are particularly vulnerable to this curse of dimensionality
 
 However, for many problems, the Hessian is
-\emph{sparse}, meaning that the proportion of non-zero elements in the
-Hessian is small.  Consider a log
+\emph{sparse}, meaning that the proportion of  ``structural''  zeros
+(matrix elements that are always zero, regardless of the value at which
+function is estimated) is high.  Consider a log
 posterior density in a Bayesian hierarchical
 model.  If the outcomes across units are conditionally
 independent, the cross-partial derivatives of heterogeneous variables
@@ -131,8 +134,10 @@ those elements.  \proglang{R} packages such as \pkg{trustOptim}
 in a compressed sparse format.
 
 The \pkg{sparseHessianFD} package is a tool for estimating
-sparse Hessians using finite differences of gradients.  Section \ref{sec:numdiff} will
-cover the specifics, but the basic idea is as follows.  Consider a
+sparse Hessians numerically, using either finite differences or
+complex perturbations of
+gradients.  Section~\ref{sec:numdiff} will
+cover the specifics, but the basic idea is as follows.  Consider a real-valued
 function $f(x)$, its gradient $\nabla{f(x)}$, and its Hessian
 $\hess{}{f(x)}$, for $x\in\mathbb{R}^M$.  Define the derivative vector
 as the transpose of the gradient, and a vector of partial derivatives, so
@@ -141,12 +146,14 @@ to reduce notational clutter by referring to the derivative and
 Hessian as $\parD{}{}{}$ and $\hess{}{}$, respectively, without the
 $f(x)$ symbol).  Let $e_m$ be a vector of zeros, except with a 1 in the $m$th
 element, and let $\delta$ be a sufficiently small scalar
-constant. A linear approximation to the $m$th column of the Hessian is ${\hess{m}{}\approx\left(\nabla f(x+\delta
+constant. A ``finite difference'' linear approximation to the $m$th column of the Hessian is ${\hess{m}{}\approx\left(\nabla f(x+\delta
   e_m)- \nabla f(x)\right)/\delta}$.  Estimating a dense Hessian in this way involves at least $M+1$ calculations of the
 gradient: one for the gradient at $x$, and one after perturbing each
-of the $M$ elements of $x$, one at a time.\footnote{More accurate
-  approximations require more gradient evaluations.  We will consider
-  only forward finite differences.}  In a sparse matrix, most of the
+of the $M$ elements of $x$, one at a time. Under certain conditions, a
+more accurate approximation is the ``complex step'' method:  $\hess{m}{}\approx\Imag\left(\nabla f(x+i\delta
+  e_m)\right)/\delta$, where $i=\sqrt{-1}$ and $\Imag$ returns the
+imaginary part of a complex
+number \citep{SquireTrapp1998}.  Regardless of the approximation method used, if the Hessian is sparse, most of the
 elements are constrained to zero.  Depending
 on the sparsity pattern of the Hessian, those constraints may let us recover
 the Hessian with fewer gradient evaluations by perturbing multiple
@@ -156,71 +163,44 @@ this paper, the number of gradient evaluations does not increase with
 the number of additional heterogeneous units.
 
 The package defines the \class{sparseHessianFD} class, whose initializer
-requires the user to provide functions that compute the objective
-function and the gradient, as well as the sparsity pattern of the
-Hessian.  Some users may find those requirements burdensome, and we
-emphasize that there may be some applications for
-which \pkg{sparseHessianFD} is not an appropriate package to use. To
-extract the maximum benefit from using \pkg{sparseHessianFD}, we need
-to accept some conditions and assumptions.
+requires the user to provide functions that compute an objective
+function, its gradient (as accurately as possible, to machine precision), and the sparsity pattern of its Hessian
+matrix. The sparsity pattern (e.g., location of structural
+zeros) must be known in advance, and cannot vary across the domain of the
+objective function. The only functions and methods of the class that
+the end user should need to use are the
+initializer, methods that return the Hessian
+in a sparse compressed format, and perhaps some utility functions that
+simplify the construction of the sparsity pattern.  The class also
+defines methods that partition the variables into groups that can be perturbed together in a finite
+differencing step, and recovers the elements of the Hessian via linear
+substitution.  Those methods perform most of the work, but should be
+invisible to the user.
 
-\begin{enumerate}
-  \item Preferred alternatives to computing the Hessian are not
-  available.  Finite differencing is not generally a ``first choice''
-  method.  Deriving a gradient or Hessian symbolically, and writing a
-  subroutine to compute it, will give an exact answer, but might be
-  tedious or difficult to implement. Algorithmic differentiation (AD) is
-  probably the most efficient method, but requires specialized
-  libraries that, at this moment, are not yet broadly available in \proglang{R}.
- \pkg{sparseHessianFD} makes the most sense when the gradient is easy to compute, but the Hessian is
-  not.
-  \item The application can tolerate the approximation error in the Hessian
-  that comes with finite differencing methods.
-\item The objective function $f(x)$ is twice differentiable, and can be
-  computed ``quickly and easily,'' even for a large number of
-  variables.  We leave the definition of ``quickly and easily''
-  intentionally murky, since no method of differentiation can overcome
-  pathologies in a function that itself is hard to compute.
-\item The gradient can
-  be computed quickly, easily and \emph{exactly} (within machine
-  precision).   We do not recommend using finite differenced gradients
-  when computing finite differenced Hessians.  The
-  approximation errors will be compounded, and the time
-  complexity of computing a gradient grows with the number of
-  variables.
-\item The sparsity pattern is known in advance, and does not depend
-    on the values of the variables.
-\end{enumerate}
-
-Our perspective on the requirements to use \pkg{sparseHessianFD} is
-that deriving a vector of first
+As with any computing method or algorithm, there are boundaries around
+the space of applications for which \pkg{sparseHessianFD} is the right
+tool for the job. In general, numerical approximations are not ``first
+choice'' methods because the result is not exact, so
+\pkg{sparseHessianFD} should not be used when the application cannot
+tolerate any error, no matter how small.  Also, we admit that some
+users might balk at having to provide an exact gradient, even though
+the Hessian will be estimated numerically.\footnote{It is possible
+  that a gradient that is approximated using a complex step method
+  would be precise enough to be useful. A further investigation is
+  beyond the scope of this paper.} However, deriving a vector of first
 derivatives, and writing \proglang{R} functions to compute them, is a
 lot easier than doing the same for a matrix of second derivatives, and
 more accurate than computing second-order approximations from the
 objective function. Even when we have derived the Hessian
 symbolically, in practice it may still be faster to estimate the Hessian
-using \pkg{sparseHessianFD} than coding it directly.   These are the
+using \pkg{sparseHessianFD} than coding it directly.  These are the
 situations in which \pkg{sparseHessianFD} adds the most value to the
-statistician's toolbox.  If AD software is available to compute the gradient, then
-it is probably available for sparse Hessians as well, and
-\pkg{sparseHessianFD} would not be needed.  Without AD-computed or
-symbolically derived Hessians, \pkg{sparseHessianFD} is the best
-available option.
-
-The only functions and methods the end user should need to use are the
-\class{sparseHessianFD} initializer, methods that return the Hessian
-in a sparse compressed format, and perhaps some utility functions that
-simplify the construction of the sparsity pattern.  The class also
-defines methods that partition
-the variables into groups that can be perturbed together in a finite
-differencing step, and recovers the elements of the Hessian via linear
-substitution.  Those methods perform most of the work, but should be
-invisible to the user.
+statistician's toolbox.
 
 This article proceeds as follows.  First, we present
 some background information about numerical differentiation, and
 sparse matrices in \proglang{R}, in Section~\ref{sec:background}.  In
-Section ~\ref{sec:using}, we explain how to use the package.
+Section~\ref{sec:using}, we explain how to use the package.
 Section~\ref{sec:algorithms} explains the underlying algorithms, and
 Section~\ref{sec:timing} demonstrates the scalability of those algorithms.
 
@@ -241,8 +221,9 @@ extensively in \pkg{sparseHessianFD}.
 \subsection[Numerical differentiation of sparse Hessians]{Numerical
   differentiation of sparse Hessians}\label{sec:numdiff}
 
-The partial derivative of a scalar-valued function $f(x)$ with respect to $x_j$ (the $j$th
-component of $x$) is defined as
+The partial derivative of a real scalar-valued function $f(x)$ with
+respect to $x_j$ (the $j$th
+component of $x\in\Real{M}$) is defined as
 \begin{align}
   \label{eq:defParD}
 \parD{}{j}{f(x)}=\lim\limits_{\delta\to 0}\frac{f(x+\delta e_j)-f(x)}{\delta}
@@ -274,7 +255,9 @@ and the Hessian as
 
 The Hessian is symmetric, so $\parD{2}{ij}{}=\parD{2}{ji}{}$.
 
-To estimate the $m$th column of $\hess{}{}$, we again choose a
+\subsubsection[Approximation using finite differences]{Approximation using finite differences}
+
+To estimate the $m$th column of $\hess{}{}$ using finite differences, we choose a
 sufficiently small $\delta$, and compute
 \begin{align}
   \label{eq:1}
@@ -284,7 +267,7 @@ sufficiently small $\delta$, and compute
 For $M=2$, our estimate of a general $\hess{}{f(x)}$ would be
 \begin{align}
   \label{eq:FDhess2}
-  \hess{}{f(x)}&=
+  \hess{}{f(x)}&\approx
   \begin{pmatrix}
     \parD{}{1}{f(x_1+\delta, x_2)}-\parD{}{1}{f(x_1,x_2)}& \parD{}{1}{f(x_1,x_2+\delta)}-\parD{}{1}{f(x_1,x_2)}\\
         \parD{}{2}{f(x_1+\delta, x_2)}-\parD{}{2}{f(x_1,x_2)}&  \parD{}{2}{f(x_1,x_2+\delta)}-\parD{}{2}{f(x_1,x_2)}
@@ -306,7 +289,7 @@ hold for $x_1+\delta$, and if Equation~\ref{eq:I2} holds for $x_2$, it
 must also hold for $x_2+\delta$.  Therefore,
 \begin{align}
   \label{eq:FDhess2sp}
-  \hess{}{f(x)}&=
+  \hess{}{f(x)}&\approx
   \begin{pmatrix}
     \parD{}{1}{f(x_1+\delta, x_2+\delta)}-\parD{}{1}{f(x_1,x_2)}&0\\
         0&  \parD{}{2}{f(x_1+\delta,x_2+\delta)}-\parD{}{2}{f(x_1,x_2)}
@@ -319,26 +302,97 @@ are needed.
 Being able to reduce the number of gradient evaluations from 3 to 2 depends on knowing that
 the cross-partial derivatives are zero.
 
+\subsubsection[Approximation using complex steps]{Approximation using complex steps}
+
+If $f(x)$ is defined over a complex domain and is holomorphic, then we
+can we can approximate $\parD{}{}{f(x)}$
+and $\hess{}{f(x)}$ at real values of $x$ using the complex step
+method. This method comes from a Taylor
+series expansion of $f(x)$ in the imaginary direction of the complex
+plane \citep{SquireTrapp1998}.  After rearranging terms, and taking the imaginary
+parts of both sides,
+\begin{align}
+  \label{eq:complexTaylor}
+  f(x+i\delta)&=f(x) + i\delta\parD{}{}{f(x)}+\mathcal{O}(\delta^2)\\
+  \parD{}{}{f(x)}&\approx\frac{\Imag(f(x+i\delta))}{\delta}
+\end{align}
+
+Estimating a first derivative using the complex step method does not
+require a differencing operation, so there is no subtraction operation
+that might generate roundoff errors.  Thus, the approximation can be
+made arbitrarily precise as $\delta\rightarrow 0$ \citep{LaiCrassidis2008}.  This is not the
+case for second-order approximations of
+the Hessian \citep{AbreuStich2013}.  However, when the gradient can be
+computed exactly, we can compute a first-order approximation to
+Hessian by treating it as the Jacobian of
+a vector-valued function \citep{LaiCrassidis2008}.
+
+\begin{align}
+  \label{eq:CShess2}
+  \hess{}{f(x)}&\approx
+  \begin{pmatrix}
+    \Imag(\parD{}{1}{f(x_1+i\delta, x_2)})& \Imag(\parD{}{1}{f(x_1,x_2+i\delta)})\\
+        \Imag(\parD{}{2}{f(x_1+i\delta, x_2)})&\Imag(\parD{}{2}{f(x_1,x_2+i\delta)})
+    \end{pmatrix}/\delta
+\end{align}
+
+If this matrix were dense, we would need two evaluations of the
+$\parD{}{}f(x)$ to estimate it.  If the matrix were sparse, with the same sparsity
+pattern as the Hessian in Equation~\ref{eq:FDhess2sp}, and we
+assume that structural zeros remain zero for all
+complex $x\in\Complex{M}$, then we need only one evaluation.  Suppose
+we were to subtract $\Imag(\parD{}{}{f(x_1,x_2)})$ from each column of
+$\hess{}{f(x)}$. When $x$ is real, the imaginary part of the gradient
+is zero, so this operation has no effect on the value of the
+Hessian. But the sparsity constraints ensure that
+the following identities hold all complex $x$.
+
+\begin{align}
+  \Imag(\parD{}{1}{f(x_1,x_2+i\delta)}) -\Imag(\parD{}{1}{f(x_1,x_2)})&=0\label{eq:I1c}\\
+    \Imag(\parD{}{2}{f(x_1+i\delta,x_2)})-\Imag(\parD{}{2}{f(x_1,x_2)})&=0\label{eq:I2c}
+\end{align}
+
+As with the finite difference method, because Equation~\ref{eq:I1c} holds
+for $x_1$, it must also hold for $x_1+i\delta$, and because Equation~\ref{eq:I2c} holds
+for $x_2$, it must also hold for $x_2+i\delta$. Thus,
+
+\begin{align}
+  \label{eq:CShess2sp}
+  \hess{}{f(x)}&\approx
+  \begin{pmatrix}
+    \Imag(\parD{}{1}{f(x_1+i\delta, x_2+i\delta)})&0\\
+        0&\Imag(\parD{}{2}{f(x_1+i\delta,x_2+i\delta)})
+    \end{pmatrix}/\delta
+\end{align}
+
+for real $x$.  Only one evaluation of the gradient is required.
+
+\subsubsection[Perturbing groups of variables]{Perturbing groups of variables}
+
 \Citet{CurtisPowellReid1974} describe a method of estimating sparse
 Jacobian matrices by perturbing groups of variables together.
 \Citet{PowellToint1979} extend this idea to the
 general case of sparse Hessians.  This method partitions
 the decision variables into $C$ mutually exclusive groups so that the number of gradient
-evaluations is reduced.  Let $\Mat{G}$ be a $M\times C$
-matrix, where $\Mat{G}_{mc}=\delta$ if variable $m$ belongs to group $c$, and zero
-otherwise.  Define $\Mat{G}_c$ as the $c$th column of $\Mat{G}$.
+evaluations is reduced.  Define $\Mat{G}\in\Real{M\times C}$ where $\Mat{G}_{mc}=\delta$ if variable $m$ belongs to group $c$, and zero
+otherwise.  Define $\Mat{G}_c\in\Real{M}$ as the $c$th column of $\Mat{G}$.
 
-Next, let $\Mat{Y}$ be a $M\times C$ matrix, where each column is a
-difference in gradients.
+Next, define $\Mat{Y}\in\Real{M\times C}$ such that each column is
+either a difference in gradients, or the imaginary part of a
+complex-valued gradient, depending on the chosen method.
 \begin{align}
   \label{eq:Yg}
-  \Mat{Y}_c&=\nabla f(x+G_c)-\nabla f(x)
+  \Mat{Y}_c&=
+           \begin{cases}
+             \nabla f(x+G_c)-\nabla f(x)&\text{finite difference method}\\
+             \Imag(\nabla f(x+iG_c))&\text{complex step method}
+             \end{cases}
 \end{align}
 
 If $C=M$, then $\Mat{G}$ is a diagonal matrix with $\delta$ in each
 diagonal element.  The matrix equation $\hess{}{}\Mat{G}=\Mat{Y}$ represents the linear approximation
 $\hess{im}{}\delta\approx y_{im}$, and we can solve for all elements of $\hess{}{}$
-just by computing $Y$. But if $C<M$,
+just by computing $\Mat{Y}$. But if $C<M$,
 there must be at least one $\Mat{G}_c$ with $\delta$ in at least two
 rows. The corresponding column $\Mat{Y}_c$ is computed by perturbing multiple variables at
 once, so we cannot solve for any $\hess{im}{}$
@@ -413,7 +467,7 @@ element in the sparsity pattern are a possible lack of efficiency
 the estimated value might be close to, but not exactly, zero. The
 algorithms for assigning decision variables to groups, and for
 extracting nonzero Hessian elements via substitution, are described in
-Section \ref{sec:algorithms}.
+Section~\ref{sec:algorithms}.
 
 \subsection[Sparse matrices in R]{Sparse matrices and the \pkg{Matrix}
   package}\label{sec:Rsparse}
@@ -487,33 +541,36 @@ Suppose we have a dataset of $N$ households, each with $T$
  number of times household $i$ purchases the product, out of the $T$
  purchase opportunities, and let $p_i$ be the probability of
  purchase.  The heterogeneous parameter $p_i$ is the same for all $T$
- opportunities, so $y_i$ is a binomial random variable.  Define each $p_i$ such that it depends on both $k$ continuous covariates
- $x_i$, and a heterogeneous coefficient vector $\beta_i$.
+ opportunities, so $y_i$ is a binomial random variable.
+
+ Let $\beta_i\in\Real{k}$ be a heterogeneous coefficient vector that
+ is specific to household $i$, such that
+ $\beta_i=(\beta_{i1},\dotsc,\beta_{ik})$. Similarly,
+ $z_i\in\Real{k}$ is a vector of household-specific covariates. Define each
+ $p_i$ such that the log odds of $p_i$ is a linear function of
+ $\beta_i$ and $z_i$, but does not depend directly on $\beta_j$ and $z_j$ for
+ another household $j\neq i$.
 \begin{align}
-  p_i=\frac{\exp(x_i'\beta_i)}{1+\exp(x_i'\beta_i)},~i=1 ... N
+  p_i=\frac{\exp(z_i'\beta_i)}{1+\exp(z_i'\beta_i)},~i=1 ... N
 \end{align}
 
-The coefficients are distributed across the population of households
-following a multivariate normal distribution with mean $\mu$ and
-covariance $\Mat{\Sigma}$.   Assume that we know $\Mat{\Sigma}$, but not $\mu$.
-Instead, place a multivariate normal prior on $\mu$, with mean $0$ and
-covariance $\Mat{\Omega}$.  Thus, each $\beta_i$, and $\mu$ are
-$k-$dimensional vectors, and the total number of unknown variables in the model is $(N+1)k$.
+The coefficient vectors $\beta_i$ are distributed across the population of households
+following a multivariate normal distribution with mean $\mu\in\Real{k}$ and
+covariance $\Mat{\Sigma}\in\Real{k\times k}$.   Assume that we know
+$\Mat{\Sigma}$, but not $\mu$, so we place a multivariate normal prior
+on $\mu$, with mean $0$ and
+covariance $\Mat{\Omega}\in\Real{k\times k}$.  Thus, the parameter
+vector $x\in\Real{(N+1)k}$ consists of the $Nk$ elements in the $N$ $\beta_i$ vectors,
+and the $k$ elements in $\mu$.
 
 The log posterior density, ignoring any normalization constants, is
 \begin{align}
   \label{eq:LPD}
-  \log \pi(\beta_{1:N},\mu|\Mat{Y}, \Mat{X}, \Mat{\Sigma},\Mat{\Omega})=\sum_{i=1}^N\left(p_i^{y_i}(1-p_i)^{T-y_i}
+  \log \pi(\beta_{1:N},\mu|\Mat{Y}, \Mat{Z}, \Mat{\Sigma},\Mat{\Omega})=\sum_{i=1}^N\left(p_i^{y_i}(1-p_i)^{T-y_i}
   -\frac{1}{2}\left(\beta_i-\mu\right)^\top\Mat{\Sigma}^{-1}\left(\beta_i-\mu\right)\right)
 -\frac{1}{2}\mu^\top\Mat{\Omega}^{-1}\mu
 \end{align}
 
-All of the $\beta_i$ are correlated with
-$\mu$.  Thus, $\hess{\beta_{ik},\mu_k}{}\neq 0$ for all $i$. Since the $\beta_i$ are independently distributed, and the $y_i$ are
-conditionally independent, the cross-partial derivatives
-$\hess{\beta_i,\beta_j}{}=\parD{2}{\beta_i, \beta_j}{}=0$ for all $i\neq
-j$.  When $N$ is much greater than $k$, the Hessian of the log
-posterior density will be sparse.
 
 
 \subsection[Sparsity patterns]{Sparsity patterns}\label{sec:sparsity}
@@ -533,9 +590,24 @@ nnz2LT <- (Q+1) * k * (k+1)/2 + Q * k^2
 options(scipen=999)
 @
 
-The sparsity pattern depends on how the variables are
-ordered within the vector. One such ordering is to group all of the
-coefficients for each unit together.
+Let $x_1$ and $x_2$ be two subsets of elements of $x$.
+Define $\parD{2}{x_1,x_2}$ as the product set of cross-partial
+derivatives between all elements in $x_1$ and all elements in
+$x_2$. From the log posterior density in Equation~\ref{eq:LPD}, we can see
+that $\parD{2}{\beta_i, \beta_i}\neq 0$ (one element of $\beta_i$ could be
+correlated with another element of $\beta_i$), and that, for all $i$,
+$\parD{2}{\beta_i, \mu}\neq 0$ (because $\mu$ is the prior mean of each
+$\beta_i$).  However, since the $\beta_i$ and $\beta_j$ are independently distributed, and the $y_i$ are
+conditionally independent, the cross-partial derivatives
+$\parD{2}{\beta_i, \beta_j}=0$ for all $i\neq j$. When $N$ is much
+greater than $k$, there will be many more zero cross-partial
+derivatives than non-zero.   Each $\parD{2}{}$ is
+mapped to a submatrix of $\hess{}{}$, most of which with be zero.  The
+resulting Hessian of the log posterior density will be sparse.
+
+The sparsity pattern depends on the indexing function; that is, on how the variables are
+ordered in $x$. One such ordering is to group all of the
+coefficients in the $\beta_i$ for each unit together.
 \begin{align}
 \beta_{11},\dotsc,\beta_{1k},\beta_{21},\dotsc,\beta_{2k},~\dotsc~,\beta_{N1},\dotsc,\beta_{Nk},\mu_1,\dotsc,\mu_k
 \end{align}
@@ -587,9 +659,7 @@ Hessian, and it is the responsibility of the user to ensure that
 the pattern is correct.  In practice, rather than trying to keep track of the row and column indices
 directly, it might be easier to construct a pattern matrix first,
 check visually that the matrix has the right pattern, and then extract
-the indices.
-
-The package defines utility functions (Table~\ref{tab:helpers}) to convert
+the indices.  The package defines utility functions (Table~\ref{tab:helpers}) to convert
 between sparse matrices, and the vectors of row and column indices
 required by the \class{sparseHessianFD} initializer.
 
@@ -637,6 +707,17 @@ pattern <- sparseMatrix(i=mc$rows, j=mc$cols)
 printSpMatrix(pattern)
 @
 
+If there is uncertainty about whether an element is a structural
+   zero or not, one should err on the side of it being non-zero, and
+   include that element in the sparsity pattern.
+   There might be a loss of efficiency if the element really is a
+   structural zero, but the result will still be correct.  All that
+   would happen is that the numerical estimate for that element would be zero
+   (within machine precision). On the other hand, excluding a non-zero
+   element from the sparsity pattern will likely lead to an incorrect
+   estimate of the Hessian.
+
+
 
 \subsection[The sparseHessianFD class]{The \class{sparseHessianFD} class}
 
@@ -658,13 +739,14 @@ fn,gr& \proglang{R} Functions that return the value of the
   and {gr} as well (see the \funcarg{...} argument below).\\
 rows, cols& Sparsity pattern: integer vectors of the row and column indices of
   the non-zero elements in the \emph{lower triangle} of the Hessian.\\
-direct& This argument is deprecated, and is included only for
-  backwards compatibility with earlier versions.\\
 delta& The perturbation amount for finite differencing of the
-  gradient to compute the Hessian (the $\delta$ in Section \ref{sec:numdiff}).  Defaults to
+  gradient to compute the Hessian (the $\delta$ in Section~\ref{sec:numdiff}).  Defaults to
   \code{sqrt(.Machine\$double.eps)}.\\
 index1& If \variable{TRUE} (the default), \funcarg{row} and \funcarg{col} use one-based
   indexing.  If \variable{FALSE}, zero-based indexing is used.\\
+  complex&If \variable{TRUE}, the complex step method is used.
+                If \variable{FALSE} (the default), a simple finite
+                differencing of gradients is used.\\
 ...& Additional arguments to be passed to \func{fn} and \func{gr}.\\
  \bottomrule
 \end{tabularx}
@@ -674,11 +756,11 @@ index1& If \variable{TRUE} (the default), \funcarg{row} and \funcarg{col} use on
 
 To create a \class{sparseHessianFD} object, just call
 \func{sparseHessianFD}.  Applying the default values for the optional
-arguments,
-<<eval=FALSE>>=
+arguments, the usage syntax to create a \class{sparseHessianFD} object is
+<<eval=FALSE, prompt=FALSE>>=
 obj <- sparseHessianFD(x, fn, gr, rows, cols, ...)
 @
-where \funcarg{...} represents all other named arguments that are
+where \funcarg{...} represents all other arguments that are
 passed to \funcarg{fn} and \funcarg{gr}.
 
 
@@ -697,10 +779,10 @@ fngrhs <- obj$fngrhs(x)
 @
 
 
-\subsection[An example]{An example}
+\subsection[An example]{An example}\label{sec:exHess}
 
 Now we can estimate the Hessian for the
-log posterior density of the model from Section \ref{sec:example}.
+log posterior density of the model from Section~\ref{sec:example}.
 For demonstration purposes, \pkg{sparseHessianFD} includes functions that compute the value
 (\func{binary.f}), the gradient (\func{binary.grad}) and the Hessian
 (\func{binary.hess}) of this model. We will treat the result from \func{binary.hess} as a
@@ -714,7 +796,7 @@ priors as lists.  The \func{data(binary)} call adds the appropriate data
 list to the environment, but we need to construct the prior list
 ourselves.
 
-<<binaryInit>>=
+<<binaryInit, tidy=FALSE>>=
 set.seed(123)
 data("binary")
 str(binary)
@@ -723,7 +805,7 @@ k <- NROW(binary[["X"]])
 T <- binary[["T"]]
 nvars <- as.integer(N * k + k)
 priors <- list(inv.Sigma = rWishart(1, k + 5, diag(k))[,,1],
-  inv.Omega = diag(k))
+   inv.Omega = diag(k))
 @
 
 This dataset represents the simulated choices for $N= \Sexpr{N}$ customers
@@ -762,28 +844,80 @@ pattern <- Matrix.to.Coord(tril(true.hess))
 str(pattern)
 @
 
-Finally, we create an instance of a \class{sparseHessianFD} object,
-evaluate the function, gradient and Hessian, and compare the output to
-the true values.
+Finally, we create an instance of a \class{sparseHessianFD} object.
+Evaluations of the function and gradient using the \method{fn} and
+\method{gr} methods will always give the same
+results as the true values because they are computed using the same functions.
 
-<<usingSparseHessianFD>>=
+<<usingSparseHessianFD1, tidy=FALSE>>=
 obj <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
-  rows=pattern[["rows"]], cols=pattern[["cols"]],
-  data=binary, priors=priors, order.row=order.row)
+   rows=pattern[["rows"]], cols=pattern[["cols"]],
+   data=binary, priors=priors, order.row=order.row)
 f <- obj$fn(P)
-all.equal(f, true.f)
+identical(f, true.f)
 gr <- obj$gr(P)
-all.equal(gr, true.grad)
-hs <- obj$hessian(P)
-all.equal(hs, true.hess)
+identical(gr, true.grad)
 @
 
+The default choice of method is \funcarg{complex=FALSE}, so the
+evaluation of the Hessian is a finite differenced approximation,
+so it is very close to, but not identical to, the true value, in terms
+of mean relative difference.
+
+<<echo=FALSE>>=
+options(scipen=0)
+@
+
+<<usingSparseHessianFD2>>=
+hs <- obj$hessian(P)
+mean(abs(hs-true.hess))/mean(abs(hs))
+@
+
+
+
+If \funcarg{complex=TRUE} in the initializer, the call to the \method{hessian} method will
+apply the complex step method. To use this method, the functions
+passed as \funcarg{fn} and \funcarg{gr} must both
+accept a complex argument, and return a complex
+result, even though we are differentiating a real-valued function. Although \pkg{base} \proglang{R} supports complex arguments
+for most basic mathematical functions, many common functions (e.g.,  \func{gamma}, \func{log1p},
+\func{expm1}, and the probability distribution functions) do not have
+complex implementations. Furthermore, the complex step method is valid
+only if the function is holomorphic. The methods in \class{sparseHessianFD} do
+\emph{not} check that this is the case for the function at hand. We convey the
+following warning from the documentation of the \pkg{numDeriv} package
+\citep{R_numDeriv}, which also implements the complex step method:
+``avoid this method if you do not know that your function is
+suitable. Your mistake may not be caught and the results will be
+spurious.''
+
+Fortunately for demonstration purposes, the log posterior density in
+Equation~\ref{eq:LPD} is holomorphic, so we
+can estimate its Hessian using the complex step method, and compute
+the mean relative difference from the true Hessian.
+
+<<tidy=FALSE>>=
+obj2 <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
+   rows=pattern[["rows"]], cols=pattern[["cols"]],
+   complex=TRUE,
+   data=binary, priors=priors, order.row=order.row)
+hs2 <- obj2$hessian(P)
+mean(abs(hs2-true.hess))/mean(abs(hs2))
+@
+
+<<echo=FALSE>>=
+options(scipen=999)
+@
+
+In short, the complex step method can be more accurate than
+finite differencing, but it comes with theoretical and implementation
+restrictions that may limit its universality.
 
 \section[Algorithms]{Algorithms}\label{sec:algorithms}
 
 In this section, we explain how \pkg{sparseHessianFD} works. The
 algorithms are adapted from \citet{ColemanGarbow1985}, who provided
-Fortran implementations as \citet{ColemanGarbow1985b}.  Earlier
+\proglang{Fortran} implementations as \citet{ColemanGarbow1985b}.  Earlier
 versions of \pkg{sparseHessianFD} included licensed copies of the
 \citet{ColemanGarbow1985b} code, on which the current version no
 longer depends. Although newer partitioning algorithms have been proposed (e.g.,
@@ -861,7 +995,7 @@ efficient than treating the Hessian as if it were dense.
     3&0&0&1&&&&\\
     4&0&0&1&1&&&\\
     5&0&0&0&0&1&&\\
-    6&1&0&0&0&1&1&\\
+    6&0&0&0&0&1&1&\\
     7&1&1&1&1&1&1&1
   \end{tabular}
   \caption{Adjacency matrix.}\label{fig:graph1adj}
@@ -920,7 +1054,7 @@ Now suppose we were to rearrange $\hess{}{}$ so the last row and
 and column were moved to the front.  In Figure~\ref{fig:graph2adj}, all columns share at least one non-zero row with
 the column for variable 7, but variable groups $\{2,4,6\}$ and
 $\{1,3,5\}$ have empty intersection sets.  The intersection graph in
-Figure~\ref{fig:graph2pic} has fewer edges, and can be colored
+Figure~\ref{fig:graph2int} has fewer edges than Figure~\ref{fig:graph1int}, and can be colored
 with only three colors.
 \begin{figure}[ptb]
   \begin{subfigure}[m]{.32\textwidth}\centering
@@ -1093,6 +1227,9 @@ values to the corresponding column in the upper triangle, and advances upwards.
   \caption{Triangular substitution method.}\label{alg:subst}
 \end{algorithm}
 
+
+
+
 \subsection[Software libraries]{Software libraries}
 The coloring and substitution algorithms use the \pkg{Eigen} numerical
 library \citep{Eigen}, and the \pkg{Rcpp} \citep{R_Rcpp} and
@@ -1105,63 +1242,63 @@ library \citep{Eigen}, and the \pkg{Rcpp} \citep{R_Rcpp} and
 \section[Speed and scalability]{Speed and scalability}\label{sec:timing}
 
 As far as we know, \pkg{numDeriv} \citep{R_numDeriv} is the only other \proglang{R} package
-that computes numerical approximations to derivatives.  It differs from
-\pkg{sparseHessianFD} in some important ways.
+that computes numerical approximations to derivatives.  Like
+\pkg{sparseHessianFD} it includes functions to compute Hessians from
+user-supplied gradients (through the \func{jacobian} function), and
+implements both the finite differencing and complex step methods.  Its
+most important distinction from \pkg{sparseHessianFD} is that it treats all Hessians as dense.  Thus, we
+will use  \pkg{numDeriv} as the baseline against which we can compare the performance of
+\pkg{sparseHessianFD}.
 
-\begin{enumerate}
-\item It treats all Hessians as dense;
-  \item It computes each element of the Hessian using a second-order
-    finite differencing approximation that does not require the user
-    to supply the gradient; and
-    \item It implements iterative algorithms to improve accuracy, at
-      the expense of speed.
-\end{enumerate}
-
-Nevertheless, \pkg{numDeriv} is an easy-to-use tool for numerical differentiation,
-so it is worthwhile to compare its performance to that of
-\pkg{sparseHessianFD}.  To prepare Table~\ref{tab:numDeriv}, we
+To prepare Table~\ref{tab:numDeriv}, we
 estimated Hessians of the log posterior density in Equation~\ref{eq:LPD} with different numbers of heterogeneous
-units ($N$) and within-unit parameters ($k$).  As in the previous
-section, the total number of
+units ($N$) and within-unit parameters ($k$).  The total number of
 variables is $M=(N+1)k$.  Table~\ref{tab:numDeriv} shows the mean
-and standard deviations (across 20 replications) for the time (in milliseconds) to
-to compute a Hessian using each package.  The difference in run times is dramatic,
-especially because the computation time for \pkg{numDeriv} grows
-quadratically in the number of variables.  The setup time for
-\pkg{sparseHessianFD} was about 7 milliseconds for all cases.  Times
-were collected using the \pkg{microbenchmark} package \citep{R_microbenchmark}.
+and standard deviations (across 500 replications) for the time (in
+milliseconds) to compute a Hessian using functions for both the finite
+difference and complex step methods from each package. Times were generated on a
+compute node running Scientific Linux 6 (64-bit) with an 8-core Intel
+Xeon X5560 processor (2.80 GHz) with 24 GB of RAM, and collected using the \pkg{microbenchmark} package
+\citep{R_microbenchmark}. Code to replicate Table~\ref{tab:numDeriv}
+is available as an online supplement to this paper, and in the
+\func{doc/} directory of the installed package. In
+Table~\ref{tab:numDeriv} we see that computation times using
+\pkg{sparseHessianFD} and considerably shorter than those using \pkg{numDeriv}.
 
+<<echo=FALSE>>=
+suppressMessages(library(xtable))
+suppressMessages(library(dplyr))
+load("vignette_tab4.Rdata")
+@
 
 \begin{table}[ptb]\centering
-  \begin{tabularx}{1\linewidth}{@{\extracolsep{\fill} }cccp{2pt}rrrrp{2pt}rrrr}
+  \begin{tabularx}{1\linewidth}{@{\extracolsep{\fill} }rrr|rrrr|rrrr}
   \toprule
-&&&&\multicolumn{4}{c}{\bfseries{Hessian
-    time}}&&\multicolumn{4}{c}{\bfseries{Hessian/Gradient ratio}}\\
-&&&&\multicolumn{2}{c}{\pkg{numDeriv}}&\multicolumn{2}{c}{\pkg{sparseHessianFD}}&&\multicolumn{2}{c}{\pkg{numDeriv}}&\multicolumn{2}{c}{\pkg{sparseHessianFD}}\\
-$N$&$k$&$M$&&mean&sd&mean&sd&&mean&sd&mean&sd\\
-  \cmidrule{1-3}\cmidrule{5-8}\cmidrule{10-13}
-   9 &    2 &   20 &&  363 & 6.4 &  2.8 & 2.2 &&  871 & 63 & 6.5 & 4.2 \\
-    12 &    2 &   26 &&  629 &  8.9 &  2.9 & 2.1 && 1469 &  124 & 6.5 & 3.3 \\
-     9 &    3 &   30 &&  819 & 27.7 &  3.6 & 2.2 && 1974 &  161 & 8.4 & 3.7 \\
-    15 &    2 &   32 &&  973 & 25.8 &    3.0 & 2.2 && 2191 &  209 &  6.5 & 3.4 \\
-    12 &    3 &   39 && 1407 & 39.3 & 3.5 & 2.0 && 3291 &  285 &    8.0 & 3.5 \\
-     9 &    4 &   40 && 1445 & 28.8 & 4.3 & 2.1 && 3453 &  292 & 9.9 & 3.1 \\
-    15 &    3 &   48 && 2138 & 92.7 & 3.5 & 2.0 && 4861 &  341 & 7.8 & 3.4 \\
-    12 &    4 &   52 && 2400 & 98.6 & 4.3 & 2.1 && 5679 &  503 & 10.1 & 3.7 \\
-    15 &    4 &   64 && 3643 &  209.0 & 4.2 & 2.2 && 8945 &  828 & 10.0 &  2.8 \\
-   \bottomrule
+&&&\multicolumn{4}{c|}{\bfseries{Finite differencing}}&\multicolumn{4}{c}{\bfseries{Complex step}}\\
+&&&\multicolumn{2}{c}{\pkg{numDeriv}}&\multicolumn{2}{c|}{\pkg{sparseHessianFD}}&\multicolumn{2}{c}{\pkg{numDeriv}}&\multicolumn{2}{c}{\pkg{sparseHessianFD}}\\
+$N$&$k$&$M$&mean&sd&mean&sd&mean&sd&mean&sd\\
+%%\midrule
+<<results='asis',echo=FALSE>>=
+arrange(tab4, M) %>%
+xtable(digits=c(rep(0,4),rep(1,8))) %>%
+    print(only.contents=TRUE, comment=FALSE, booktabs=TRUE,
+      include.rownames=FALSE, include.colnames=FALSE)
+@
 \end{tabularx}
 \caption{Computation times (milliseconds) for computing Hessians using the
-  \pkg{numDeriv} and \pkg{sparseHessianFD} packages, across 200 replications. Rows are ordered by the
+  \pkg{numDeriv} and \pkg{sparseHessianFD} packages, and the finite
+ difference and complex step methods, across 500 replications. Rows are ordered by the
   number of variables.}\label{tab:numDeriv}
 \end{table}
 
-Because \pkg{numDeriv} does not scale, we cannot use it to benchmark \pkg{sparseHessianFD} for
-larger sparse Hessians.  To help us understand just how scalable
+To help us understand just how scalable
 \pkg{sparseHessianFD} is, we ran another set of simulations, for the
 same hierarchical model, for different values of $N$ and $k$.  We then
 recorded the run times for different steps in the sparse Hessian
-estimation, across 200 replications.  The steps are summarized in Table~\ref{tab:timeMeasures}.
+estimation, across 200 replications.  The steps are summarized in
+Table~\ref{tab:timeMeasures}.  The times were generated on an
+Apple Mac Pro with a 12-core Intel Xeon E5-2697 processor (2.7 GHz)
+with 64 GB of RAM.
 
 \begin{table}[ptb]\centering
   \begin{tabularx}{1.0\linewidth}{>{\bfseries}l X}
@@ -1175,16 +1312,14 @@ Hessian&computing the Hessian (not including initialization or
 Partitioning&finding a consistent partitioning of the
   variables (the vertex coloring problem)\\
 Initialization&total setup time (including the partitioning time)\\
-Hessian/Gradient&ratio of the Hessian time to the
-    gradient time\\
     \bottomrule
   \end{tabularx}
   \caption{Summary of timing tests (see Figure~\ref{fig:timing}).}\label{tab:timeMeasures}
 \end{table}
 
 In the plots in Figure~\ref{fig:timing}, the number of heterogeneous units ($N$) is
-on the x-axis, and mean run time, in milliseconds, is on the y-axis.  Each panel shows the
-relationship between $N$ and run time for a different measure of time,
+on the x-axis, and median run time, in milliseconds, is on the y-axis.  Each panel shows the
+relationship between $N$ and run time for a different step in the algorithm,
 and each curve in a panel represents a different number of within-unit
 parameters ($k$).
 
@@ -1200,20 +1335,15 @@ for the function and gradient, as well as the setup and
 partitioning times for the \class{sparseHessianFD} object, grow
 linearly with the number of heterogenous units.  The time
 for the Hessian grows linearly as well, and that might be partially
-surprising.  We saw in Section \ref{sec:coloring} that adding
+surprising.  We saw in Section~\ref{sec:coloring} that adding
 additional heterogeneous units in a hierarchical model does not
 increase the number of required gradient evaluations.  So we might
 think that the time
 to compute a Hessian should not increase with $N$ \emph{at all}.  The
-reason it does is that each gradient evaluation takes longer.  The
-plot of the ratio of Hessian-to-gradient run times is relatively flat as the size
-of the dataset increases.  We can conclude that the
+reason it does is that each gradient evaluation takes longer.
+Nevertheless, we can conclude that the
 \pkg{sparseHessianFD} algorithms are quite efficient and scalable for
 hierarchical models.
-
-
-
-
 
 \FloatBarrier
 \bibliography{sparseHessianFD}
