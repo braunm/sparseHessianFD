@@ -1,0 +1,79 @@
+Dear Prof. Michael Braun:
+
+Your submission
+
+"sparseHessianFD: An R Package for Estimating Sparse Hessian Matrices"
+
+has been conditionally accepted for publication in JSS. Your manuscript will
+now enter in the post-processing stage, which may take up to three weeks to
+complete. When this stage is complete you will be emailed with all necessary
+changes.
+
+Thank you for considering JSS and contributing to free statistical software.
+
+Best Regards,
+
+Bettina Grün
+Edzer Pebesma
+Achim Zeileis
+------------------------------------------------------
+Reviewer A:
+The revised version of this paper addresses all of my concerns and I
+recommend that it be accepted. Below are some minor comments to pass along
+for the author's consideration.
+
+p.8, under 'Sparsity patterns'.  This description is much improved and I
+find the intuition of what is being done is now clearer. However, I am not
+sure the precision added by inducing the Ind() function really adds a lot.
+Possibly in contradiction to what I said in the previous round, perhaps the
+intuition is more important than precision for this explanation. You might
+consider omitting most of the first paragraph, from "Furthermore, define" to
+"symmetry of the Hessian)" and then in the next paragraph change "D^2 is
+mapped to H through the indexing function" to something like "D^2 is mapped
+into sub matrices of H some of which will be block zero" or even more simply
+"D^2 is mapped into sub matrices of H."
+
+
+p.11, l.-8  "purpose, sparseHessianFD" -> "purpose, package
+sparseHessianFD"
+   (only to aid the reader, because your were talking about function
+sparseHessianFD in the paragraph before.)
+   
+p.15 Figure 2(a) I think the "1" in row 6 column 1 may be an error. (If it
+is not, then I do not understand why there is no connection from 1 to 6 in
+the sparsity graph nor do I understand the permutation for the matrix in
+Figure 3.)
+
+And some minor comments on the code:
+
+1/ sparseHessianFD() defines the structure but seems to unnecessarily
+require (and include?) the point x. For example, on p 11 when the obj$fn(x),
+obj$gr(x), and obj$hessian(x) are evaluated, it is the x in the global
+environment not the x used to define the object which is used. The object's
+functions can be evaluated at other points. Perhaps the point is being used
+for some consistency checks, I could easily be missing a lot. Possibly a
+function for building the structure alone, omitting the point x, would be
+useful?
+
+2/ Also on p 11.  re  obj$fn()  and others: Sometimes it is useful to
+define "extractor" functions to access elements of an object, and keep the
+structure "opaque" rather than have users directly access it. Then if you
+change the object structure the user is not affected. For example, if you
+change the object to S4 classes then obj$fn() would become obj@fn() but if
+you had an extractor
+
+   fn <- function(obj) obj$fn
+
+the user's code would be 
+
+   fn(obj)(x)
+
+and  the change to S4 would be in your package's extractor rather than the
+users code.
+
+
+
+------------------------------------------------------
+-------------------------------
+Journal of Statistical Software
+http://www.jstatsoft.org/

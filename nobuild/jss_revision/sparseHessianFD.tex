@@ -1,4 +1,4 @@
-\documentclass[jss]{jss}\usepackage[]{graphicx}\usepackage[]{color}
+ \documentclass[jss]{jss}\usepackage[]{graphicx}\usepackage[]{color}
 %% maxwidth is the original width if it is less than linewidth
 %% otherwise use linewidth (to make sure the graphics do not exceed the margin)
 \makeatletter
@@ -90,7 +90,7 @@
   unavailable.}
 
 
-\date{December 22, 2016}
+\date{January 25, 2017}
 
 %% need no \usepackage{Sweave.sty}
 
@@ -265,7 +265,7 @@ and the Hessian as
 
 The Hessian is symmetric, so $\parD{2}{ij}{}=\parD{2}{ji}{}$.
 
-\subsubsection[Approximation using finite differences]{Approximation using finite differences} 
+\subsubsection[Approximation using finite differences]{Approximation using finite differences}
 
 To estimate the $m$th column of $\hess{}{}$ using finite differences, we choose a
 sufficiently small $\delta$, and compute
@@ -393,7 +393,7 @@ complex-valued gradient, depending on the chosen method.
 \begin{align}
   \label{eq:Yg}
   \Mat{Y}_c&=
-           \begin{cases}  
+           \begin{cases}
              \nabla f(x+G_c)-\nabla f(x)&\text{finite difference method}\\
              \Imag(\nabla f(x+iG_c))&\text{complex step method}
              \end{cases}
@@ -587,19 +587,10 @@ The log posterior density, ignoring any normalization constants, is
 
 
 
-
-
 Let $x_1$ and $x_2$ be two subsets of elements of $x$.
 Define $\parD{2}{x_1,x_2}$ as the product set of cross-partial
-derivatives between all elements in $x_1$ and all elements in $x_2$.
-Furthermore, define an indexing function Ind$(x_i)$ that returns the
-indices in the parameter vector
-$x$ that correspond to the elements in $x_i$, and $\hess{x_1,x_2}{}$
-as the Hessian elements in rows Ind$(x_1)$ and columns Ind$(x_2)$, and
-in rows Ind$(x_2)$ and columns Ind$(x_1)$ (from the symmetry of the
-Hessian).
-
-From the log posterior density in Equation~\ref{eq:LPD}, we can see
+derivatives between all elements in $x_1$ and all elements in
+$x_2$. From the log posterior density in Equation~\ref{eq:LPD}, we can see
 that $\parD{2}{\beta_i, \beta_i}\neq 0$ (one element of $\beta_i$ could be
 correlated with another element of $\beta_i$), and that, for all $i$,
 $\parD{2}{\beta_i, \mu}\neq 0$ (because $\mu$ is the prior mean of each
@@ -607,9 +598,9 @@ $\beta_i$).  However, since the $\beta_i$ and $\beta_j$ are independently distri
 conditionally independent, the cross-partial derivatives
 $\parD{2}{\beta_i, \beta_j}=0$ for all $i\neq j$. When $N$ is much
 greater than $k$, there will be many more zero cross-partial
-derivatives than non-zero.  Regardless of how each $\parD{2}{}$ is
-mapped to $\hess{}{}$ through the indexing function, the Hessian of the log
-posterior density will be sparse.
+derivatives than non-zero.   Each $\parD{2}{}$ is
+mapped to a submatrix of $\hess{}{}$, most of which with be zero.  The
+resulting Hessian of the log posterior density will be sparse.
 
 The sparsity pattern depends on the indexing function; that is, on how the variables are
 ordered in $x$. One such ordering is to group all of the
@@ -1093,7 +1084,7 @@ efficient than treating the Hessian as if it were dense.
     3&0&0&1&&&&\\
     4&0&0&1&1&&&\\
     5&0&0&0&0&1&&\\
-    6&1&0&0&0&1&1&\\
+    6&0&0&0&0&1&1&\\
     7&1&1&1&1&1&1&1
   \end{tabular}
   \caption{Adjacency matrix.}\label{fig:graph1adj}
