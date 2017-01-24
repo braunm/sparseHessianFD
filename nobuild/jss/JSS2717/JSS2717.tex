@@ -1,8 +1,23 @@
- \documentclass[jss]{jss}
+ \documentclass[jss]{jss}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\usepackage{Sweave}
+
+
 
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{sparseHessianFD}
-%\VignetteKeyword{sparseHessianFD}
+%\VignettePackage{sparseHessianFD}
 
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -23,7 +38,7 @@
 \usepackage{tikz}
 }{}
 
-   \newcolumntype{d}[1]{D{.}{.}{#1}}
+ \newcolumntype{d}[1]{D{.}{.}{#1}}
 \newcommand{\func}[1]{\code{#1}}
 \newcommand{\class}[1]{\textsl{#1}}
 \newcommand{\funcarg}[1]{\code{#1}}
@@ -76,18 +91,13 @@
 %% need no \usepackage{Sweave.sty}
 
 %%\newenvironment{knitrout}{\begin{figure}}{\end{figure}}
-
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \begin{document}
 
 
 
 
-<<setup1, echo=FALSE, cache=FALSE>>=
-suppressPackageStartupMessages(require(Matrix))
-knitr::render_sweave()
-knitr::opts_chunk$set(prompt=TRUE, cache=FALSE,error=FALSE) #$
-options(replace.assign=TRUE, width=77, prompt="R> ")
-@
+
 
 The Hessian matrix of a log likelihood function or log posterior
 density function plays
@@ -571,20 +581,7 @@ The log posterior density, ignoring any normalization constants, is
 
 \subsection[Sparsity patterns]{Sparsity patterns}\label{sec:sparsity}
 
-<<setup2, echo=FALSE>>=
-N <- 5
-k <- 2
-nv1 <- (N + 1) * k
-nels1 <- nv1^2
-nnz1 <- (N + 1) * k^2 + 2 * N * k^2
-nnz1LT <- (N + 1) * k * (k+1)/2 + N * k^2
-Q <- 1000
-nv2 <- (Q+1) * k
-nels2 <- nv2^2
-nnz2 <- (Q+1) * k^2 + 2 * Q * k^2
-nnz2LT <- (Q+1) * k * (k+1)/2 + Q * k^2
-options(scipen=999)
-@
+
 
 Let $x_1$ and $x_2$ be two subsets of elements of $x$.
 Define $\parD{2}{x_1,x_2}$ as the product set of cross-partial
@@ -608,7 +605,7 @@ coefficients in the $\beta_i$ for each unit together.
 \beta_{11},\dotsc,\beta_{1k},\beta_{21},\dotsc,\beta_{2k},~\dotsc~,\beta_{N1},\dotsc,\beta_{Nk},\mu_1,\dotsc,\mu_k
 \end{align}
 In this case, the Hessian has a ``block-arrow'' structure.  For example,
-if $N=\Sexpr{N}$ and $k=\Sexpr{k}$, then there are \Sexpr{nv1} total
+if $N=5$ and $k=2$, then there are 12 total
 variables, and the Hessian will have the pattern in Figure~\ref{fig:blockarrow}.
 
 Another possibility is to group coefficients for each covariate
@@ -619,35 +616,57 @@ together.
 Now the Hessian has an "banded" sparsity pattern, as in Figure~\ref{fig:banded}.
 \begin{figure}[tbp]
   \begin{subfigure}[b]{.5\textwidth}
-<<blockarrow, echo=FALSE>>=
-Mat <- as(kronecker(diag(N), matrix(1, k, k)),"sparseMatrix")
-Mat <- rBind(Mat, Matrix(1, k, N*k))
-Mat <- cBind(Mat, Matrix(1, k * (N+1), k))
-printSpMatrix(as(Mat,"nMatrix"))
-@
+\begin{Schunk}
+\begin{Soutput}
+                             
+ [1,] | | . . . . . . . . | |
+ [2,] | | . . . . . . . . | |
+ [3,] . . | | . . . . . . | |
+ [4,] . . | | . . . . . . | |
+ [5,] . . . . | | . . . . | |
+ [6,] . . . . | | . . . . | |
+ [7,] . . . . . . | | . . | |
+ [8,] . . . . . . | | . . | |
+ [9,] . . . . . . . . | | | |
+[10,] . . . . . . . . | | | |
+[11,] | | | | | | | | | | | |
+[12,] | | | | | | | | | | | |
+\end{Soutput}
+\end{Schunk}
 \caption{A ``block-arrow'' sparsity pattern.}\label{fig:blockarrow}
 \end{subfigure}
 \begin{subfigure}[b]{.5\textwidth}
-<<banded, echo=FALSE>>=
-Mat <- kronecker(Matrix(1, k, k), diag(N))
-Mat <- rBind(Mat, Matrix(1, k, N * k))
-Mat <- cBind(Mat, Matrix(1, k * (N + 1), k))
-printSpMatrix(as(Mat,"nMatrix"))
-@
+\begin{Schunk}
+\begin{Soutput}
+                             
+ [1,] | . . . . | . . . . | |
+ [2,] . | . . . . | . . . | |
+ [3,] . . | . . . . | . . | |
+ [4,] . . . | . . . . | . | |
+ [5,] . . . . | . . . . | | |
+ [6,] | . . . . | . . . . | |
+ [7,] . | . . . . | . . . | |
+ [8,] . . | . . . . | . . | |
+ [9,] . . . | . . . . | . | |
+[10,] . . . . | . . . . | | |
+[11,] | | | | | | | | | | | |
+[12,] | | | | | | | | | | | |
+\end{Soutput}
+\end{Schunk}
 \caption{A ``banded'' sparsity pattern.}\label{fig:banded}
 \end{subfigure}
 \caption{Two examples of sparsity patterns for a hierarchical model.}\label{fig:patterns}
 \end{figure}
 
 In both cases, the number of non-zeros is the same.   There are
-\Sexpr{nels1} elements in this symmetric matrix, but only \Sexpr{nnz1} are
-non-zero, and only \Sexpr{nnz1LT} values are unique.  Although the reduction in
+144 elements in this symmetric matrix, but only 64 are
+non-zero, and only 38 values are unique.  Although the reduction in
 RAM from using a sparse matrix structure for the Hessian may be
-modest, consider what would happen if $N=\Sexpr{scales::comma(Q)}$ instead.  In that case,
-there are \Sexpr{scales::comma(nv2)} variables in the problem, and more than $\Sexpr{scales::comma(floor(nels2/10^6))}$ million
-elements in the Hessian.  However, only $\Sexpr{scales::comma(nnz2)}$ of those elements are
+modest, consider what would happen if $N=1,000$ instead.  In that case,
+there are 2,002 variables in the problem, and more than $4$ million
+elements in the Hessian.  However, only $12,004$ of those elements are
 non-zero.  If we work with only the lower triangle of the Hessian, then we need to work with
-only \Sexpr{scales::comma(nnz2LT)} values.
+only 7,003 values.
 
 The sparsity pattern required by \pkg{sparseHessianFD} consists of the row and column
 indices of the non-zero elements in the \emph{lower triangle} the
@@ -684,24 +703,55 @@ constructs a logical block diagonal matrix, converts it to a sparse
 matrix, and prints the sparsity pattern of its lower triangle.
 
 \begin{minipage}{\columnwidth}
-<<>>=
-library("sparseHessianFD")
-bd <- kronecker(diag(3), matrix(TRUE, 2, 2))
-Mat <- as(bd, "nMatrix")
-printSpMatrix(tril(Mat))
-mc <- Matrix.to.Coord(tril(Mat))
-mc
-@
+\begin{Schunk}
+\begin{Sinput}
+R> library("sparseHessianFD")
+R> bd <- kronecker(diag(3), matrix(TRUE, 2, 2))
+R> Mat <- as(bd, "nMatrix")
+R> printSpMatrix(tril(Mat))
+\end{Sinput}
+\begin{Soutput}
+                
+[1,] | . . . . .
+[2,] | | . . . .
+[3,] . . | . . .
+[4,] . . | | . .
+[5,] . . . . | .
+[6,] . . . . | |
+\end{Soutput}
+\begin{Sinput}
+R> mc <- Matrix.to.Coord(tril(Mat))
+R> mc
+\end{Sinput}
+\begin{Soutput}
+$rows
+[1] 1 2 2 3 4 4 5 6 6
+
+$cols
+[1] 1 1 2 3 3 4 5 5 6
+\end{Soutput}
+\end{Schunk}
 \end{minipage}
 
 \vspace{1em}
 To check that a proposed sparsity pattern represents the
 intended matrix visually, use the \pkg{Matrix} \func{sparseMatrix} constructor.
 
-<<>>=
-pattern <- sparseMatrix(i=mc$rows, j=mc$cols)
-printSpMatrix(pattern)
-@
+\begin{Schunk}
+\begin{Sinput}
+R> pattern <- sparseMatrix(i=mc$rows, j=mc$cols)
+R> printSpMatrix(pattern)
+\end{Sinput}
+\begin{Soutput}
+                
+[1,] | . . . . .
+[2,] | | . . . .
+[3,] . . | . . .
+[4,] . . | | . .
+[5,] . . . . | .
+[6,] . . . . | |
+\end{Soutput}
+\end{Schunk}
 
 If there is uncertainty about whether an element is a structural
    zero or not, one should err on the side of it being non-zero, and
@@ -753,9 +803,11 @@ index1& If \variable{TRUE} (the default), \funcarg{row} and \funcarg{col} use on
 To create a \class{sparseHessianFD} object, just call
 \func{sparseHessianFD}.  Applying the default values for the optional
 arguments, the usage syntax to create a \class{sparseHessianFD} object is
-<<eval=FALSE, prompt=FALSE>>=
+\begin{Schunk}
+\begin{Sinput}
 obj <- sparseHessianFD(x, fn, gr, rows, cols, ...)
-@
+\end{Sinput}
+\end{Schunk}
 where \funcarg{...} represents all other arguments that are
 passed to \funcarg{fn} and \funcarg{gr}.
 
@@ -766,13 +818,15 @@ function, gradient and Hessian at a variable vector $x$.  The
 \func{fngrhs} method includes the Hessian as well.
 
 
-<<eval=FALSE>>=
-f <- obj$fn(x)
-df <- obj$gr(x)
-hess <- obj$hessian(x)
-fngr <- obj$fngr(x)
-fngrhs <- obj$fngrhs(x)
-@
+\begin{Schunk}
+\begin{Sinput}
+R> f <- obj$fn(x)
+R> df <- obj$gr(x)
+R> hess <- obj$hessian(x)
+R> fngr <- obj$fngr(x)
+R> fngrhs <- obj$fngrhs(x)
+\end{Sinput}
+\end{Schunk}
 
 
 \subsection[An example]{An example}\label{sec:exHess}
@@ -792,21 +846,31 @@ priors as lists.  The \func{data(binary)} call adds the appropriate data
 list to the environment, but we need to construct the prior list
 ourselves.
 
-<<binaryInit, tidy=FALSE>>=
-set.seed(123)
-data("binary")
-str(binary)
-N <- length(binary[["Y"]])
-k <- NROW(binary[["X"]])
-T <- binary[["T"]]
-nvars <- as.integer(N * k + k)
-priors <- list(inv.Sigma = rWishart(1, k + 5, diag(k))[,,1],
-   inv.Omega = diag(k))
-@
+\begin{Schunk}
+\begin{Sinput}
+R> set.seed(123)
+R> data("binary")
+R> str(binary)
+\end{Sinput}
+\begin{Soutput}
+List of 3
+ $ Y: int [1:50] 13 1 18 18 19 6 16 6 5 8 ...
+ $ X: num [1:4, 1:50] -0.07926 -0.23018 1.55871 0.00997 0.01828 ...
+ $ T: num 20
+\end{Soutput}
+\begin{Sinput}
+R> N <- length(binary[["Y"]])
+R> k <- NROW(binary[["X"]])
+R> T <- binary[["T"]]
+R> nvars <- as.integer(N * k + k)
+R> priors <- list(inv.Sigma = rWishart(1, k + 5, diag(k))[,,1],
++    inv.Omega = diag(k))
+\end{Sinput}
+\end{Schunk}
 
-This dataset represents the simulated choices for $N= \Sexpr{N}$ customers
-over $T= \Sexpr{T}$ purchase opportunties, where the probability of purchase
-is influenced by $k= \Sexpr{k}$ covariates.
+This dataset represents the simulated choices for $N= 50$ customers
+over $T= 20$ purchase opportunties, where the probability of purchase
+is influenced by $k= 4$ covariates.
 
 The next code chunk evaluates the ``true'' value, gradient and
 Hessian.  The \funcarg{order.row} argument tells the function whether
@@ -815,13 +879,15 @@ the variables are ordered by household (\variable{TRUE}) or by covariate
 will have a banded pattern.  If \funcarg{order.row} is \variable{FALSE}, then the
 Hessian will have a block-arrow pattern.
 
-<<trueValues>>=
-P <- rnorm(nvars)
-order.row <- FALSE
-true.f <- binary.f(P, binary, priors, order.row=order.row)
-true.grad <- binary.grad(P, binary, priors, order.row=order.row)
-true.hess <- binary.hess(P, binary, priors, order.row=order.row)
-@
+\begin{Schunk}
+\begin{Sinput}
+R> P <- rnorm(nvars)
+R> order.row <- FALSE
+R> true.f <- binary.f(P, binary, priors, order.row=order.row)
+R> true.grad <- binary.grad(P, binary, priors, order.row=order.row)
+R> true.hess <- binary.hess(P, binary, priors, order.row=order.row)
+\end{Sinput}
+\end{Schunk}
 
 The sparsity pattern of the Hessian is specified by two integer
 vectors:  one each for the row and column indices of the non-zero
@@ -835,39 +901,59 @@ the problem.  For a hierarchical model, we can create a block-arrow
 pattern matrix using either the \func{Matrix::bdiag} or \func{kronecker} functions to
 create a block diagonal matrix, and concatenate dense rows and columns to the margins.
 
-<<binaryRowsCols>>=
-pattern <- Matrix.to.Coord(tril(true.hess))
-str(pattern)
-@
+\begin{Schunk}
+\begin{Sinput}
+R> pattern <- Matrix.to.Coord(tril(true.hess))
+R> str(pattern)
+\end{Sinput}
+\begin{Soutput}
+List of 2
+ $ rows: int [1:1310] 1 2 3 4 201 202 203 204 2 3 ...
+ $ cols: int [1:1310] 1 1 1 1 1 1 1 1 2 2 ...
+\end{Soutput}
+\end{Schunk}
 
 Finally, we create an instance of a \class{sparseHessianFD} object.
 Evaluations of the function and gradient using the \method{fn} and
 \method{gr} methods will always give the same
 results as the true values because they are computed using the same functions.
 
-<<usingSparseHessianFD1, tidy=FALSE>>=
-obj <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
-   rows=pattern[["rows"]], cols=pattern[["cols"]],
-   data=binary, priors=priors, order.row=order.row)
-f <- obj$fn(P)
-identical(f, true.f)
-gr <- obj$gr(P)
-identical(gr, true.grad)
-@
+\begin{Schunk}
+\begin{Sinput}
+R> obj <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
++    rows=pattern[["rows"]], cols=pattern[["cols"]],
++    data=binary, priors=priors, order.row=order.row)
+R> f <- obj$fn(P)
+R> identical(f, true.f)
+\end{Sinput}
+\begin{Soutput}
+[1] TRUE
+\end{Soutput}
+\begin{Sinput}
+R> gr <- obj$gr(P)
+R> identical(gr, true.grad)
+\end{Sinput}
+\begin{Soutput}
+[1] TRUE
+\end{Soutput}
+\end{Schunk}
 
 The default choice of method is \funcarg{complex=FALSE}, so the
 evaluation of the Hessian is a finite differenced approximation,
 so it is very close to, but not identical to, the true value, in terms
 of mean relative difference.
 
-<<echo=FALSE>>=
-options(scipen=0)
-@
 
-<<usingSparseHessianFD2>>=
-hs <- obj$hessian(P)
-mean(abs(hs-true.hess))/mean(abs(hs))
-@
+
+\begin{Schunk}
+\begin{Sinput}
+R> hs <- obj$hessian(P)
+R> mean(abs(hs-true.hess))/mean(abs(hs))
+\end{Sinput}
+\begin{Soutput}
+[1] 2.3357e-09
+\end{Soutput}
+\end{Schunk}
 
 
 
@@ -892,18 +978,21 @@ Equation~\ref{eq:LPD} is holomorphic, so we
 can estimate its Hessian using the complex step method, and compute
 the mean relative difference from the true Hessian.
 
-<<tidy=FALSE>>=
-obj2 <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
-   rows=pattern[["rows"]], cols=pattern[["cols"]],
-   complex=TRUE,
-   data=binary, priors=priors, order.row=order.row)
-hs2 <- obj2$hessian(P)
-mean(abs(hs2-true.hess))/mean(abs(hs2))
-@
+\begin{Schunk}
+\begin{Sinput}
+R> obj2 <- sparseHessianFD(P, fn=binary.f, gr=binary.grad,
++    rows=pattern[["rows"]], cols=pattern[["cols"]],
++    complex=TRUE,
++    data=binary, priors=priors, order.row=order.row)
+R> hs2 <- obj2$hessian(P)
+R> mean(abs(hs2-true.hess))/mean(abs(hs2))
+\end{Sinput}
+\begin{Soutput}
+[1] 8.0555e-17
+\end{Soutput}
+\end{Schunk}
 
-<<echo=FALSE>>=
-options(scipen=999)
-@
+
 
 In short, the complex step method can be more accurate than
 finite differencing, but it comes with theoretical and implementation
@@ -1261,11 +1350,7 @@ is available as an online supplement to this paper, and in the
 Table~\ref{tab:numDeriv} we see that computation times using
 \pkg{sparseHessianFD} and considerably shorter than those using \pkg{numDeriv}.
 
-<<echo=FALSE>>=
-suppressMessages(library(xtable))
-suppressMessages(library(dplyr))
-load("vignette_tab4.Rdata")
-@
+
 
 \begin{table}[ptb]\centering
   \begin{tabularx}{1\linewidth}{@{\extracolsep{\fill} }rrr|rrrr|rrrr}
@@ -1274,12 +1359,21 @@ load("vignette_tab4.Rdata")
 &&&\multicolumn{2}{c}{\pkg{numDeriv}}&\multicolumn{2}{c|}{\pkg{sparseHessianFD}}&\multicolumn{2}{c}{\pkg{numDeriv}}&\multicolumn{2}{c}{\pkg{sparseHessianFD}}\\
 $N$&$k$&$M$&mean&sd&mean&sd&mean&sd&mean&sd\\
 %%\midrule
-<<results='asis',echo=FALSE>>=
-arrange(tab4, M) %>%
-xtable(digits=c(rep(0,4),rep(1,8))) %>%
-    print(only.contents=TRUE, comment=FALSE, booktabs=TRUE,
-      include.rownames=FALSE, include.colnames=FALSE)
-@
+  \midrule
+15 & 2 & 32 & 12.7 & 0.9 & 2.4 & 0.1 & 13.2 & 0.7 & 2.0 & 0.1 \\ 
+  15 & 5 & 80 & 32.2 & 0.9 & 5.0 & 0.5 & 36.1 & 10.1 & 5.2 & 0.8 \\ 
+  50 & 2 & 102 & 51.3 & 9.8 & 3.0 & 0.4 & 54.5 & 1.0 & 2.7 & 0.6 \\ 
+  15 & 8 & 128 & 53.6 & 0.9 & 7.8 & 0.6 & 62.5 & 16.7 & 8.2 & 0.8 \\ 
+  100 & 2 & 202 & 131.7 & 16.9 & 3.7 & 0.3 & 147.6 & 24.1 & 3.4 & 0.5 \\ 
+  50 & 5 & 255 & 144.0 & 27.1 & 6.6 & 0.6 & 162.8 & 29.2 & 6.7 & 0.7 \\ 
+  50 & 8 & 408 & 256.2 & 43.5 & 12.5 & 12.9 & 291.1 & 39.0 & 11.7 & 0.7 \\ 
+  100 & 5 & 505 & 495.7 & 129.5 & 9.8 & 3.1 & 559.8 & 125.9 & 11.8 & 10.4 \\ 
+  100 & 8 & 808 & 850.0 & 171.4 & 20.9 & 20.4 & 999.2 & 217.5 & 23.6 & 17.3 \\ 
+  500 & 2 & 1002 & 1953.4 & 321.7 & 10.8 & 3.7 & 2156.2 & 339.7 & 9.5 & 3.4 \\ 
+  500 & 5 & 2505 & 5444.0 & 951.0 & 27.1 & 10.6 & 6159.3 & 1009.2 & 26.5 & 4.6 \\ 
+  500 & 8 & 4008 & 9533.1 & 190.9 & 54.5 & 12.8 & 14059.4 & 3797.9 & 62.5 & 21.8 \\ 
+   \bottomrule
+
 \end{tabularx}
 \caption{Computation times (milliseconds) for computing Hessians using the
   \pkg{numDeriv} and \pkg{sparseHessianFD} packages, and the finite
@@ -1342,6 +1436,6 @@ Nevertheless, we can conclude that the
 hierarchical models.
 
 \FloatBarrier
-\bibliography{sparseHessianFD}
+\bibliography{JSS2717}
 
 \end{document}

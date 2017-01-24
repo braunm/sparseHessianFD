@@ -1,0 +1,11 @@
+Replication instructions for sparseHessianFD
+
+There are two replication files in the Code/ subdirectory.
+
+1.  jss2717_manuscript.R:  runs the code that is included in the article.
+2.  jss2717_repl.R:  code to replicate Figure 4 and Table 4.
+
+The code in file 2 may take a long time to run.  As written, the objects
+tab4 and fig4 are not saved to a file.  If you want to retain the output,
+you should edit the code accordingly.
+
