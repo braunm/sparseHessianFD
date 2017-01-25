@@ -1,5 +1,9 @@
 # NEWS file for sparseHessianFD package 
 
+## VERSION 0.3.2.1
+
+*  Final version submitted to Journal of Statistical Software
+
 ## VERSION 0.3.2
 
 *  Added implementation of the complex step method.

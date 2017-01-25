@@ -1,4 +1,11 @@
+
+
 NEWS FILE FOR SPARSEHESSIANFD PACKAGE
+
+
+VERSION 0.3.2.1
+
+-   Final version submitted to Journal of Statistical Software
 
 
 VERSION 0.3.2
@@ -7,7 +14,8 @@ VERSION 0.3.2
 
 -   Revised vignette.
 
--   The 'direct' argument to the sparseHessianFD initializer was removed (defunct).
+-   The 'direct' argument to the sparseHessianFD initializer was removed
+    (defunct).
 
 
 VERSION 0.3.0

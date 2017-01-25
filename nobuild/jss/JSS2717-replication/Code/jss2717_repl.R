@@ -2,7 +2,6 @@ library("sparseHessianFD")
 library("Matrix")
 library("mvtnorm")
 library("microbenchmark")
-library("doParallel")
 library("dplyr")
 library("tidyr")
 library("numDeriv")
@@ -10,7 +9,6 @@ library("reshape2")
 library("ggplot2")
 
 set.seed(1234)
-registerDoParallel(cores=6)
 
 binary_sim <- function(N, k, T) {
   x.mean <- rep(0,k)
@@ -36,9 +34,12 @@ priors_sim <- function(k) {
 make_funcs <- function(D, priors, order.row=FALSE) {
   res <- vector("list", length=3)
   names(res) <- c("fn", "gr", "hessian")
-  res$fn <-  function(pars) binary.f(pars, data=D, priors=priors, order.row=order.row)
-  res$gr <-  function(pars) binary.grad(pars, data=D, priors=priors, order.row=order.row)
-  res$hessian <-  function(pars) binary.hess(pars, data=D, priors=priors, order.row=order.row)
+  res$fn <-  function(pars) binary.f(pars, data=D, priors=priors,
+                                     order.row=order.row)
+  res$gr <-  function(pars) binary.grad(pars, data=D, priors=priors,
+                                        order.row=order.row)
+  res$hessian <-  function(pars) binary.hess(pars, data=D, priors=priors,
+                                             order.row=order.row)
   return(res)
 }
 
@@ -150,7 +151,7 @@ cases_fig4 <- expand.grid(k=c(8, 5, 2),
 )
 reps_fig4 <- 200
 runs_fig4 <- plyr::adply(cases_fig4, 1, run_test_fig4, reps=reps_fig4,
-                         order.row=TRUE, .parallel=TRUE)
+                         order.row=TRUE)
 tab_fig4 <- mutate(runs_fig4, ms=bench.time/1000000) %>%
   dcast(N+k+T+bench.rep+ncolors~bench.expr, value.var="ms")  %>%
   mutate(nvars=N*k+k) %>%
@@ -159,13 +160,15 @@ tab_fig4 <- mutate(runs_fig4, ms=bench.time/1000000) %>%
   summarize(median=median(ms))
 D2 <- filter(data.frame(tab_fig4), stat %in% c("f", "df", "hess",
                                                "colors", "setup"))
-D2$stat <- plyr::revalue(D2$stat, c("f"="Function", "df"="Gradient", "hess"="Hessian",
-                              "colors"="Partitioning",
-                              "setup"="Initialization"))
+D2$stat <- plyr::revalue(D2$stat, c("f"="Function", "df"="Gradient",
+                                    "hess"="Hessian",
+                                    "colors"="Partitioning",
+                                    "setup"="Initialization"))
 D2$stat <- factor(D2$stat, levels=c("Function","Gradient","Hessian",
                                     "Partitioning","Initialization"))
 theme_set(theme_bw())
-fig4 <- ggplot(D2, aes(x=N,y=median, color=as.factor(k), linetype=as.factor(k))) %>%
+fig4 <- ggplot(D2, aes(x=N,y=median, color=as.factor(k),
+                       linetype=as.factor(k))) %>%
     + geom_line(size=.4) %>%
     + scale_x_continuous("Number of heterogeneous units") %>%
     + scale_y_continuous("Computation time (milliseconds)") %>%
@@ -180,7 +183,7 @@ cases_tab4 <- expand.grid(k=c(8,5,2),
                           N=c(15, 50, 100, 500))
 
 runs_tab4 <- plyr::adply(cases_tab4, 1, run_test_tab4, reps=reps_tab4,
-                         order.row=TRUE, .parallel=TRUE)
+                         order.row=TRUE)
 
 tab4 <-  mutate(runs_tab4, ms=bench.time/1000000) %>%
   select(-bench.time) %>%
@@ -192,5 +195,6 @@ tab4 <-  mutate(runs_tab4, ms=bench.time/1000000) %>%
     gather(stat2, value, c(mean,sd)) %>%
   dcast(N+k+M~method+stat2,value.var="value") %>%
     arrange(k,N) %>%
-    select(N, k, M, jac_mean, jac_sd, sp_mean, sp_sd, cplx_mean, cplx_sd, sp_cplx_mean, sp_cplx_sd)
+    select(N, k, M, jac_mean, jac_sd, sp_mean, sp_sd, cplx_mean,
+           cplx_sd, sp_cplx_mean, sp_cplx_sd)
 
