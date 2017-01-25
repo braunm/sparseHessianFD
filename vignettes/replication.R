@@ -80,7 +80,7 @@ run_test_fig4 <- function(NkT, reps=50, order.row=FALSE) {
 
   obj <- sparseHessianFD(X, F$fn, F$gr, pat$rows, pat$cols, complex=TRUE)
   colors <- obj$partition()
-  perm <- obj$get_perm()
+  perm <- obj$get_perm()S
   ncolors <- length(unique(colors))
   nvars <- N*k+k
 

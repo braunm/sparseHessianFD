@@ -590,8 +590,6 @@ nnz2LT <- (Q+1) * k * (k+1)/2 + Q * k^2
 options(scipen=999)
 @
 
-
-
 Let $x_1$ and $x_2$ be two subsets of elements of $x$.
 Define $\parD{2}{x_1,x_2}$ as the product set of cross-partial
 derivatives between all elements in $x_1$ and all elements in $x_2$.
@@ -640,6 +638,7 @@ printSpMatrix(as(Mat,"nMatrix"))
 @
 \caption{A ``block-arrow'' sparsity pattern.}\label{fig:blockarrow}
 \end{subfigure}
+
 \begin{subfigure}[b]{.5\textwidth}
 <<banded, echo=FALSE>>=
 Mat <- kronecker(Matrix(1, k, k), diag(N))
