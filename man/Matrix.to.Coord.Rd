@@ -36,4 +36,3 @@ C <- Matrix.to.Coord(M1)
 M2 <- Matrix::sparseMatrix(i=C$rows, j=C$cols)
 all.equal(M1,M2)
 }
-

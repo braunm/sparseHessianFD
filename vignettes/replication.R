@@ -215,9 +215,7 @@ tab4 <-  mutate(runs_tab4, ms=bench.time/1000000) %>%
     group_by(N, k, method, M, stat)  %>%
     summarize(mean=mean(time), sd=sd(time)) %>%
     gather(stat2, value, c(mean,sd)) %>%
-    ##  summarize(mean=mean(time)) %>%
-  ##  gather(stat2, value, mean) %>%
-  dcast(N+k+M~stat+method+stat2,value.var="value") %>%
+    dcast(N+k+M~stat+method+stat2,value.var="value") %>%
     arrange(k,N)
 
 save(runs_tab4, tab4, D2, file="repl.Rdata")

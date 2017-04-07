@@ -70,4 +70,3 @@ called by an end user.
 \seealso{
 Matrix.to.Coord
 }
-

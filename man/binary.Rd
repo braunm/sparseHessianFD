@@ -35,4 +35,3 @@ Functions for binary choice example in the vignette.
 These functions are used by the heterogeneous binary
 choice example in the vignette. There are N heterogeneous units, each making T binary choices.  The choice probabilities depend on k covariates.
 }
-

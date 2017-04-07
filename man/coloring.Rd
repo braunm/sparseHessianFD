@@ -21,4 +21,3 @@ cyclic coloring from a lower triangular pattern matrix
 For internal use.  Exported in order for replication files for
 JSS article to run.
 }
-

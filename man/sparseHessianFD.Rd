@@ -86,6 +86,7 @@ Hessian.  The value corresponds to the "color" for that column.}
 
 \item{\code{perm,invperm}}{Permutation vector and its inverse}
 }}
+
 \section{Methods}{
 
 \describe{
@@ -111,13 +112,14 @@ Hessian.  The value corresponds to the "color" for that column.}
 
 \item{\code{hessian(x)}}{Return sparse Hessian, evaluated at x, as a dgCMatrix object.}
 
-\item{\code{initialize(x, fn, gr, rows, cols, delta = 0.0000001, index1 = TRUE,
+\item{\code{initialize(x, fn, gr, rows, cols, delta = 1e-07, index1 = TRUE,
   complex = FALSE, ...)}}{Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter delta, flags for 0 or 1-based indexing (index1), whether the complex step method will be used, and other arguments (...) to be passed to fn and gr.}
 
 \item{\code{partition()}}{Return the partitioning used to compute finite differences}
 
 \item{\code{pointers(out.index1 = index1)}}{Return list with indices (idx) and pointers (pntr) for sparsity pattern of the compressed sparse Hessian.  Since the Hessian is symmetric, the indices and pointers for row-oriented and column-oriented storage patterns are the same.}
 }}
+
 \examples{
 ## Log posterior density of hierarchical binary choice model. See vignette.
 set.seed(123)
@@ -142,4 +144,3 @@ df <- obj$gr(P) ## gradient
 fdf <- obj$fngr(P) ## list of obj function and gradient
 fdfhs <- obj$fngrhs(P) ## list of obj function, gradient and Hessian.
 }
-
