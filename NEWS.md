@@ -2,7 +2,10 @@
 
 ## VERSION 0.3.2.1
 
-*  Final version submitted to Journal of Statistical Software
+*  Updated version as accepted at Journal of Statistical Software
+
+*  Explicit registration of native routines, as required by R 3.4.0.
+
 
 ## VERSION 0.3.2
 

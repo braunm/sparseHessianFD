@@ -35,7 +35,7 @@
 #'
 #' @keywords package
 #'
-#' @useDynLib sparseHessianFD
+#' @useDynLib sparseHessianFD, .registration=TRUE
 #' @import Rcpp
 #' @import methods
 #' @import Matrix
