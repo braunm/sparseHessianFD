@@ -1,7 +1,7 @@
 ##Submission notes for sparseHessianFD, version 0.3.3
 
 - This is a minor update that corresponds to the final version
-submitted to the Journal of Statistical Software.
+accepted at the Journal of Statistical Software.
 
 - Explicit registration of native routines, as required by R 3.4.0.
 
