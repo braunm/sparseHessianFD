@@ -20,4 +20,3 @@ Generate proper vertex coloring of a sparse undirected graph.
 \details{
 For internal use.  You should not have to call this function directly.
 }
-

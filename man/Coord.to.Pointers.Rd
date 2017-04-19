@@ -58,4 +58,3 @@ list.}
 \seealso{
 Matrix.to.Pointers
 }
-

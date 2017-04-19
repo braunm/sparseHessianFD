@@ -3,11 +3,11 @@
 \docType{data}
 \name{binary-data}
 \alias{binary-data}
-\alias{binary_large}
-\alias{binary_large-data}
 \alias{binary_small}
-\alias{binary_small-data}
+\alias{binary_large}
 \alias{binary_super}
+\alias{binary_small-data}
+\alias{binary_large-data}
 \alias{binary_super-data}
 \title{Sample simulated data for binary choice example in vignette}
 \description{
@@ -26,4 +26,3 @@ The package provides four sample datasets for the hierarchical binary choice mod
 
 The datasets were generated using the code in data-raw/binary_sim.R.
 }
-

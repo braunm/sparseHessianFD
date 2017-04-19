@@ -39,4 +39,3 @@ Hessian Matrices.  SIAM Journal on Numerical Analysis 16 (6)
 (December): 1060-1074.
 }
 \keyword{package}
-

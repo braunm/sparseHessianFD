@@ -1,0 +1,82 @@
+Dear author,
+
+Your submission
+
+ JSS 2717
+
+has just finished the post-processing stage. In order to continue in the
+process there are a few changes that need to be made. Attached to this email
+is a comments file where you can find all the necessary changes.
+
+Please upload the full sources for your submission as a single .zip (or
+.tar.gz) to http://www.jstatsoft.org/author/submissionReview/XXXX. It should
+contain:
+
+(1) The full sources of the latest version of the software. (Binary versions
+can be provided in addition.) 
+
+(2) The .tex, .bib, and final .pdf for the manuscript. Please name all files
+jssXXXX.tex, jssXXXX.bib, jssXXXX.pdf, and so on, where XXXX is the number
+that has been assigned to your manuscript in the review process.  Also
+include all graphics in a Figures/ directory, uploaded as a compressed .zip
+or .tar.gz file.
+
+(3) Information on how to replicate the examples in the manuscript.
+(Typically, this is a self-contained standalone script file that
+loads/calls/sources the software package from (1). If data or other external
+files are needed, that are not yet provided with the software package,
+include these as well.)  Please use subdirectories for Figures/ and Code/,
+and upload these subdirectories as a single .zip or .tar.gz file.  All
+scripts should be in the subdirectory Code/, and all figures produced by the
+scripts, if they are written to file, should be written to Figures/.  Please
+make sure only necessary files are included.  That is, please do not include
+.aux, .log, etc. files and any unused files such as jss.cls, jss.bst,
+jsslogo.jpg, etc.
+
+Note for R authors: If you have prepared your manuscript using Sweave, the
+files for replication of the examples in (3) can be produced by Sweave.  The
+files for the Code/ directory can be produced by Tangle (possibly enhancing
+the comments). Also indicate in your submission that Sweave was used and the
+technical editor will provide you with further Sweave-specific information.
+Thanks for choosing JSS and contributing to free statistical software.
+
+Best regards,
+
+Achim ZeileisBettina GrünEdzer Pebesma
+
+
+JSS 2717: Michael Braun
+
+sparseHessianFD: An R Package for Estimating Sparse Hessian Matrices
+---------------------------------------------------------
+For further instructions on JSS style requirements please see the Style Files (in particular section 2.1 Style Checklist of jss.pdf) and FAQ at http://www.jstatsoft.org/about/submissions.
+
+For further examples please see RECENT JSS papers.
+---------------------------------------------------------
+
+Manuscript style comments:
+
+o For the code layout in R publications, we typically distinguish input/output using Sinput/Soutput (or equivalently CodeInput/CodeOutput). Unless there are special reasons to format it differently, the input should use the text width (up to 76 or 77 characters) and be indented by two spaces, e.g.,
+
+begin{Sinput}
+R> example_model <- lm(response ~ variable1 + variable2 + variable3, 
++    weights = w, data = mydata)
+\end{Sinput}
+
+o Code should have enough spaces to facilitate reading.  Please include spaces before and after operators and after commas (unless spaces have syntactical meaning).
+
+o All table row/column headers should also be in sentence style. There should not be further footnote-style annotations in tables; these should all be placed in the caption.
+
+o As a reminder, please make sure that:
+	- \proglang, \pkg and \code have been used for highlighting throughout the paper (including titles and references), except where explicitly escaped.
+
+o As a reminder,
+	- Please make sure that all software packages are \cite{}'d properly.
+
+	- All references should be in title style.
+
+	- See FAQ for specific reference instructions.
+
+Code:
+
+o As a reminder, please make sure that the files needed to replicate all code/examples within the manuscript are included in a standalone replication script.

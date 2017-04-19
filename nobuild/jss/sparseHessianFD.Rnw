@@ -1,4 +1,4 @@
- \documentclass[nojss]{jss}
+ \documentclass[jss]{jss}
 
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{sparseHessianFD}
@@ -24,10 +24,6 @@
 }{}
 
    \newcolumntype{d}[1]{D{.}{.}{#1}}
-%%\newcommand{\pkg}[1]{\emph{#1}}
-%%\newcommand{\proglang}[1]{\textsf{#1}}
-%%\newcommand{\filename}[1]{\textit{#1}}
-%%\newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\func}[1]{\code{#1}}
 \newcommand{\class}[1]{\textsl{#1}}
 \newcommand{\funcarg}[1]{\code{#1}}
@@ -631,7 +627,6 @@ printSpMatrix(as(Mat,"nMatrix"))
 @
 \caption{A ``block-arrow'' sparsity pattern.}\label{fig:blockarrow}
 \end{subfigure}
-
 \begin{subfigure}[b]{.5\textwidth}
 <<banded, echo=FALSE>>=
 Mat <- kronecker(Matrix(1, k, k), diag(N))
@@ -1261,8 +1256,8 @@ difference and complex step methods from each package. Times were generated on a
 compute node running Scientific Linux 6 (64-bit) with an 8-core Intel
 Xeon X5560 processor (2.80 GHz) with 24 GB of RAM, and collected using the \pkg{microbenchmark} package
 \citep{R_microbenchmark}. Code to replicate Table~\ref{tab:numDeriv}
-is available in the \func{doc/} directory of the installed package, and the
-\func{vignettes/} directory of the source package.  In
+is available as an online supplement to this paper, and in the
+\func{doc/} directory of the installed package. In
 Table~\ref{tab:numDeriv} we see that computation times using
 \pkg{sparseHessianFD} and considerably shorter than those using \pkg{numDeriv}.
 
