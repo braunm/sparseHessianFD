@@ -1,4 +1,4 @@
-##Submission notes for sparseHessianFD, version 0.3.3
+##Submission notes for sparseHessianFD, version 0.3.3.1
 
 ### Changes from last version
 
@@ -7,7 +7,7 @@
 ### Test environments
 
 -  local macOS 10.12.6 install
--  R 3.4.2 (CRAN compiled binary) and R 3.4.2 patched (binary from r.research.att.com).
+-  R 3.4.2 (CRAN compiled binary)
 -  win_builder, both R-release and R-devel
 
 ### R CMD check results
