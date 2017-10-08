@@ -1,13 +1,16 @@
+NEWS FILE FOR sparseHessianFD PACKAGE
+
+VERSION 0.3.3.1
+
+-  Modified registration of native routines in src/init.c to be
+   compatible with new Rcpp naming convention.
 
 
-NEWS FILE FOR SPARSEHESSIANFD PACKAGE
+VERSION 0.3.3
 
+*  Updated version as accepted at Journal of Statistical Software
 
-VERSION 0.3.2.1
-
--   Updated version as accepted at Journal of Statistical Software
-
--   Explicit registration of native routines, as required by R 3.4.0.
+*  Explicit registration of native routines, as required by R 3.4.0.
 
 
 VERSION 0.3.2
