@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // get_colors
 Rcpp::IntegerVector get_colors(const IntegerVector& pntr, const IntegerVector& idx, const int nvars);
-RcppExport SEXP sparseHessianFD_get_colors(SEXP pntrSEXP, SEXP idxSEXP, SEXP nvarsSEXP) {
+RcppExport SEXP _sparseHessianFD_get_colors(SEXP pntrSEXP, SEXP idxSEXP, SEXP nvarsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,7 +21,7 @@ END_RCPP
 }
 // subst
 Rcpp::S4 subst(const Rcpp::NumericMatrix& Y, const Rcpp::IntegerVector& colors, const Rcpp::IntegerVector& jCol, const Rcpp::IntegerVector& ipntr, const double& delta, const int& nvars, const int& nnz);
-RcppExport SEXP sparseHessianFD_subst(SEXP YSEXP, SEXP colorsSEXP, SEXP jColSEXP, SEXP ipntrSEXP, SEXP deltaSEXP, SEXP nvarsSEXP, SEXP nnzSEXP) {
+RcppExport SEXP _sparseHessianFD_subst(SEXP YSEXP, SEXP colorsSEXP, SEXP jColSEXP, SEXP ipntrSEXP, SEXP deltaSEXP, SEXP nvarsSEXP, SEXP nnzSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;

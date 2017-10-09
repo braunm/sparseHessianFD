@@ -1,8 +1,8 @@
 Package: sparseHessianFD
 Type: Package
 Title: Numerical Estimation of Sparse Hessians
-Version: 0.3.3
-Date: 2017-04-18
+Version: 0.3.3.1
+Date: 2017-10-05
 Authors@R: person(family="Braun", given="Michael", role=c("aut","cre","cph"), email="braunm@smu.edu")
 Maintainer: Michael Braun <braunm@smu.edu>
 URL: http://www.smu.edu/Cox/Departments/FacultyDirectory/BraunMichael
@@ -13,11 +13,11 @@ Description: Estimates Hessian of a scalar-valued function, and returns it
 License: MPL (== 2.0)
 LazyData: true
 Depends:
-    R (>= 3.2.3)
+    R (>= 3.4.2)
 Imports: 
-    Matrix (>= 1.2.4),
+    Matrix (>= 1.2.8),
     methods,
-    Rcpp (>= 0.12.8)
+    Rcpp (>= 0.12.13)
 Suggests:
     testthat,
     numDeriv,
@@ -25,7 +25,7 @@ Suggests:
     knitr,
     xtable,
     dplyr
-LinkingTo: Rcpp, RcppEigen (>= 0.3.2.9.0)
+LinkingTo: Rcpp, RcppEigen (>= 0.3.3.0)
 VignetteBuilder: knitr
 SystemRequirements: C++11
 Roxygen: list(wrap=FALSE)

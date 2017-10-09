@@ -8,7 +8,7 @@
 #' @return An integer vector of length nvars, where each element represents the color of the corresponding vertex. Indices are zero-based.
 #' @details  For internal use.  You should not have to call this function directly.
 get_colors <- function(pntr, idx, nvars) {
-    .Call('sparseHessianFD_get_colors', PACKAGE = 'sparseHessianFD', pntr, idx, nvars)
+    .Call(`_sparseHessianFD_get_colors`, pntr, idx, nvars)
 }
 
 #' @title Estimate sparse Hessian
@@ -22,6 +22,6 @@ get_colors <- function(pntr, idx, nvars) {
 #' @return A sparse Hessian of class dgCMatrix.
 #' @details For internal use.  You should not have to call this function directly.
 subst <- function(Y, colors, jCol, ipntr, delta, nvars, nnz) {
-    .Call('sparseHessianFD_subst', PACKAGE = 'sparseHessianFD', Y, colors, jCol, ipntr, delta, nvars, nnz)
+    .Call(`_sparseHessianFD_subst`, Y, colors, jCol, ipntr, delta, nvars, nnz)
 }
 

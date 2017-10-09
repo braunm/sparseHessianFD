@@ -5,12 +5,12 @@
 
 
 /* .Call calls */
-extern SEXP sparseHessianFD_get_colors(SEXP, SEXP, SEXP);
-extern SEXP sparseHessianFD_subst(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _sparseHessianFD_get_colors(SEXP, SEXP, SEXP);
+extern SEXP _sparseHessianFD_subst(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"sparseHessianFD_get_colors", (DL_FUNC) &sparseHessianFD_get_colors, 3},
-    {"sparseHessianFD_subst",      (DL_FUNC) &sparseHessianFD_subst,      7},
+    {"_sparseHessianFD_get_colors", (DL_FUNC) &_sparseHessianFD_get_colors, 3},
+    {"_sparseHessianFD_subst",      (DL_FUNC) &_sparseHessianFD_subst,      7},
     {NULL, NULL, 0}
 };
 

@@ -1,6 +1,12 @@
 # NEWS file for sparseHessianFD package 
 
-## VERSION 0.3.2.1
+## VERSION 0.3.3.1 
+
+*  Modified registration of native routines in src/init.c to be
+   compatible with new Rcpp naming convention.
+
+
+## VERSION 0.3.3
 
 *  Updated version as accepted at Journal of Statistical Software
 
