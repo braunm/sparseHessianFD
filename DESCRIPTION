@@ -1,15 +1,15 @@
 Package: sparseHessianFD
 Type: Package
 Title: Numerical Estimation of Sparse Hessians
-Version: 0.3.3.1
-Date: 2017-10-05
+Version: 0.3.3.2
+Date: 2017-11-24
 Authors@R: person(family="Braun", given="Michael", role=c("aut","cre","cph"), email="braunm@smu.edu")
 Maintainer: Michael Braun <braunm@smu.edu>
 URL: http://www.smu.edu/Cox/Departments/FacultyDirectory/BraunMichael
 Description: Estimates Hessian of a scalar-valued function, and returns it
     in a sparse Matrix format. The sparsity pattern must be known in advance. The
     algorithm is especially efficient for hierarchical models with a large number of
-    heterogeneous units.
+    heterogeneous units.  See Braun, M. (2017) <doi:10.18637/jss.v080.i10>.
 License: MPL (== 2.0)
 LazyData: true
 Depends:
@@ -25,7 +25,7 @@ Suggests:
     knitr,
     xtable,
     dplyr
-LinkingTo: Rcpp, RcppEigen (>= 0.3.3.0)
+LinkingTo: Rcpp, RcppEigen (>= 0.3.3.3.0)
 VignetteBuilder: knitr
 SystemRequirements: C++11
 Roxygen: list(wrap=FALSE)
