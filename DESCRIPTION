@@ -9,7 +9,7 @@ URL: http://www.smu.edu/Cox/Departments/FacultyDirectory/BraunMichael
 Description: Estimates Hessian of a scalar-valued function, and returns it
     in a sparse Matrix format. The sparsity pattern must be known in advance. The
     algorithm is especially efficient for hierarchical models with a large number of
-    heterogeneous units.  See Braun, M. (2017) <doi:10.18637/jss.v080.i10>.
+    heterogeneous units.  See Braun, M. (2017) <doi:10.18637/jss.v082.i10>.
 License: MPL (== 2.0)
 LazyData: true
 Depends:

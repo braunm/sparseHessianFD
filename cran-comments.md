@@ -2,7 +2,7 @@
 
 ### Changes from last version
 
--  Includes references to forthcoming JSS article.  
+-  Includes references to forthcoming JSS article (DOI corrected).
 
 ### Test environments
 
