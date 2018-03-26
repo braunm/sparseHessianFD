@@ -625,8 +625,8 @@ Now the Hessian has an "banded" sparsity pattern, as in Figure~\ref{fig:banded}.
   \begin{subfigure}[b]{.5\textwidth}
 <<blockarrow, echo=FALSE>>=
 Mat <- as(kronecker(diag(N), matrix(1, k, k)),"sparseMatrix")
-Mat <- rBind(Mat, Matrix(1, k, N*k))
-Mat <- cBind(Mat, Matrix(1, k * (N+1), k))
+Mat <- rbind(Mat, Matrix(1, k, N*k))
+Mat <- cbind(Mat, Matrix(1, k * (N+1), k))
 printSpMatrix(as(Mat,"nMatrix"))
 @
 \caption{A ``block-arrow'' sparsity pattern.}\label{fig:blockarrow}
@@ -635,8 +635,8 @@ printSpMatrix(as(Mat,"nMatrix"))
 \begin{subfigure}[b]{.5\textwidth}
 <<banded, echo=FALSE>>=
 Mat <- kronecker(Matrix(1, k, k), diag(N))
-Mat <- rBind(Mat, Matrix(1, k, N * k))
-Mat <- cBind(Mat, Matrix(1, k * (N + 1), k))
+Mat <- rbind(Mat, Matrix(1, k, N * k))
+Mat <- cbind(Mat, Matrix(1, k * (N + 1), k))
 printSpMatrix(as(Mat,"nMatrix"))
 @
 \caption{A ``banded'' sparsity pattern.}\label{fig:banded}
