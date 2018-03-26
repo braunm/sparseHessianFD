@@ -13,7 +13,7 @@ Description: Estimates Hessian of a scalar-valued function, and returns it
 License: MPL (== 2.0)
 LazyData: true
 Depends:
-    R (>= 3.4.2)
+    R (>= 3.4.4)
 Imports: 
     Matrix (>= 1.2.12),
     methods,
