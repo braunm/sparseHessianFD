@@ -1,9 +1,14 @@
-year <- sub("-.*", "", meta$Date)
-note <- sprintf("R package version %s", meta$Version)
+bibentry(bibtype = "Article",
+  title        = "{sparseHessianFD}: An {R} Package for Estimating Sparse Hessian Matrices",
+  author       = person(given = "Michael",
+                        family = "Braun",
+                        email = "braunm@smu.edu"),
+  journal      = "Journal of Statistical Software",
+  year         = "2017",
+  volume       = "82",
+  number       = "10",
+  pages        = "1--22",
+  doi          = "10.18637/jss.v082.i10",
 
-bibentry(bibtype = "Manual",
-         title = "{sparseHessianFD}:An R Package for Estimating Sparse Hessians",
-         author = person(given="Michael", family="Braun"),
-         year = year,
-         note = note,
-         url = "https://CRAN.R-project.org/package=sparseHessianFD")
+  header       = "To cite sparseHessianFD in publications use:"
+)

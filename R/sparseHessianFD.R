@@ -17,6 +17,9 @@
 #' \link{Matrix.to.Coord} utility function.
 #'
 #' @references
+#' Braun, Michael. 2017. sparseHessianFD: An R Package for Estimating
+#' Sparse Hessian Matrices.  Journal of Statistical Software 82 (10): 1-22.
+#' 
 #' Coleman, Thomas F, and Jin-Yi Cai. 1986.  The Cyclic Coloring Problem
 #' and Estimation of Sparse Hessian Matrices.  SIAM Journal on Algebraic
 #' Discrete Methods 7 (2): 221-235

@@ -1,5 +1,9 @@
 # NEWS file for sparseHessianFD package 
 
+## VERSION 0.3.3.2
+
+* References Journal of Statistical Software paper.
+
 ## VERSION 0.3.3.1 
 
 *  Modified registration of native routines in src/init.c to be

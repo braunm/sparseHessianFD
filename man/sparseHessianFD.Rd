@@ -112,7 +112,7 @@ Hessian.  The value corresponds to the "color" for that column.}
 
 \item{\code{hessian(x)}}{Return sparse Hessian, evaluated at x, as a dgCMatrix object.}
 
-\item{\code{initialize(x, fn, gr, rows, cols, delta = 1e-07, index1 = TRUE,
+\item{\code{initialize(x, fn, gr, rows, cols, delta = 0.0000001, index1 = TRUE,
   complex = FALSE, ...)}}{Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter delta, flags for 0 or 1-based indexing (index1), whether the complex step method will be used, and other arguments (...) to be passed to fn and gr.}
 
 \item{\code{partition()}}{Return the partitioning used to compute finite differences}
