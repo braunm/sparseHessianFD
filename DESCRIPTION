@@ -15,7 +15,7 @@ LazyData: true
 Depends:
     R (>= 3.4.2)
 Imports: 
-    Matrix (>= 1.2.8),
+    Matrix (>= 1.2.12),
     methods,
     Rcpp (>= 0.12.13)
 Suggests:
