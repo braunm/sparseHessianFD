@@ -1,5 +1,10 @@
 # NEWS file for sparseHessianFD package 
 
+## VERSION 0.3.3.3
+
+* Replaced deprecated Matrix package functions rBind and cBind with
+  their rbind and cbind counterparts.
+
 ## VERSION 0.3.3.2
 
 * References Journal of Statistical Software paper.

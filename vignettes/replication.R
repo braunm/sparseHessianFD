@@ -70,8 +70,8 @@ run_test_fig4 <- function(NkT, reps=50, order.row=FALSE) {
   } else {
       mm <- Matrix::kronecker(Matrix::Diagonal(N),Matrix(1,k,k))
   }
-  M <- rBind(mm,Matrix(TRUE,k,N*k)) %>%
-       cBind(Matrix(TRUE, k*(N+1), k)) %>%
+  M <- rbind(mm,Matrix(TRUE,k,N*k)) %>%
+       cbind(Matrix(TRUE, k*(N+1), k)) %>%
        as("sparseMatrix") %>%
        as("nMatrix")
 
@@ -123,8 +123,8 @@ run_test_tab4 <- function(Nk, reps=50, order.row=TRUE) {
     } else {
         mm <- Matrix::kronecker(Matrix::Diagonal(N),Matrix(1,k,k))
     }
-    M <- rBind(mm,Matrix(TRUE,k,N*k)) %>%
-        cBind(Matrix(TRUE, k*(N+1), k)) %>%
+    M <- rbind(mm,Matrix(TRUE,k,N*k)) %>%
+        cbind(Matrix(TRUE, k*(N+1), k)) %>%
         as("sparseMatrix") %>%
         as("nMatrix")
 
