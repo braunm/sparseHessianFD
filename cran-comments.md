@@ -13,10 +13,6 @@
 
 ### R CMD check results
 
-There were no ERRORs or WARNINGs.  There are two notes.
+There were no ERRORs, WARNINGs, or NOTEs.
 
-1.  The DOI in the CITATION is for a new JSS publication that will be registered after
-   publication on CRAN.
-
-2.  "Hessians" and "Braun" in the DESCRIPTION file is not misspelled.
 
