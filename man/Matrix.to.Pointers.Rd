@@ -5,8 +5,8 @@
 \title{Extract row and column indices, pointers and values from a
 sparse matrix.}
 \usage{
-Matrix.to.Pointers(M, as.symmetric = Matrix::isSymmetric(M), values = !is(M,
-  "nMatrix"), order = NULL, index1 = TRUE)
+Matrix.to.Pointers(M, as.symmetric = Matrix::isSymmetric(M),
+  values = !is(M, "nMatrix"), order = NULL, index1 = TRUE)
 }
 \arguments{
 \item{M}{A sparse Matrix, as defined in the Matrix package.}

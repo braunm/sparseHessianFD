@@ -1,13 +1,14 @@
-##Submission notes for sparseHessianFD, version 0.3.3.2
+##Submission notes for sparseHessianFD, version 0.3.3.4
 
 ### Changes from last version
 
--  Includes references to forthcoming JSS article (DOI corrected).
+-  Fix typo in inst/doc/replication.R (responding to email notice from
+   Kurt Hornik).
 
 ### Test environments
 
--  local macOS 10.13.1 install
--  R 3.4.2 (CRAN compiled binary)
+-  local macOS 10.14.3 install
+-  R 3.5.2 (CRAN compiled binary)
 -  win_builder, both R-release and R-devel
 
 ### R CMD check results

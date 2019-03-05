@@ -6,7 +6,8 @@
 defined by a row- or column-oriented compression scheme.}
 \usage{
 Coord.to.Pointers(rows, cols, dims, triangle = TRUE, lower = TRUE,
-  symmetric = FALSE, order = c("column", "row", "triplet"), index1 = TRUE)
+  symmetric = FALSE, order = c("column", "row", "triplet"),
+  index1 = TRUE)
 }
 \arguments{
 \item{rows, cols}{row and column indices of non-zero elements}

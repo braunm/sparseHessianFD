@@ -1,3 +1,5 @@
+Meta
+doc
 *.so
 *.o
 *~
@@ -21,5 +23,4 @@ README.html
 _region_*
 cache
 nobuild/jss_prescreened/*
-
 

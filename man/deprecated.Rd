@@ -4,8 +4,6 @@
 \alias{deprecated}
 \alias{Sym.CSC.to.Matrix}
 \alias{Coord.to.Sym.Pattern.Matrix}
-\alias{Sym.CSC.to.Matrix}
-\alias{Coord.to.Sym.Pattern.Matrix}
 \alias{Coord.to.Pattern.Matrix}
 \alias{new.sparse.hessian.obj}
 \alias{sparseHessianFD.new}
