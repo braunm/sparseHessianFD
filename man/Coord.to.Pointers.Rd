@@ -5,9 +5,16 @@
 \title{Convert a matrix defined by row and column indices to one
 defined by a row- or column-oriented compression scheme.}
 \usage{
-Coord.to.Pointers(rows, cols, dims, triangle = TRUE, lower = TRUE,
-  symmetric = FALSE, order = c("column", "row", "triplet"),
-  index1 = TRUE)
+Coord.to.Pointers(
+  rows,
+  cols,
+  dims,
+  triangle = TRUE,
+  lower = TRUE,
+  symmetric = FALSE,
+  order = c("column", "row", "triplet"),
+  index1 = TRUE
+)
 }
 \arguments{
 \item{rows, cols}{row and column indices of non-zero elements}

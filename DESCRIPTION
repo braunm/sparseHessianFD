@@ -30,4 +30,4 @@ Encoding: UTF-8
 VignetteBuilder: knitr
 SystemRequirements: C++11
 Roxygen: list(wrap=FALSE)
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0

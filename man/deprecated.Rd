@@ -13,14 +13,35 @@ Sym.CSC.to.Matrix(H, nvars)
 
 Coord.to.Sym.Pattern.Matrix(H, nvars)
 
-Coord.to.Pattern.Matrix(rows, cols, dims, compressed = TRUE,
-  symmetric = FALSE, index1 = TRUE)
+Coord.to.Pattern.Matrix(
+  rows,
+  cols,
+  dims,
+  compressed = TRUE,
+  symmetric = FALSE,
+  index1 = TRUE
+)
 
-new.sparse.hessian.obj(x, fn, gr, hs, fd.method = 0L,
-  eps = sqrt(.Machine$double.eps), ...)
+new.sparse.hessian.obj(
+  x,
+  fn,
+  gr,
+  hs,
+  fd.method = 0L,
+  eps = sqrt(.Machine$double.eps),
+  ...
+)
 
-sparseHessianFD.new(x, fn, gr, rows, cols, direct = NULL,
-  eps = sqrt(.Machine$double.eps), ...)
+sparseHessianFD.new(
+  x,
+  fn,
+  gr,
+  rows,
+  cols,
+  direct = NULL,
+  eps = sqrt(.Machine$double.eps),
+  ...
+)
 }
 \arguments{
 \item{H}{a list containing Hessian data.  See details.}
