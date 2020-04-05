@@ -1,9 +1,13 @@
 # NEWS file for sparseHessianFD package 
 
+
+## VERSION 0.3.3.5 (devel)
+
+* Minor changes for compatibility with Roxygen2 version 7.1.0.
+
 ## VERSION 0.3.3.4
 
 * Fix typo in inst/doc/replication.R.
-
 
 ## VERSION 0.3.3.3
 

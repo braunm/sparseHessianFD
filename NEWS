@@ -2,6 +2,10 @@
 
 NEWS FILE FOR SPARSEHESSIANFD PACKAGE
 
+VERSION 0.3.3.5 (devel)
+
+-   Minor changes for compatibility with Roxygen2 v7.1.0. 
+
 
 VERSION 0.3.3.4
 
