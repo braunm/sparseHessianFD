@@ -1,5 +1,10 @@
 # NEWS file for sparseHessianFD package 
 
+## VERSION 0.3.3.4
+
+* Fix typo in inst/doc/replication.R.
+
+
 ## VERSION 0.3.3.3
 
 * Replaced deprecated Matrix package functions rBind and cBind with

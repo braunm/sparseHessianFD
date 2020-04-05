@@ -1,8 +1,8 @@
 Package: sparseHessianFD
 Type: Package
 Title: Numerical Estimation of Sparse Hessians
-Version: 0.3.3.3
-Date: 2018-03-26
+Version: 0.3.3.4
+Date: 2019-03-05
 Authors@R: person(family="Braun", given="Michael", role=c("aut","cre","cph"), email="braunm@smu.edu")
 Maintainer: Michael Braun <braunm@smu.edu>
 URL: http://www.smu.edu/Cox/Departments/FacultyDirectory/BraunMichael
@@ -26,7 +26,8 @@ Suggests:
     xtable,
     dplyr
 LinkingTo: Rcpp, RcppEigen (>= 0.3.3.3.0)
+Encoding: UTF-8
 VignetteBuilder: knitr
 SystemRequirements: C++11
 Roxygen: list(wrap=FALSE)
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
