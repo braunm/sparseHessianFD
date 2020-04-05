@@ -1,33 +1,26 @@
-
-
-NEWS FILE FOR SPARSEHESSIANFD PACKAGE
+NEWS file for sparseHessianFD package
 
 VERSION 0.3.3.5 (devel)
 
--   Minor changes for compatibility with Roxygen2 v7.1.0. 
-
+-   Minor changes for compatibility with Roxygen2 version 7.1.0.
 
 VERSION 0.3.3.4
 
 -   Fix typo in inst/doc/replication.R.
-
 
 VERSION 0.3.3.3
 
 -   Replaced deprecated Matrix package functions rBind and cBind with
     their rbind and cbind counterparts.
 
-
 VERSION 0.3.3.2
 
 -   References Journal of Statistical Software paper.
-
 
 VERSION 0.3.3.1
 
 -   Modified registration of native routines in src/init.c to be
     compatible with new Rcpp naming convention.
-
 
 VERSION 0.3.3
 
@@ -35,16 +28,14 @@ VERSION 0.3.3
 
 -   Explicit registration of native routines, as required by R 3.4.0.
 
-
 VERSION 0.3.2
 
 -   Added implementation of the complex step method.
 
 -   Revised vignette.
 
--   The 'direct' argument to the sparseHessianFD initializer was removed
+-   The ‘direct’ argument to the sparseHessianFD initializer was removed
     (defunct).
-
 
 VERSION 0.3.0
 
@@ -56,8 +47,8 @@ VERSION 0.3.0
     is deprecated. Instead, use sparseHessianFD to initialize an object.
     Initialization once again takes place in a single step.
 
--   The 'direct' computation method has been removed. All computation
-    uses the 'indirect' triangular substitution method. The 'direct'
+-   The ‘direct’ computation method has been removed. All computation
+    uses the ‘indirect’ triangular substitution method. The ‘direct’
     argument in the initializer for the sparseHessianFD class is now
     deprecated, and remains solely for compatibility with older versions
     of the package.
@@ -67,14 +58,13 @@ VERSION 0.3.0
 
 -   New matrix helper functions Matrix.to.Pointers and
     Coord.to.Pointers. The Coord.to.Pattern.Matrix function is
-    deprecated. Use the spMatrix or sparseMatrix functions in the
-    _Matrix_ package instead.
+    deprecated. Use the spMatrix or sparseMatrix functions in the Matrix
+    package instead.
 
 -   With the removal of ACM-copyrighted code, this package is now
     licensed under the MPL 2.0.
 
-
-VERSION 0.2.0 (Jan. 28, 2015)
+VERSION 0.2.0 (Jan. 28, 2015)
 
 -   Essentially a complete re-write of the package.
 
@@ -93,21 +83,19 @@ VERSION 0.2.0 (Jan. 28, 2015)
     construction and initialization steps.
 
 -   Deprecated functions in Version 0.2.0
+
     -   new.sparse.hessian.object. Use sparseHessianFD.new instead.
     -   Coord.to.Sym.Pattern.Matrix. Use Coord.to.Pattern.Matrix
         instead, with option symmetric=TRUE.
-    -   Sym.CSC.to.Matrix. Use the spMatrix function in the _Matrix_
+    -   Sym.CSC.to.Matrix. Use the spMatrix function in the Matrix
         package instead.
 
-
-VERSION 0.1.1 (Nov. 5, 2013)
+VERSION 0.1.1 (Nov. 5, 2013)
 
 -   Removed functions for sampling from, and computing the density of, a
     multivariate normal distribution. These functions are now available
-    in the _sparseMVN_ package.
+    in the sparseMVN package.
 
-
-VERSION 0.1.0 (Nov. 5, 2012)
+VERSION 0.1.0 (Nov. 5, 2012)
 
 -   Initial upload to CRAN.
-
