@@ -33,7 +33,7 @@
 ##' \preformatted{sparseHessianFD(x, fn, gr, rows, cols, delta, index1, complex, ...)}
 ##' The function, gradient and sparsity pattern are
 ##' declared as part of the initialization.
-##' 
+##'
 ##' Once initialized, the $hessian method will evaluate the Hessian at x.
 ##' \preformatted{
 ##' obj <- sparseHessian(x, fn, gr, rows, cols, ...)
@@ -113,7 +113,7 @@ sparseHessianFD <-
                     initialize = function(x, fn, gr, rows, cols,
                                           delta=1e-7,
                                           index1 = TRUE, complex=FALSE, ...) {
-                        "Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter delta, flags for 0 or 1-based indexing (index1), whether the complex step method will be used, and other arguments (...) to be passed to fn and gr."                     
+                        "Initialize object with functions to compute the objective function and gradient (fn and gr), row and column indices of non-zero elements (rows and cols), an initial variable vector x at which fn and gr can be evaluated, a finite differencing parameter delta, flags for 0 or 1-based indexing (index1), whether the complex step method will be used, and other arguments (...) to be passed to fn and gr."
 
 
                         validate(fn, gr, rows, cols, x, delta, index1, complex, ...)
@@ -135,7 +135,8 @@ sparseHessianFD <-
 
                         tmp <- sparseMatrix(i=iRow, j=jCol,
                                             index1=index1, symmetric=TRUE,
-                                            giveCsparse=FALSE)
+ ## fix for Matrix 1.3?     ##              giveCsparse=FALSE)
+                                            repr = 'T')
                         perm <<- order(Matrix::rowSums(tmp), decreasing=TRUE)
                         invperm <<- invPerm(perm)
 
@@ -187,7 +188,7 @@ sparseHessianFD <-
                                   check.index1.col,
                                   is.finite(val)
                                   )
-                        if(complex) {                   
+                        if(complex) {
                             h0 <- rep(0, k)
                             h0[1] <- delta * 1i
                             fc <- try(fn(x + h0, ...))
@@ -199,7 +200,7 @@ sparseHessianFD <-
                             if(inherits(gc, "try-error"))
                                 stop("gradient does not accept complex argument as required by complex step method")
                             if(!all(is.complex(gc)))
-                                stop("gradient does not return a complex value as required by complex step method") 
+                                stop("gradient does not return a complex value as required by complex step method")
                         }
 
                         dups <- which(duplicated(cbind(rows, cols)))
@@ -220,21 +221,21 @@ sparseHessianFD <-
 
                     hessian = function(x) {
                         "Return sparse Hessian, evaluated at x, as a dgCMatrix object."
-                      
+
                         stopifnot(ready)
 
                         if(complex) {
                             usingMethods(fd_complex)
-                            Y2 <- apply(D, 2, fd_complex, x = x)                 
+                            Y2 <- apply(D, 2, fd_complex, x = x)
                         } else {
-                            usingMethods(fd)      
+                            usingMethods(fd)
                             grad.x <- gr1(x)
                             Y2 <- apply(D, 2, fd, x = x, grad.x = grad.x)
                         }
                         Y <- Y2[perm,]
                         res <- subst(Y, colors,
                                      idx-index1, pntr-index1, delta, nvars, nnz)
-                        return(res[invperm,invperm])                        
+                        return(res[invperm,invperm])
                     },
 
                     fn = function(x) {
@@ -298,5 +299,3 @@ sparseHessianFD <-
                     }
                     )
                 )
-
-

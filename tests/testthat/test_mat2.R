@@ -25,9 +25,9 @@ test_that("Matrix.to.Pointers", {
     expect_equal(names(P1c), c("iRow","jpntr","x", "class"))
     expect_equal(names(P1t), c("rows","cols","x","class"))
 
-    A1r <- as(sparseMatrix(j=P1r$jCol, p=P1r$ipntr-1, x=P1r$x),"RsparseMatrix")
-    A1c <- sparseMatrix(i=P1c$iRow, p=P1c$jpntr-1, x=P1c$x)
-    A1t <- sparseMatrix(i=P1t$rows, j=P1t$cols, x=P1t$x, giveCsparse=FALSE)
+    A1r <- sparseMatrix(j=P1r$jCol, p=P1r$ipntr-1, x=P1r$x, repr='R')
+    A1c <- sparseMatrix(i=P1c$iRow, p=P1c$jpntr-1, x=P1c$x, repr='C')
+    A1t <- sparseMatrix(i=P1t$rows, j=P1t$cols, x=P1t$x, repr='T')
 
     expect_equal(AR, A1r)
     expect_equal(AC, A1c)
@@ -41,9 +41,9 @@ test_that("Matrix.to.Pointers", {
     expect_equal(names(P2c), c("iRow","jpntr","x", "class"))
     expect_equal(names(P2t), c("rows","cols","x","class"))
 
-    A2r <- as(sparseMatrix(j=P2r$jCol, p=P2r$ipntr-1, x=P2r$x),"RsparseMatrix")
-    A2c <- sparseMatrix(i=P2c$iRow, p=P2c$jpntr-1, x=P2c$x)
-    A2t <- sparseMatrix(i=P2t$rows, j=P2t$cols, x=P2t$x, giveCsparse=FALSE)
+    A2r <- sparseMatrix(j=P2r$jCol, p=P2r$ipntr-1, x=P2r$x, repr='R')
+    A2c <- sparseMatrix(i=P2c$iRow, p=P2c$jpntr-1, x=P2c$x, repr='C')
+    A2t <- sparseMatrix(i=P2t$rows, j=P2t$cols, x=P2t$x, repr='T')
 
     expect_equal(AR, A2r)
     expect_equal(AC, A2c)
@@ -57,9 +57,9 @@ test_that("Matrix.to.Pointers", {
     expect_equal(names(P3c), c("iRow","jpntr", "class"))
     expect_equal(names(P3t), c("rows","cols","class"))
 
-    A3r <- as(sparseMatrix(j=P3r$jCol, p=P3r$ipntr-1),"RsparseMatrix")
-    A3c <- sparseMatrix(i=P3c$iRow, p=P3c$jpntr-1)
-    A3t <- sparseMatrix(i=P3t$rows, j=P3t$cols, giveCsparse=FALSE)
+    A3r <- sparseMatrix(j=P3r$jCol, p=P3r$ipntr-1,repr='R')
+    A3c <- sparseMatrix(i=P3c$iRow, p=P3c$jpntr-1, repr='C')
+    A3t <- sparseMatrix(i=P3t$rows, j=P3t$cols, repr='T')
 
     nAR <- as(as(AR,"nMatrix"),"RsparseMatrix")
     nAC <- as(as(AC,"nMatrix"),"CsparseMatrix")

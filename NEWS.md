@@ -1,33 +1,37 @@
-# NEWS file for sparseHessianFD package 
+# sparseHessianFD 0.3.3.5
 
-## VERSION 0.3.3.4
+* Minor changes for compatibility with Roxygen2 version 7.1.
+* New API for Matrix 1.3: replaced deprecated giveCsparse arguments with repr.
+* Added pkgdown website.
+
+# sparseHessianFD 0.3.3.4
 
 * Fix typo in inst/doc/replication.R.
 
-
-## VERSION 0.3.3.3
+# sparseHessianFD 0.3.3.3
 
 * Replaced deprecated Matrix package functions rBind and cBind with
   their rbind and cbind counterparts.
 
-## VERSION 0.3.3.2
+# sparseHessianFD 0.3.3.2
+
 
 * References Journal of Statistical Software paper.
 
-## VERSION 0.3.3.1 
+# sparseHessianFD 0.3.3.1
 
 *  Modified registration of native routines in src/init.c to be
    compatible with new Rcpp naming convention.
 
 
-## VERSION 0.3.3
+# sparseHessianFD 0.3.3
 
 *  Updated version as accepted at Journal of Statistical Software
 
 *  Explicit registration of native routines, as required by R 3.4.0.
 
 
-## VERSION 0.3.2
+# sparseHessianFD 0.3.2
 
 *  Added implementation of the complex step method.
 
@@ -35,7 +39,7 @@
 
 *  The 'direct' argument to the sparseHessianFD initializer was removed (defunct).
 
-## VERSION 0.3.0
+# sparseHessianFD 0.3.0
 
 *  An even more major rewrite of the package.  All ACM code was
    removed, and replaced with original R/C++ implementations.
@@ -62,7 +66,7 @@
 *  With the removal of ACM-copyrighted code, this package is now
    licensed under the MPL 2.0.
 
-## VERSION 0.2.0 (Jan. 28, 2015)
+# sparseHessianFD 0.2.0 (Jan. 28, 2015)
 
 *  Essentially a complete re-write of the package.
 
@@ -80,15 +84,14 @@
     +  `new.sparse.hessian.object`.  Use `sparseHessianFD.new` instead.
     +  `Coord.to.Sym.Pattern.Matrix`. Use `Coord.to.Pattern.Matrix` instead, with option `symmetric=TRUE`.
     +  `Sym.CSC.to.Matrix`.  Use the `spMatrix` function in the *Matrix* package instead.
-   
 
 
-## VERSION 0.1.1 (Nov. 5, 2013)
+
+# sparseHessianFD 0.1.1 (Nov. 5, 2013)
 
 *  Removed functions for sampling from, and computing the density of, a multivariate normal distribution.  These functions are now available in the *sparseMVN* package.
 
 
-## VERSION 0.1.0 (Nov. 5, 2012)
+# sparseHessianFD 0.1.0 (Nov. 5, 2012)
 
 *  Initial upload to CRAN.
-

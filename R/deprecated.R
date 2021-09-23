@@ -31,7 +31,8 @@ Sym.CSC.to.Matrix <- function(H,nvars) {
 
 
 #' @name Coord.to.Sym.Pattern.Matrix
-#' @inheritParams Sym.CSC.to.Matrix
+#' @param H a list containing Hessian data.  See details.
+#' @param nvars the number of rows (and columns) in the matrix.
 #' @details
 #' Use Coord.to.Pattern.Matrix with symmetric=TRUE instead of Coord.to.Sym.Pattern.Matrix.
 #' @rdname deprecated
