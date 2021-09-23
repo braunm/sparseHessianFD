@@ -5,8 +5,8 @@ Version: 0.3.3.5
 Date: 2021-09-22
 Authors@R: person(family="Braun", given="Michael", role=c("aut","cre","cph"), email="braunm@smu.edu",comment=c(ORCID="0000-0003-4774-2119"))
 Maintainer: Michael Braun <braunm@smu.edu>
-URL: https://braunm.github.io/sparseHessianFD
-BugReports: https://github.com/braunm/trustOptim/issues
+URL: https://braunm.github.io/sparseHessianFD/, https://github.com/braunm/sparseHessianFD/
+BugReports: https://github.com/braunm/trustOptim/issues/
 Description: Estimates Hessian of a scalar-valued function, and returns it
     in a sparse Matrix format. The sparsity pattern must be known in advance. The
     algorithm is especially efficient for hierarchical models with a large number of
@@ -30,4 +30,4 @@ LinkingTo: Rcpp, RcppEigen (>= 0.3.3.3.0)
 Encoding: UTF-8
 VignetteBuilder: knitr
 SystemRequirements: C++11
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.2

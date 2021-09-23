@@ -74,6 +74,7 @@ X <- rnorm(N) ## another set of variables at which the function is evaluated
 val <- obj$fn(X) ## function value
 gr <- obj$gr(X) ## gradient
 hess <- obj$hessian(X)  ## Hessian, as a sparse dgCMatrix object
+
 ```
 
 See the vignette and package manual for more details, options,
