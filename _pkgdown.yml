@@ -35,10 +35,10 @@ reference:
     - starts_with("binary")
 - title: Deprecated
   contents:
-    - Sym.CSC.to.Matrix
-    - Coord.to.Sym.Pattern.Matrix
-    - Coord.to.Pattern.Matrix
-    - new.sparse.hessian.obj
-    - sparseHessianFD.new
+    # - Sym.CSC.to.Matrix
+    # - Coord.to.Sym.Pattern.Matrix
+    # - Coord.to.Pattern.Matrix
+    # - new.sparse.hessian.obj
+    - deprecated
 links:
   - text:  Browse the source code at
