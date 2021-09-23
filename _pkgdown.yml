@@ -1,0 +1,44 @@
+url: https://braunm.github.io/sparseHessianFD
+
+template:
+  params:
+    bootswatch: spacelab
+    ganalytics: G-HJZLF2TRPM
+
+authors:
+  Michael Braun:
+    href: https://braunm.github.io
+
+reference:
+- title: Package overview
+  contents:
+    - sparseHessianFD-package
+- title: The sparseHessianFD class
+  desc: "The 'workhorse' for defining and computing sparse Hessian matrices."
+  contents:
+    - sparseHessianFD
+- title: Conversion helpers
+  desc: For decomposing a sparse matrix into points or coordinates
+  contents:
+    - Matrix.to.Pointers
+    - Matrix.to.Coord
+    - Coord.to.Pointers
+- title: "Coloring algorithm details"
+  desc: "For internal use.  Do not call these directly"
+  contents:
+    - subst
+    - get_colors
+    - coloring
+- title: Data and functions for examples
+  desc: "Functions and data used in the vignettes and examples"
+  contents:
+    - starts_with("binary")
+- title: Deprecated
+  contents:
+    - Sym.CSC.to.Matrix
+    - Coord.to.Sym.Pattern.Matrix
+    - Coord.to.Pattern.Matrix
+    - new.sparse.hessian.obj
+    - sparseHessianFD.new
+links:
+  - text:  Browse the source code at

@@ -2,7 +2,7 @@
 title:  The sparseHessianFD package
 output:
   md_document:
-    variant: markdown_github
+    variant: gfm
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Why use the sparseHessianFD package?
+# sparseHessianFD: Because gradients are easy, but Hessians are hard
 
 Suppose you have a scalar-valued objective function of _N_ variables.  You have an **R** function that returns the function value, and another that returns the gradient.  You still need the
 Hessian, which would be hard to derive analytically, and translate
@@ -47,9 +47,11 @@ The package is available on CRAN, so a simple
 install.packages("sparseHessianFD")
 ```
 
-should suffice.  The package is being developed on github at
-github.com/braunm/sparseHessian, and you can get development branches
-there.
+should suffice.  The package is being developed on [Github](www.github.com/braunm/sparseHessianFD), so you can also install from
+
+```
+devtools::install_github("braunm/sparseHessianFD")
+```
 
 # Using the package
 

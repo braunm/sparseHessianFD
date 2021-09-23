@@ -26,3 +26,6 @@ data-raw/*
 ^cran-comments\.md$
 \_region\_.*
 ^\.\.pdf
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

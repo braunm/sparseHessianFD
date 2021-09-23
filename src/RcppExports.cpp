@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // get_colors
 Rcpp::IntegerVector get_colors(const IntegerVector& pntr, const IntegerVector& idx, const int nvars);
 RcppExport SEXP _sparseHessianFD_get_colors(SEXP pntrSEXP, SEXP idxSEXP, SEXP nvarsSEXP) {

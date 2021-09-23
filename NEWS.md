@@ -1,9 +1,11 @@
-# NEWS file for sparseHessianFD package 
+# NEWS file for sparseHessianFD package
 
 
 ## VERSION 0.3.3.5 (devel)
 
 * Minor changes for compatibility with Roxygen2 version 7.1.0.
+* Minor changes for compatibility with new API in Matrix 1.3.
+* Added pkgdown website.
 
 ## VERSION 0.3.3.4
 
@@ -18,7 +20,7 @@
 
 * References Journal of Statistical Software paper.
 
-## VERSION 0.3.3.1 
+## VERSION 0.3.3.1
 
 *  Modified registration of native routines in src/init.c to be
    compatible with new Rcpp naming convention.
@@ -84,7 +86,7 @@
     +  `new.sparse.hessian.object`.  Use `sparseHessianFD.new` instead.
     +  `Coord.to.Sym.Pattern.Matrix`. Use `Coord.to.Pattern.Matrix` instead, with option `symmetric=TRUE`.
     +  `Sym.CSC.to.Matrix`.  Use the `spMatrix` function in the *Matrix* package instead.
-   
+
 
 
 ## VERSION 0.1.1 (Nov. 5, 2013)
@@ -95,4 +97,3 @@
 ## VERSION 0.1.0 (Nov. 5, 2012)
 
 *  Initial upload to CRAN.
-
