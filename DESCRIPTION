@@ -6,7 +6,7 @@ Date: 2021-09-22
 Authors@R: person(family="Braun", given="Michael", role=c("aut","cre","cph"), email="braunm@smu.edu",comment=c(ORCID="0000-0003-4774-2119"))
 Maintainer: Michael Braun <braunm@smu.edu>
 URL: https://braunm.github.io/sparseHessianFD/, https://github.com/braunm/sparseHessianFD/
-BugReports: https://github.com/braunm/trustOptim/issues/
+BugReports: https://github.com/braunm/sparseHessianFD/issues/
 Description: Estimates Hessian of a scalar-valued function, and returns it
     in a sparse Matrix format. The sparsity pattern must be known in advance. The
     algorithm is especially efficient for hierarchical models with a large number of
