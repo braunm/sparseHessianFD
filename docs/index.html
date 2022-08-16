@@ -88,14 +88,14 @@
 <li>sampling from, and estimating the density of, high-dimensional multivariate normal distributions.</li>
 </ol>
 <p>The <em>sparseHessianFD</em> package solves this problem when the Hessian is sparse, and the sparsity pattern is known in advance. The sparsity pattern is just the row and column indices of the non-zero elements in the lower triangle of the Hessian. Sparse Hessians arise, for example, in hierarchical models in which parameters are conditionally independent across heterogeneous units. In that case, we know which cross-partial derivatives are zero.</p>
-<p>See the vignette for more about sparsity patterns in Hessians.</p>
+<p>See the <a href="https://cloud.r-project.org/web/packages/sparseHessianFD/vignettes/sparseHessianFD.pdf" target="_blank" class="external-link">vignette</a> for more about sparsity patterns in Hessians.</p>
 </div>
 <div class="section level1">
 <h1 id="getting-the-package">Getting the package<a class="anchor" aria-label="anchor" href="#getting-the-package"></a>
 </h1>
 <p>The package is available on CRAN, so a simple</p>
 <pre><code><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"sparseHessianFD"</span><span class="op">)</span></code></pre>
-<p>should suffice. The package is being developed on github at github.com/braunm/sparseHessian, and you can get development branches there.</p>
+<p>should suffice. The package is being developed on <a href="https://github.com/braunm/sparseHessianFD" target="_blank" class="external-link">Github</a> and you can get development branches there.</p>
 </div>
 <div class="section level1">
 <h1 id="using-the-package">Using the package<a class="anchor" aria-label="anchor" href="#using-the-package"></a>
@@ -115,7 +115,7 @@
 <span class="va">val</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">fn</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="co">## function value</span>
 <span class="va">gr</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">gr</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="co">## gradient</span>
 <span class="va">hess</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">hessian</span><span class="op">(</span><span class="va">X</span><span class="op">)</span>  <span class="co">## Hessian, as a sparse dgCMatrix object</span></code></pre></div>
-<p>See the vignette and package manual for more details, options, convenience functions, etc.</p>
+<p>See the <a href="https://cloud.r-project.org/web/packages/sparseHessianFD/vignettes/sparseHessianFD.pdf" target="_blank" class="external-link">vignette</a> and reference pages for more details, options, convenience functions, etc.</p>
 </div>
 
   </div>

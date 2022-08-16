@@ -29,7 +29,8 @@ non-zero elements in the lower triangle of the Hessian.  Sparse Hessians arise, 
 which parameters are conditionally independent across heterogeneous
 units.  In that case, we know which cross-partial derivatives are zero.
 
-See the vignette for more about sparsity patterns in Hessians.
+See the <a href="https://cloud.r-project.org/web/packages/sparseHessianFD/vignettes/sparseHessianFD.pdf" target="_blank">vignette</a>
+ for more about sparsity patterns in Hessians.
 
 
 # Getting the package
@@ -41,8 +42,8 @@ The package is available on CRAN, so a simple
 install.packages("sparseHessianFD")
 ```
 
-should suffice.  The package is being developed on github at
-github.com/braunm/sparseHessian, and you can get development branches
+should suffice.  The package is being developed on
+<a href="https://github.com/braunm/sparseHessianFD" target="_blank">Github</a> and you can get development branches
 there.
 
 # Using the package
@@ -77,5 +78,5 @@ hess <- obj$hessian(X)  ## Hessian, as a sparse dgCMatrix object
 
 ```
 
-See the vignette and package manual for more details, options,
+See the <a href="https://cloud.r-project.org/web/packages/sparseHessianFD/vignettes/sparseHessianFD.pdf" target="_blank">vignette</a>  and reference pages for more details, options,
 convenience functions, etc.
