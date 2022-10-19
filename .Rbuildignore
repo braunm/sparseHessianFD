@@ -6,6 +6,7 @@ vignettes/.*\.bbl$
 vignettes/.*\.blg$
 vignettes/prv\_.*
 vignettes/missfont.log
+vignettes/Sweave.sty
 vignettes/.*\.aux
 vignettes/cache
 ^\\.git$

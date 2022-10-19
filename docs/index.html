@@ -42,7 +42,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">sparseHessianFD</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.3.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.3.7</span>
       </span>
     </div>
 
@@ -52,12 +52,15 @@
   <a href="reference/index.html">Reference</a>
 </li>
 <li>
+  <a href="articles/index.html">Articles</a>
+</li>
+<li>
   <a href="news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/braunm/sparseHessianFD/">
+  <a href="https://github.com/braunm/sparseHessianFD/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -75,9 +78,9 @@
       </header><div class="row">
   <div class="contents col-md-9">
 
-<div id="why-use-the-sparsehessianfd-package" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#why-use-the-sparsehessianfd-package" class="anchor" aria-hidden="true"></a>Why use the sparseHessianFD package?</h1></div>
+<div class="section level1">
+<div class="page-header"><h1 id="why-use-the-sparsehessianfd-package">Why use the sparseHessianFD package?<a class="anchor" aria-label="anchor" href="#why-use-the-sparsehessianfd-package"></a>
+</h1></div>
 <p>Suppose you have a scalar-valued objective function of <em>N</em> variables. You have an <strong>R</strong> function that returns the function value, and another that returns the gradient. You still need the Hessian, which would be hard to derive analytically, and translate into an <strong>R</strong> function. If <em>N</em> is very large, it can take a long time to estimate the Hessian numerically, and a lot of memory to store all <em>N^2</em> elements.</p>
 <p>This scalability problem comes up in at least two areas of statistics:</p>
 <ol style="list-style-type: decimal">
@@ -85,18 +88,18 @@
 <li>sampling from, and estimating the density of, high-dimensional multivariate normal distributions.</li>
 </ol>
 <p>The <em>sparseHessianFD</em> package solves this problem when the Hessian is sparse, and the sparsity pattern is known in advance. The sparsity pattern is just the row and column indices of the non-zero elements in the lower triangle of the Hessian. Sparse Hessians arise, for example, in hierarchical models in which parameters are conditionally independent across heterogeneous units. In that case, we know which cross-partial derivatives are zero.</p>
-<p>See the vignette for more about sparsity patterns in Hessians.</p>
+<p>See the <a href="https://cloud.r-project.org/web/packages/sparseHessianFD/vignettes/sparseHessianFD.pdf" target="_blank" class="external-link">vignette</a> for more about sparsity patterns in Hessians.</p>
 </div>
-<div id="getting-the-package" class="section level1">
-<h1 class="hasAnchor">
-<a href="#getting-the-package" class="anchor" aria-hidden="true"></a>Getting the package</h1>
+<div class="section level1">
+<h1 id="getting-the-package">Getting the package<a class="anchor" aria-label="anchor" href="#getting-the-package"></a>
+</h1>
 <p>The package is available on CRAN, so a simple</p>
-<pre><code>install.packages("sparseHessianFD")</code></pre>
-<p>should suffice. The package is being developed on github at github.com/braunm/sparseHessian, and you can get development branches there.</p>
+<pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"sparseHessianFD"</span><span class="op">)</span></span></code></pre>
+<p>should suffice. The package is being developed on <a href="https://github.com/braunm/sparseHessianFD" target="_blank" class="external-link">Github</a> and you can get development branches there.</p>
 </div>
-<div id="using-the-package" class="section level1">
-<h1 class="hasAnchor">
-<a href="#using-the-package" class="anchor" aria-hidden="true"></a>Using the package</h1>
+<div class="section level1">
+<h1 id="using-the-package">Using the package<a class="anchor" aria-label="anchor" href="#using-the-package"></a>
+</h1>
 <p>To use the package, you need at least the following:</p>
 <ul>
 <li>an R function that takes a parameter vector as the first argument, and returns the value of the function for which you need the Hessian;</li>
@@ -106,13 +109,13 @@
 <p>The <code>sparseHessianFD</code> function returns an object of class sparseHessianFD. This class contains methods to return the function value, gradient and Hessian. The Hessian is returned in a sparse, compressed format as a <code>dgCMatrix</code> object (defined in the <em>Matrix</em> package).</p>
 <p>A typical usage might look like this.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">P</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span> <span class="co">## random "starting value" for initialization</span>
-<span class="va">obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sparseHessianFD.html">sparseHessianFD</a></span><span class="op">(</span><span class="va">P</span>, <span class="va">f</span>, <span class="va">df</span>, <span class="va">rows</span>, <span class="va">cols</span><span class="op">)</span>
-<span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span> <span class="co">## another set of variables at which the function is evaluated</span>
-<span class="va">val</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">fn</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="co">## function value</span>
-<span class="va">gr</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">gr</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="co">## gradient</span>
-<span class="va">hess</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">hessian</span><span class="op">(</span><span class="va">X</span><span class="op">)</span>  <span class="co">## Hessian, as a sparse dgCMatrix object</span></code></pre></div>
-<p>See the vignette and package manual for more details, options, convenience functions, etc.</p>
+<code class="sourceCode R"><span><span class="va">P</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span> <span class="co">## random "starting value" for initialization</span></span>
+<span><span class="va">obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sparseHessianFD.html">sparseHessianFD</a></span><span class="op">(</span><span class="va">P</span>, <span class="va">f</span>, <span class="va">df</span>, <span class="va">rows</span>, <span class="va">cols</span><span class="op">)</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span> <span class="co">## another set of variables at which the function is evaluated</span></span>
+<span><span class="va">val</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">fn</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="co">## function value</span></span>
+<span><span class="va">gr</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">gr</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="co">## gradient</span></span>
+<span><span class="va">hess</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">hessian</span><span class="op">(</span><span class="va">X</span><span class="op">)</span>  <span class="co">## Hessian, as a sparse dgCMatrix object</span></span></code></pre></div>
+<p>See the <a href="https://cloud.r-project.org/web/packages/sparseHessianFD/vignettes/sparseHessianFD.pdf" target="_blank" class="external-link">vignette</a> and reference pages for more details, options, convenience functions, etc.</p>
 </div>
 
   </div>
@@ -121,12 +124,9 @@
     <div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li>Download from CRAN at <br><a href="https://cloud.r-project.org/package=sparseHessianFD">https://​cloud.r-project.org/​package=sparseHessianFD</a>
-</li>
-<li>Browse source code at <br><a href="https://github.com/braunm/sparseHessianFD/">https://​github.com/​braunm/​sparseHessianFD/​</a>
-</li>
-<li>Report a bug at <br><a href="https://github.com/braunm/sparseHessianFD/issues/">https://​github.com/​braunm/​sparseHessianFD/​issues/​</a>
-</li>
+<li><a href="https://cloud.r-project.org/package=sparseHessianFD" class="external-link">View on CRAN</a></li>
+<li><a href="https://github.com/braunm/sparseHessianFD/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/braunm/sparseHessianFD/issues/" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 
@@ -141,7 +141,7 @@
 <div class="citation">
 <h2 data-toc-skip>Citation</h2>
 <ul class="list-unstyled">
-<li><a href="authors.html">Citing sparseHessianFD</a></li>
+<li><a href="authors.html#citation">Citing sparseHessianFD</a></li>
 </ul>
 </div>
 
@@ -149,7 +149,7 @@
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>
-<a href="https://braunm.github.io">Michael Braun</a> <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/0000-0003-4774-2119" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<a href="https://braunm.github.io" class="external-link">Michael Braun</a> <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/0000-0003-4774-2119" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>
 
@@ -166,7 +166,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 1.6.1.9001.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>

@@ -23,3 +23,5 @@ README.html
 _region_*
 cache
 nobuild/jss_prescreened/*
+/doc/
+/Meta/

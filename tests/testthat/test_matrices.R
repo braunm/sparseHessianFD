@@ -80,8 +80,13 @@ test_that("Coord.to.Pointers", {
     rowsLT <- c(1,2,5,3,4,4,5)
     colsLT <- c(1,2,2,3,3,4,5)
 
-    M2.true <- as(tril(sparseMatrix(i=rowsLT, j=colsLT, dims=c(k,k))),"ngCMatrix")
-    M2.trueS <- as(sparseMatrix(i=rowsLT, j=colsLT, dims=c(k,k), symmetric=TRUE),"ngCMatrix")
+    M2.true.0 <- sparseMatrix(i=rowsLT, j=colsLT, dims=c(k,k))
+    M2.true.1 <- tril(M2.true.0)
+    M2.true <- as(as(M2.true.1,"generalMatrix"), "CsparseMatrix")
+
+    M2.trueS.0 <- sparseMatrix(i=rowsLT, j=colsLT, dims=c(k,k), symmetric=TRUE)
+    M2.trueS <- as(as(M2.trueS.0,"generalMatrix"), "CsparseMatrix")
+
     expect_true(Matrix::isTriangular(M2.true))
     C2s <- Coord.to.Pointers(rowsLT, colsLT, c(k,k), triangle=TRUE,
                              symmetric=TRUE, order="column")
@@ -105,8 +110,9 @@ test_that("Coord.to.Pointers", {
     P2 <- Coord.to.Pattern.Matrix(rowsLT, colsLT, dims=c(k,k),
                                   symmetric=FALSE)
 
-    P3 <- as(Coord.to.Pattern.Matrix(rowsLT, colsLT, dims=c(k,k),
-                                  symmetric=TRUE), "ngCMatrix")
+    P30 <- Coord.to.Pattern.Matrix(rowsLT, colsLT, dims=c(k,k),
+                                  symmetric=TRUE)
+    P3 <- as(as(P30, "generalMatrix"), "CsparseMatrix")
 
     expect_equal(M1.true, P1)
     expect_equal(M2.true, P2)

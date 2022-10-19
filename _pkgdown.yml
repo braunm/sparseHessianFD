@@ -1,5 +1,6 @@
 url: https://braunm.github.io/sparseHessianFD
 
+
 template:
   params:
     bootswatch: spacelab
@@ -42,3 +43,8 @@ reference:
     - deprecated
 links:
   - text:  Browse the source code at
+
+articles:
+  - title: Vignettes
+    contents:
+      - sparseHessianFD

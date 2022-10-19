@@ -75,29 +75,30 @@ Coord.to.Pointers <- function(rows, cols, dims,
                               order=c("column", "row", "triplet"),
                               index1=TRUE) {
 
-    stopifnot(is.logical(triangle),
-              is.logical(index1),
-              is.logical(lower),
-              length(rows) == length(cols)
-              )
+  stopifnot(is.logical(triangle),
+            is.logical(index1),
+            is.logical(lower),
+            length(rows) == length(cols)
+            )
 
-    if (triangle) {
-        if (lower) {
-            stopifnot(all(rows >= cols))
-        } else {
-            stopifnot(all(rows <= cols))
-        }
-    }
-
-    R <- as(sparseMatrix(i=rows, j=cols, dims=dims,
-                         index1=index1, giveCsparse=TRUE), "nMatrix")
-    if (triangle & symmetric) {
-        C <- as(sparseMatrix(i=cols, j=rows, dims=dims, index1=index1), "nMatrix")
-        A <- as(R + C, "ngCMatrix") ## symmetric , but stored as general CSC sparse
+  if (triangle) {
+    if (lower) {
+      stopifnot(all(rows >= cols))
     } else {
-        A <- R
+      stopifnot(all(rows <= cols))
     }
-    Matrix.to.Pointers(A, symmetric, values=FALSE, order=order, index1=index1)
+  }
+
+  R <- sparseMatrix(i=rows, j=cols, dims=dims,
+                     index1=index1, repr="C") ## should be ngCMatrix
+  ## R <- as(R0, "nMatrix")
+  if (triangle & symmetric) {
+    C <- as(sparseMatrix(i=cols, j=rows, dims=dims, index1=index1), "nMatrix")
+    A <- as(R + C, "nMatrix") ## symmetric , but stored as general CSC sparse
+  } else {
+    A <- R
+  }
+  Matrix.to.Pointers(A, symmetric, values=FALSE, order=order, index1=index1)
 }
 
 
@@ -224,4 +225,3 @@ Matrix.to.Pointers <- function(M,
 
     return(res)
 }
-

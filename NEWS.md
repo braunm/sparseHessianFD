@@ -1,3 +1,13 @@
+# sparseHessianFD 0.3.3.7
+
+* Ensure compatibility with Matrix 1.5-2
+
+
+# sparseHessianFD 0.3.3.6
+
+* Ensure compatibility with Matrix 1.4-2
+
+
 # sparseHessianFD 0.3.3.5
 
 * Minor changes for compatibility with Roxygen2 version 7.1.
