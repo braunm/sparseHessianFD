@@ -26,7 +26,7 @@ pointers, and/or values of a sparse Hessian."><!-- mathjax --><script src="https
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">sparseHessianFD</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.3.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.3.7</span>
       </span>
     </div>
 
@@ -67,40 +67,51 @@ pointers, and/or values of a sparse Hessian.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">Matrix.to.Pointers</span><span class="op">(</span>
-  <span class="va">M</span>,
-  as.symmetric <span class="op">=</span> <span class="fu">Matrix</span><span class="fu">::</span><span class="fu">isSymmetric</span><span class="op">(</span><span class="va">M</span><span class="op">)</span>,
-  values <span class="op">=</span> <span class="op">!</span><span class="fu">is</span><span class="op">(</span><span class="va">M</span>, <span class="st">"nMatrix"</span><span class="op">)</span>,
-  order <span class="op">=</span> <span class="cn">NULL</span>,
-  index1 <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">Matrix.to.Pointers</span><span class="op">(</span></span>
+<span>  <span class="va">M</span>,</span>
+<span>  as.symmetric <span class="op">=</span> <span class="fu">Matrix</span><span class="fu">::</span><span class="fu">isSymmetric</span><span class="op">(</span><span class="va">M</span><span class="op">)</span>,</span>
+<span>  values <span class="op">=</span> <span class="op">!</span><span class="fu">is</span><span class="op">(</span><span class="va">M</span>, <span class="st">"nMatrix"</span><span class="op">)</span>,</span>
+<span>  order <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  index1 <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>M</dt>
 <dd><p>A sparse Matrix, as defined in the Matrix package.</p></dd>
+
+
 <dt>as.symmetric</dt>
 <dd><p>Defaults to isSymmetric(M).  If M is symmetric,
 and as.symmetric is FALSE, then index/pointer elements in the
 output list will be labeled according to order. If M is not
 symmetric, and as.symmetric is TRUE, then an error will be triggered.</p></dd>
+
+
 <dt>values</dt>
 <dd><p>If TRUE, values are returned in list as 'x'.
 Defaults to TRUE for numeric and logical matrices, and FALSE for
 pattern matrices.  If M is a pattern matrix, values=TRUE will
 trigger a warning.</p></dd>
+
+
 <dt>order</dt>
 <dd><p>Determines the indexing/compression scheme for the
 output matrix.  Use 'triplet" to get row and column indices.
 Defaults to the same class as M.</p></dd>
+
+
 <dt>index1</dt>
 <dd><p>TRUE (default) if return indices and pointers should
 use 1-based indexing.  FALSE for 0-based indexing.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list with the following elements. If order=='row',</p><dl><dt>jCol</dt>
+    
+
+<p>A list with the following elements. If order=='row',</p><dl><dt>jCol</dt>
 <dd><p>Integer vector containing column indices of non-zero elements</p></dd>
 
 <dt>ipntr</dt>
@@ -108,7 +119,9 @@ use 1-based indexing.  FALSE for 0-based indexing.</p></dd>
 jCol at which the next row begins.</p></dd>
 
 
-</dl><p>If order=='column'</p><dl><dt>iRow</dt>
+</dl><p>If order=='column'</p>
+<p></p>
+<dl><dt>iRow</dt>
 <dd><p>Integer vector containing row indices of non-zero elements</p></dd>
 
 <dt>jpntr</dt>
@@ -123,7 +136,9 @@ iRow at which the next column begins.</p></dd>
 <dd><p>Column indices of non-zero elements</p></dd>
 
 
-</dl><p>If as.symmetric is TRUE, then the row/column orientation does not matter.</p><dl><dt>idx</dt>
+</dl><p>If as.symmetric is TRUE, then the row/column orientation does not matter.</p>
+<p></p>
+<dl><dt>idx</dt>
 <dd><p>Integer vector containing indices of non-zero elements</p></dd>
 
 <dt>pntr</dt>
@@ -160,7 +175,7 @@ called by an end user.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

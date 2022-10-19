@@ -42,7 +42,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">sparseHessianFD</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.3.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.3.7</span>
       </span>
     </div>
 
@@ -94,7 +94,7 @@
 <h1 id="getting-the-package">Getting the package<a class="anchor" aria-label="anchor" href="#getting-the-package"></a>
 </h1>
 <p>The package is available on CRAN, so a simple</p>
-<pre><code><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"sparseHessianFD"</span><span class="op">)</span></code></pre>
+<pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"sparseHessianFD"</span><span class="op">)</span></span></code></pre>
 <p>should suffice. The package is being developed on <a href="https://github.com/braunm/sparseHessianFD" target="_blank" class="external-link">Github</a> and you can get development branches there.</p>
 </div>
 <div class="section level1">
@@ -109,12 +109,12 @@
 <p>The <code>sparseHessianFD</code> function returns an object of class sparseHessianFD. This class contains methods to return the function value, gradient and Hessian. The Hessian is returned in a sparse, compressed format as a <code>dgCMatrix</code> object (defined in the <em>Matrix</em> package).</p>
 <p>A typical usage might look like this.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">P</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span> <span class="co">## random "starting value" for initialization</span>
-<span class="va">obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sparseHessianFD.html">sparseHessianFD</a></span><span class="op">(</span><span class="va">P</span>, <span class="va">f</span>, <span class="va">df</span>, <span class="va">rows</span>, <span class="va">cols</span><span class="op">)</span>
-<span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span> <span class="co">## another set of variables at which the function is evaluated</span>
-<span class="va">val</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">fn</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="co">## function value</span>
-<span class="va">gr</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">gr</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="co">## gradient</span>
-<span class="va">hess</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">hessian</span><span class="op">(</span><span class="va">X</span><span class="op">)</span>  <span class="co">## Hessian, as a sparse dgCMatrix object</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">P</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span> <span class="co">## random "starting value" for initialization</span></span>
+<span><span class="va">obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sparseHessianFD.html">sparseHessianFD</a></span><span class="op">(</span><span class="va">P</span>, <span class="va">f</span>, <span class="va">df</span>, <span class="va">rows</span>, <span class="va">cols</span><span class="op">)</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span> <span class="co">## another set of variables at which the function is evaluated</span></span>
+<span><span class="va">val</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">fn</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="co">## function value</span></span>
+<span><span class="va">gr</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">gr</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="co">## gradient</span></span>
+<span><span class="va">hess</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="fu">hessian</span><span class="op">(</span><span class="va">X</span><span class="op">)</span>  <span class="co">## Hessian, as a sparse dgCMatrix object</span></span></code></pre></div>
 <p>See the <a href="https://cloud.r-project.org/web/packages/sparseHessianFD/vignettes/sparseHessianFD.pdf" target="_blank" class="external-link">vignette</a> and reference pages for more details, options, convenience functions, etc.</p>
 </div>
 
@@ -166,7 +166,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>

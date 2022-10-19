@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">sparseHessianFD</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.3.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.3.7</span>
       </span>
     </div>
 
@@ -62,19 +62,24 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">get_colors</span><span class="op">(</span><span class="va">pntr</span>, <span class="va">idx</span>, <span class="va">nvars</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_colors</span><span class="op">(</span><span class="va">pntr</span>, <span class="va">idx</span>, <span class="va">nvars</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>pntr, idx</dt>
 <dd><p>row pointers and column indices of the adjacency matrix, in compressed column-oriented format. Must use zero-based indexing.</p></dd>
+
+
 <dt>nvars</dt>
 <dd><p>Number of vertices.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An integer vector of length nvars, where each element represents the color of the corresponding vertex. Indices are zero-based.</p>
+    
+
+<p>An integer vector of length nvars, where each element represents the color of the corresponding vertex. Indices are zero-based.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -93,7 +98,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

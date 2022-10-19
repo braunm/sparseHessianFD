@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">sparseHessianFD</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.3.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.3.7</span>
       </span>
     </div>
 
@@ -62,11 +62,11 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">binary.f</span><span class="op">(</span><span class="va">P</span>, <span class="va">data</span>, <span class="va">priors</span>, order.row <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="fu">binary.grad</span><span class="op">(</span><span class="va">P</span>, <span class="va">data</span>, <span class="va">priors</span>, order.row <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="fu">binary.hess</span><span class="op">(</span><span class="va">P</span>, <span class="va">data</span>, <span class="va">priors</span>, order.row <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">binary.f</span><span class="op">(</span><span class="va">P</span>, <span class="va">data</span>, <span class="va">priors</span>, order.row <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">binary.grad</span><span class="op">(</span><span class="va">P</span>, <span class="va">data</span>, <span class="va">priors</span>, order.row <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">binary.hess</span><span class="op">(</span><span class="va">P</span>, <span class="va">data</span>, <span class="va">priors</span>, order.row <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -74,17 +74,26 @@
     <dl><dt>P</dt>
 <dd><p>Numeric vector of length \((N+1)k\).  First \(Nk\)
 elements are heterogeneous coefficients. The remaining k elements are population parameters.</p></dd>
+
+
 <dt>data</dt>
 <dd><p>Named list of data matrices Y and X, and choice count integer T</p></dd>
+
+
 <dt>priors</dt>
 <dd><p>Named list of matrices inv.Omega and inv.Sigma</p></dd>
+
+
 <dt>order.row</dt>
 <dd><p>Determines order of heterogeneous coefficients in
 parameter vector. If TRUE, heterogeneous coefficients are ordered by unit.  If FALSE, they are ordered by covariate.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Log posterior density, gradient and Hessian. The Hessian is
+    
+
+<p>Log posterior density, gradient and Hessian. The Hessian is
 a dgCMatrix object.</p>
     </div>
     <div id="details">
@@ -105,7 +114,7 @@ choice example in the vignette. There are N heterogeneous units, each making T b
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

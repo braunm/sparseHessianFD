@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">sparseHessianFD</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.3.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.3.7</span>
       </span>
     </div>
 
@@ -62,27 +62,40 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">subst</span><span class="op">(</span><span class="va">Y</span>, <span class="va">colors</span>, <span class="va">jCol</span>, <span class="va">ipntr</span>, <span class="va">delta</span>, <span class="va">nvars</span>, <span class="va">nnz</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">subst</span><span class="op">(</span><span class="va">Y</span>, <span class="va">colors</span>, <span class="va">jCol</span>, <span class="va">ipntr</span>, <span class="va">delta</span>, <span class="va">nvars</span>, <span class="va">nnz</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>Y</dt>
 <dd><p>Matrix of finite differences of gradients</p></dd>
+
+
 <dt>colors</dt>
 <dd><p>Vector of length nvars that identifies color of each variable</p></dd>
+
+
 <dt>jCol, ipntr</dt>
 <dd><p>Column indices and row pointers for non-zero elements of lower triangle of Hessian (row-oriented compressed format).</p></dd>
+
+
 <dt>delta</dt>
 <dd><p>Perturbation factor used to compute finite differences of gradients.</p></dd>
+
+
 <dt>nvars</dt>
 <dd><p>Dimension of Hessian (number of variables)</p></dd>
+
+
 <dt>nnz</dt>
 <dd><p>Number of non-zero elements in the lower triangle of the Hessian.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A sparse Hessian of class dgCMatrix.</p>
+    
+
+<p>A sparse Hessian of class dgCMatrix.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -101,7 +114,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

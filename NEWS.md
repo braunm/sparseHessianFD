@@ -1,3 +1,8 @@
+# sparseHessianFD 0.3.3.7
+
+* Ensure compatibility with Matrix 1.5-2
+
+
 # sparseHessianFD 0.3.3.6
 
 * Ensure compatibility with Matrix 1.4-2

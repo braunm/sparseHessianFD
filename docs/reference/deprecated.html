@@ -29,7 +29,7 @@ This function is deprecated.  Use sparseHessianFD instead."><!-- mathjax --><scr
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">sparseHessianFD</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.3.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.3.7</span>
       </span>
     </div>
 
@@ -74,86 +74,121 @@ object of Matrix class</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">Sym.CSC.to.Matrix</span><span class="op">(</span><span class="va">H</span>, <span class="va">nvars</span><span class="op">)</span>
-
-<span class="fu">Coord.to.Sym.Pattern.Matrix</span><span class="op">(</span><span class="va">H</span>, <span class="va">nvars</span><span class="op">)</span>
-
-<span class="fu">Coord.to.Pattern.Matrix</span><span class="op">(</span>
-  <span class="va">rows</span>,
-  <span class="va">cols</span>,
-  <span class="va">dims</span>,
-  compressed <span class="op">=</span> <span class="cn">TRUE</span>,
-  symmetric <span class="op">=</span> <span class="cn">FALSE</span>,
-  index1 <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span>
-
-<span class="fu">new.sparse.hessian.obj</span><span class="op">(</span>
-  <span class="va">x</span>,
-  <span class="va">fn</span>,
-  <span class="va">gr</span>,
-  <span class="va">hs</span>,
-  fd.method <span class="op">=</span> <span class="fl">0L</span>,
-  eps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">.Machine</span><span class="op">$</span><span class="va">double.eps</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="fu">sparseHessianFD.new</span><span class="op">(</span>
-  <span class="va">x</span>,
-  <span class="va">fn</span>,
-  <span class="va">gr</span>,
-  <span class="va">rows</span>,
-  <span class="va">cols</span>,
-  direct <span class="op">=</span> <span class="cn">NULL</span>,
-  eps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">.Machine</span><span class="op">$</span><span class="va">double.eps</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">Sym.CSC.to.Matrix</span><span class="op">(</span><span class="va">H</span>, <span class="va">nvars</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">Coord.to.Sym.Pattern.Matrix</span><span class="op">(</span><span class="va">H</span>, <span class="va">nvars</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">Coord.to.Pattern.Matrix</span><span class="op">(</span></span>
+<span>  <span class="va">rows</span>,</span>
+<span>  <span class="va">cols</span>,</span>
+<span>  <span class="va">dims</span>,</span>
+<span>  compressed <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  index1 <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">new.sparse.hessian.obj</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">fn</span>,</span>
+<span>  <span class="va">gr</span>,</span>
+<span>  <span class="va">hs</span>,</span>
+<span>  fd.method <span class="op">=</span> <span class="fl">0L</span>,</span>
+<span>  eps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">.Machine</span><span class="op">$</span><span class="va">double.eps</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">sparseHessianFD.new</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">fn</span>,</span>
+<span>  <span class="va">gr</span>,</span>
+<span>  <span class="va">rows</span>,</span>
+<span>  <span class="va">cols</span>,</span>
+<span>  direct <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  eps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">.Machine</span><span class="op">$</span><span class="va">double.eps</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>H</dt>
 <dd><p>a list containing Hessian data.  See details.</p></dd>
+
+
 <dt>nvars</dt>
 <dd><p>the number of rows (and columns) in the matrix.</p></dd>
+
+
 <dt>rows, cols</dt>
 <dd><p>row and column indices of non-zero elements</p></dd>
+
+
 <dt>dims</dt>
 <dd><p>2-element vector for number of rows and columns in
 matrix</p></dd>
+
+
 <dt>compressed</dt>
 <dd><p>If TRUE, returns a matrix is compressed column (default=TRUE)</p></dd>
+
+
 <dt>symmetric</dt>
 <dd><p>If TRUE, matrix will be symmetric, and only the
 lower triangular elements need to be provided (default=FALSE)</p></dd>
+
+
 <dt>index1</dt>
 <dd><p>TRUE if input row and col use 1-based indexing, and FALSE for 0-based indexing.</p></dd>
+
+
 <dt>x</dt>
 <dd><p>variable vector for initialization</p></dd>
+
+
 <dt>fn</dt>
 <dd><p>R function that returns function value</p></dd>
+
+
 <dt>gr</dt>
 <dd><p>R function that returns the gradient of the function</p></dd>
+
+
 <dt>hs</dt>
 <dd><p>list of two vectors:  row and column indices of non-zero
 elements of lower triangle of Hessian.  See details.</p></dd>
+
+
 <dt>fd.method</dt>
 <dd><p>If TRUE, use direct method for computatation.  Otherwise, use
 indirect/substitution method.  See references.</p></dd>
+
+
 <dt>eps</dt>
 <dd><p>The perturbation amount for finite differencing of the
 gradient to compute the Hessian. Defaults to
 sqrt(.Machine$double.eps).</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other parameters to be passed to fn and gr.</p></dd>
+
+
 <dt>direct</dt>
 <dd><p>If TRUE, use direct method for computatation.  Otherwise, use
 indirect/substitution method.  See references.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of Matrix class.
-A sparse pattern matrix
-An object of class sparseHessianFD</p>
+    
+
+<p>An object of Matrix class.</p>
+
+
+<p>A sparse pattern matrix</p>
+
+
+<p>An object of class sparseHessianFD</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -185,7 +220,7 @@ lower triangle of Hessian.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
